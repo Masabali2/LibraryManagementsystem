@@ -1,0 +1,359 @@
+﻿@model IEnumerable<Library.Web.ViewModels.BookViewModel>
+
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewData["Title"] = "Search Books";
+    ViewData["ActivePage"] = "Books";
+
+    // 1. Group books by Department right at the top!
+    var groupedBooks = Model.GroupBy(b => b.Department);
+}
+
+@section Styles {
+    <style>
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 30px; /* Space between department blocks */
+        }
+
+            .styled-table th {
+                background-color: #f7fafc;
+                color: #718096;
+                font-weight: 600;
+                padding: 15px;
+                border-bottom: 2px solid #edf2f7;
+                text-transform: uppercase;
+                font-size: 12px;
+                letter-spacing: 0.5px;
+            }
+
+            .styled-table td {
+                padding: 15px;
+                border-bottom: 1px solid #edf2f7;
+                color: #2d3748;
+            }
+
+        .clickable-row {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .clickable-row:hover {
+                background-color: #f8fafc;
+            }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Status Badge Colors */
+        .status-available {
+            background: #e6fffa;
+            color: #319795;
+        }
+
+        .status-borrowed {
+            background: #ebf8ff;
+            color: #3182ce;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .detail-box {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* Department block headers */
+        .dept-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3182ce;
+            padding-left: 10px;
+        }
+
+        /* 🚀 Feature: Auto-dismiss sliding animation */
+        .alert-dismissible-custom {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .alert-hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+
+        /* 🚀 Feature: Pulse effect for real-time copy counter */
+        .pulse-counter {
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .pulse-active {
+            transform: scale(1.4);
+            color: #e53e3e !important;
+        }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 style="font-size: 24px; color: #2d3748;">Library Catalog</h1>
+        <p style="color: #718096;">Browse and interact with available resources.</p>
+    </div>
+
+    <div id="alertContainer">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success py-2 px-3 mb-0 alert-dismissible-custom" style="border-radius: 10px;">
+                @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger py-2 px-3 mb-0 alert-dismissible-custom" style="border-radius: 10px;">
+                @TempData["Error"]
+            </div>
+        }
+    </div>
+
+    <div class="d-flex gap-3">
+        <select id="deptDropdownFilter" class="form-select" style="width: 200px; border-radius: 10px;">
+            <option value="">All Departments</option>
+            @foreach (var dept in groupedBooks.Select(g => g.Key).Distinct())
+            {
+                <option value="@dept.ToUpper()">@dept</option>
+            }
+        </select>
+
+        <input type="text" id="customSearch" class="form-control" placeholder="Quick search..." style="width: 200px; border-radius: 10px;">
+    </div>
+</div>
+
+<div id="catalogContainer">
+    @foreach (var group in groupedBooks)
+    {
+        <div class="dept-block" data-department="@group.Key.ToUpper()">
+            <h2 class="dept-header">Department: @group.Key</h2>
+
+            <div class="table-responsive">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th style="cursor:pointer;" onclick="sortTable(this, 0)">Title ↕</th>
+                            <th style="cursor:pointer;" onclick="sortTable(this, 1)">Author ↕</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="booksTableBody">
+                        @foreach (var book in group)
+                        {
+                            <tr class="clickable-row book-main-row" data-bs-toggle="collapse" data-bs-target="#detail-@book.Id">
+                                <td class="fw-bold">@book.Title</td>
+                                <td>@book.Author</td>
+                                <td class="status-cell">
+                                    @if (book.IsAvailable)
+                                    {
+                                        <span class="status-badge status-available">Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-borrowed">Borrowed</span>
+                                    }
+                                </td>
+                            </tr>
+
+                            <tr id="detail-@book.Id" class="collapse bg-light">
+                                <td colspan="3">
+                                    <div class="detail-box mx-3 my-2">
+                                        <h6 class="fw-bold text-primary mb-3">Detailed Information</h6>
+
+                                        <div class="row text-sm mb-3">
+                                            <div class="col-md-4">
+                                                <p class="mb-1"><strong>Author Name:</strong> @book.Author</p>
+                                                <p class="mb-1"><strong>Edition:</strong> @book.Edition</p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p class="mb-1"><strong>Publication Year:</strong> @book.PublicationYear</p>
+                                                <p class="mb-1"><strong>Total Copies:</strong> @book.TotalCopies</p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p class="mb-1">
+                                                    <strong>Available Copies:</strong>
+                                                    <span id="count-@book.Id" class="@(book.AvailableCopies > 0 ? "text-success" : "text-danger") fw-bold pulse-counter">
+                                                        @book.AvailableCopies
+                                                    </span>
+                                                </p>
+                                                <p class="mb-1"><strong>Location:</strong> Shelf A-3</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
+                                            <p class="text-muted text-xs mb-0 notice-text"></p>
+
+                                            <div class="d-flex gap-2">
+                                                <form asp-action="Reserve" asp-controller="Books" asp-route-id="@book.Id" method="post" class="action-form" data-book-id="@book.Id">
+                                                    <button type="submit" class="btn btn-warning btn-sm px-4 action-btn">Reserve Book</button>
+                                                </form>
+
+                                                @if (book.IsAvailable)
+                                                {
+                                                    <form asp-action="Borrow" asp-controller="Books" asp-route-id="@book.Id" method="post" class="action-form" data-book-id="@book.Id">
+                                                        <button type="submit" class="btn btn-primary btn-sm px-4 action-btn">Borrow Book</button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // 🚀 Feature 1: Auto-Dismiss Alert Messages after 3 Seconds
+        const alerts = document.querySelectorAll('.alert-dismissible-custom');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add('alert-hidden');
+                setTimeout(() => alert.remove(), 500);
+            }, 3000);
+        });
+
+        // 🚀 Feature 2: Wait for Approval State & Live Counter Animation
+        const actionForms = document.querySelectorAll('.action-form');
+        actionForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const bookId = this.getAttribute('data-book-id');
+                const detailBox = this.closest('.detail-box');
+                const mainRow = document.querySelector(`[data-bs-target="#${this.closest('.collapse').id}"]`);
+
+                // Update bottom notice text
+                const noticeText = detailBox.querySelector('.notice-text');
+                if (noticeText) {
+                    noticeText.innerHTML = "<span class='text-warning fw-bold'>Please wait while the admin approves...</span>";
+                }
+
+                // Update table row status badge visually
+                const statusCell = mainRow.querySelector('.status-cell');
+                if (statusCell) {
+                    statusCell.innerHTML = "<span class='status-badge status-pending'>Pending Approval</span>";
+                }
+
+                // 🚀 Feature 5: Real-time available copies counter animation
+                const counterSpan = document.getElementById(`count-${bookId}`);
+                if (counterSpan) {
+                    let currentCount = parseInt(counterSpan.textContent);
+                    if (currentCount > 0) {
+                        counterSpan.classList.add('pulse-active');
+                        setTimeout(() => {
+                            counterSpan.textContent = currentCount - 1;
+                            counterSpan.classList.remove('pulse-active');
+                            if (currentCount - 1 === 0) {
+                                counterSpan.className = "text-danger fw-bold pulse-counter";
+                            }
+                        }, 300);
+                    }
+                }
+
+                // Disable buttons to avoid spam clicking
+                const buttons = detailBox.querySelectorAll('.action-btn');
+                buttons.forEach(btn => btn.classList.add('disabled'));
+            });
+        });
+
+        // 🚀 Feature 3: Combined Department & Search Filter
+        const customSearch = document.getElementById('customSearch');
+        const deptDropdownFilter = document.getElementById('deptDropdownFilter');
+
+        function applyFilters() {
+            let searchVal = customSearch.value.toUpperCase();
+            let deptVal = deptDropdownFilter.value.toUpperCase();
+            let deptBlocks = document.querySelectorAll('.dept-block');
+
+            deptBlocks.forEach(block => {
+                let blockDept = block.getAttribute('data-department');
+                let rows = block.querySelectorAll('.book-main-row');
+                let visibleRowsInBlock = 0;
+
+                let matchesDept = (deptVal === "" || blockDept === deptVal);
+
+                rows.forEach(row => {
+                    let title = row.cells[0].textContent.toUpperCase();
+                    let author = row.cells[1].textContent.toUpperCase();
+
+                    let matchesSearch = (searchVal === "" || title.includes(searchVal) || author.includes(searchVal));
+
+                    if (matchesDept && matchesSearch) {
+                        row.style.display = "";
+                        visibleRowsInBlock++;
+                    } else {
+                        row.style.display = "none";
+                        // Auto-close accordion if hidden
+                        let targetId = row.getAttribute('data-bs-target');
+                        let detailRow = document.querySelector(targetId);
+                        if (detailRow && detailRow.classList.contains('show')) {
+                            detailRow.classList.remove('show');
+                        }
+                    }
+                });
+
+                // Hide entire department block if no books match
+                if (visibleRowsInBlock === 0) {
+                    block.style.display = "none";
+                } else {
+                    block.style.display = "";
+                }
+            });
+        }
+
+        customSearch.addEventListener('input', applyFilters);
+        deptDropdownFilter.addEventListener('change', applyFilters);
+
+        // Client-Side Table Sorting per Department Block
+        function sortTable(headerElement, n) {
+            let table = headerElement.closest('table');
+            let tbody = table.querySelector('.booksTableBody');
+            let rows = Array.from(tbody.rows).filter(r => r.classList.contains('book-main-row'));
+
+            rows.sort((a, b) => {
+                let x = a.cells[n].textContent.toLowerCase();
+                let y = b.cells[n].textContent.toLowerCase();
+                return x.localeCompare(y);
+            });
+
+            rows.forEach(row => {
+                tbody.appendChild(row);
+                let detailRow = document.getElementById(row.getAttribute('data-bs-target').replace('#', ''));
+                if (detailRow) {
+                    tbody.appendChild(detailRow);
+                }
+            });
+        }
+    </script>
+}

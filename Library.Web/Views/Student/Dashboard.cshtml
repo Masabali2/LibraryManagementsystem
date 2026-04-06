@@ -1,0 +1,269 @@
+﻿@model Library.Web.ViewModels.StudentDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    ViewData["Title"] = "Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+}
+
+@section Styles {
+    <style>
+        /* WELCOME SECTION */
+        .welcome-section {
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+            .welcome-section h1 {
+                font-size: 28px;
+                color: #1a202c;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .welcome-section p {
+                color: #718096;
+                font-size: 15px;
+            }
+
+        /* STATS GRID & CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #edf2f7;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+                border-color: #e2e8f0;
+            }
+
+        .stat-info h3 {
+            font-size: 14px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-info p {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+            line-height: 1;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* ICON BACKGROUND COLORS */
+        .icon-blue {
+            background-color: rgba(66, 153, 225, 0.15);
+            color: #3182ce;
+        }
+
+        .icon-green {
+            background-color: rgba(72, 187, 120, 0.15);
+            color: #38a169;
+        }
+
+        .icon-red {
+            background-color: rgba(245, 101, 101, 0.15);
+            color: #e53e3e;
+        }
+
+        /* TABLE SECTION STYLES */
+        .table-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #edf2f7;
+            animation: fadeInUp 1s ease-out;
+        }
+
+            .table-section h2 {
+                font-size: 20px;
+                color: #2d3748;
+                font-weight: 700;
+                margin-bottom: 20px;
+            }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 15px;
+        }
+
+            .styled-table thead tr {
+                background-color: #f7fafc;
+                color: #718096;
+                font-weight: 600;
+            }
+
+            .styled-table th,
+            .styled-table td {
+                padding: 15px 20px;
+                border-bottom: 1px solid #edf2f7;
+            }
+
+            .styled-table tbody tr:hover {
+                background-color: #f8fafc;
+            }
+
+        /* STATUS BADGES */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-borrowed {
+            background-color: rgba(66, 153, 225, 0.15);
+            color: #3182ce;
+        }
+
+        .status-due {
+            background-color: rgba(245, 101, 101, 0.15);
+            color: #e53e3e;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #a0aec0;
+        }
+
+        /* ANIMATIONS */
+        @@keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+}
+
+<div class="welcome-section">
+    <h1>Welcome Back, @Model.StudentName! 👋</h1>
+    <p>Here's a quick look at your library activity today.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Borrowed Books</h3>
+            <p>@Model.BorrowedBooksCount.ToString("00")</p>
+        </div>
+        <div class="stat-icon icon-blue">📚</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Active Reservations</h3>
+            <p>@Model.ActiveReservationsCount.ToString("00")</p>
+        </div>
+        <div class="stat-icon icon-green">🔖</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Fines</h3>
+            <p>PKR @Model.PendingFines.ToString("0.00")</p>
+        </div>
+        <div class="stat-icon icon-red">💰</div>
+    </div>
+</div>
+
+<div class="table-section">
+    <h2>Current Borrowed Items</h2>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Borrowed Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.BorrowedItems != null && Model.BorrowedItems.Any())
+            {
+                foreach (var item in Model.BorrowedItems)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.BorrowedDate.ToString("yyyy-MM-dd")</td>
+                        <td>@item.DueDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (item.IsDueSoon)
+                            {
+                                <span class="status-badge status-due">Due Soon</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-borrowed">Borrowed</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center text-muted">You have no borrowed items at the moment.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

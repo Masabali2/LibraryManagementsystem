@@ -1,0 +1,298 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .left-section {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .library-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @@keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .left-section h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .left-section p {
+            font-size: 14px;
+            text-align: center;
+            opacity: 0.9;
+            z-index: 1;
+            line-height: 1.6;
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #fafbfc;
+        }
+
+            .right-section h1 {
+                font-size: 28px;
+                color: #2d3748;
+                margin-bottom: 10px;
+            }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+            input[type="text"]:focus,
+            input[type="password"]:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .login-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff5f5;
+            border-radius: 5px;
+            border: 1px solid #feb2b2;
+            animation: shake 0.5s ease-in-out;
+            opacity: 1;
+        }
+
+        @@keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Styles for the registration link */
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+            .register-link a {
+                color: #667eea;
+                font-weight: 600;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+                .register-link a:hover {
+                    color: #764ba2;
+                    text-decoration: underline;
+                }
+
+        @@media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-section {
+                min-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <div class="library-icon">📚</div>
+            <h2>Library System</h2>
+            <p>Access your library account and explore thousands of books, journals, and digital resources at your fingertips.</p>
+        </div>
+
+        <div class="right-section">
+            <h1>Welcome Back</h1>
+            <p style="color: #718096; margin-bottom: 30px;">Sign in to your account to continue</p>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="Enter your username" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="error-message">
+                        @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <button type="submit" class="login-btn" style="margin-top: 20px;">Sign In</button>
+
+                <div class="register-link">
+                    Don't have an account?
+                    <a asp-controller="Account" asp-action="Register">Register here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const usernameInput = document.querySelector('input[name="username"]');
+        const passwordInput = document.querySelector('input[name="password"]');
+        const errorMessage = document.querySelector('.error-message');
+
+        const clearError = () => {
+            if (errorMessage) {
+                errorMessage.style.opacity = '0';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 300);
+            }
+        };
+
+        usernameInput.addEventListener('input', clearError);
+        passwordInput.addEventListener('input', clearError);
+
+        const addFocusEffect = (input) => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'translateX(5px)';
+                input.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = 'translateX(0)';
+            });
+        };
+
+        addFocusEffect(usernameInput);
+        addFocusEffect(passwordInput);
+
+        const form = document.querySelector('form');
+        const btn = document.querySelector('.login-btn');
+
+        form.addEventListener('submit', function() {
+            btn.innerHTML = 'Authenticating...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+        });
+    });
+</script>
