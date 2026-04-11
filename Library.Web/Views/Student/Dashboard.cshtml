@@ -7,7 +7,7 @@
 
 @section Styles {
     <style>
-        /* WELCOME SECTION */
+        /* [KEEPING ALL YOUR ORIGINAL CSS] */
         .welcome-section {
             margin-bottom: 30px;
             animation: fadeInDown 0.6s ease-out;
@@ -25,7 +25,6 @@
                 font-size: 15px;
             }
 
-        /* STATS GRID & CARDS */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -41,15 +40,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid #edf2f7;
         }
 
             .stat-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-                border-color: #e2e8f0;
             }
 
         .stat-info h3 {
@@ -68,6 +65,37 @@
             line-height: 1;
         }
 
+        .stat-split {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+            .stat-item span {
+                display: block;
+                font-size: 10px;
+                color: #a0aec0;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .stat-item b {
+                font-size: 22px;
+                color: #667eea;
+            }
+
+        .divider {
+            width: 1px;
+            background: #edf2f7;
+            height: 35px;
+            align-self: center;
+        }
+
         .stat-icon {
             width: 55px;
             height: 55px;
@@ -76,17 +104,6 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover .stat-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        /* ICON BACKGROUND COLORS */
-        .icon-blue {
-            background-color: rgba(66, 153, 225, 0.15);
-            color: #3182ce;
         }
 
         .icon-green {
@@ -99,22 +116,14 @@
             color: #e53e3e;
         }
 
-        /* TABLE SECTION STYLES */
         .table-section {
             background: #ffffff;
             border-radius: 16px;
             padding: 25px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border: 1px solid #edf2f7;
-            animation: fadeInUp 1s ease-out;
+            margin-bottom: 30px;
         }
-
-            .table-section h2 {
-                font-size: 20px;
-                color: #2d3748;
-                font-weight: 700;
-                margin-bottom: 20px;
-            }
 
         .styled-table {
             width: 100%;
@@ -126,20 +135,22 @@
             .styled-table thead tr {
                 background-color: #f7fafc;
                 color: #718096;
-                font-weight: 600;
             }
 
-            .styled-table th,
-            .styled-table td {
+            .styled-table th, .styled-table td {
                 padding: 15px 20px;
                 border-bottom: 1px solid #edf2f7;
             }
 
-            .styled-table tbody tr:hover {
-                background-color: #f8fafc;
-            }
+        .type-badge {
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+        }
 
-        /* STATUS BADGES */
         .status-badge {
             display: inline-block;
             padding: 5px 12px;
@@ -159,38 +170,32 @@
             color: #e53e3e;
         }
 
-        .text-center {
-            text-align: center;
+        .status-pending {
+            background-color: rgba(236, 163, 17, 0.15);
+            color: #b7791f;
         }
 
-        .text-muted {
-            color: #a0aec0;
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        /* ANIMATIONS */
-        @@keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .filter-btn {
+            padding: 6px 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
         }
 
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+            .filter-btn.active {
+                background: #667eea;
+                color: white;
+                border-color: #667eea;
             }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 }
 
@@ -201,11 +206,25 @@
 
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-info">
-            <h3>Borrowed Books</h3>
-            <p>@Model.BorrowedBooksCount.ToString("00")</p>
+        <div class="stat-info" style="width: 100%;">
+            <h3>Library Assets</h3>
+            <div class="stat-split">
+                <div class="stat-item">
+                    <b>@Model.BooksCount.ToString("00")</b>
+                    <span>Books</span>
+                </div>
+                <div class="divider"></div>
+                <div class="stat-item">
+                    <b>@Model.ThesesCount.ToString("00")</b>
+                    <span>Theses</span>
+                </div>
+                <div class="divider"></div>
+                <div class="stat-item">
+                    <b>@Model.JournalsCount.ToString("00")</b>
+                    <span>Journals</span>
+                </div>
+            </div>
         </div>
-        <div class="stat-icon icon-blue">📚</div>
     </div>
 
     <div class="stat-card">
@@ -226,11 +245,21 @@
 </div>
 
 <div class="table-section">
-    <h2>Current Borrowed Items</h2>
-    <table class="styled-table">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Current Activity (Borrowed)</h2>
+        <div class="filter-group">
+            <button class="filter-btn active" onclick="filterData('All', this)">All</button>
+            <button class="filter-btn" onclick="filterData('Book', this)">Books</button>
+            <button class="filter-btn" onclick="filterData('Thesis', this)">Theses</button>
+            <button class="filter-btn" onclick="filterData('Journal', this)">Journals</button>
+        </div>
+    </div>
+
+    <table class="styled-table" id="activityTable">
         <thead>
             <tr>
-                <th>Book Name</th>
+                <th>Type</th>
+                <th>Item Name</th>
                 <th>Borrowed Date</th>
                 <th>Due Date</th>
                 <th>Status</th>
@@ -241,12 +270,21 @@
             {
                 foreach (var item in Model.BorrowedItems)
                 {
-                    <tr>
-                        <td>@item.Title</td>
+                    <tr class="activity-row" data-type="@item.Type">
+                        <td>
+                            <span class="type-badge">
+                                @(item.Type == "Thesis" ? "🎓 Thesis" : item.Type == "Journal" ? "📑 Journal" : "📚 Book")
+                            </span>
+                        </td>
+                        <td><strong>@item.Title</strong></td>
                         <td>@item.BorrowedDate.ToString("yyyy-MM-dd")</td>
                         <td>@item.DueDate.ToString("yyyy-MM-dd")</td>
                         <td>
-                            @if (item.IsDueSoon)
+                            @if (item.Status == "Pending")
+                            {
+                                <span class="status-badge status-pending">Wait for Admin</span>
+                            }
+                            else if (item.IsDueSoon)
                             {
                                 <span class="status-badge status-due">Due Soon</span>
                             }
@@ -260,10 +298,79 @@
             }
             else
             {
-                <tr>
-                    <td colspan="4" class="text-center text-muted">You have no borrowed items at the moment.</td>
-                </tr>
+                <tr><td colspan="5" class="text-center text-muted">No borrowed items.</td></tr>
             }
         </tbody>
     </table>
 </div>
+
+<div class="table-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Active Reservations</h2>
+    </div>
+
+    <table class="styled-table" id="reservationTable">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Item Name</th>
+                <th>Reservation Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ReservedItems != null && Model.ReservedItems.Any())
+            {
+                foreach (var item in Model.ReservedItems)
+                {
+                    <tr class="activity-row" data-type="@item.ItemType">
+                        <td>
+                            <span class="type-badge">
+                                @(item.ItemType == "Thesis" ? "🎓 Thesis" : item.ItemType == "Journal" ? "📑 Journal" : "📚 Book")
+                            </span>
+                        </td>
+                        <td><strong>@item.Title</strong></td>
+                        <td>@item.ReservationDate.ToString("yyyy-MM-dd")</td>
+                        <td>@item.ExpiryDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (item.Status == "Pending")
+                            {
+                                <span class="status-badge status-pending">Wait for Admin</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-borrowed">Reserved</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5" class="text-center text-muted">No active reservations.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function filterData(type, btn) {
+            // Update active button state
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Apply filter to all tables containing '.activity-row'
+            const rows = document.querySelectorAll('.activity-row');
+            rows.forEach(row => {
+                const rowType = row.getAttribute('data-type');
+                if (type === 'All' || rowType === type) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

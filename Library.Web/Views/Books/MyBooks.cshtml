@@ -28,17 +28,19 @@
         /* TABS NAVIGATION */
         .tabs-nav {
             display: flex;
+            align-items: center;
             gap: 15px;
             margin-bottom: 30px;
             border-bottom: 1px solid #edf2f7;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
             background: none;
             border: none;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             color: #718096;
             cursor: pointer;
@@ -55,6 +57,13 @@
                 background-color: #f7fafc;
                 color: #2d3748;
             }
+
+        .filter-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #e2e8f0;
+            margin: 0 10px;
+        }
 
         /* BOOK GRID & CARDS */
         .books-grid {
@@ -209,7 +218,6 @@
             cursor: not-allowed;
         }
 
-        /* ANIMATIONS */
         @@keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -242,8 +250,15 @@
 </div>
 
 <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchTab('active')">Currently Borrowed</button>
-    <button class="tab-btn" onclick="switchTab('history')">Past Reads</button>
+    <button class="tab-btn active status-tab" onclick="switchStatusTab('active', this)">Currently Borrowed</button>
+    <button class="tab-btn status-tab" onclick="switchStatusTab('history', this)">Past Reads</button>
+
+    <div class="filter-divider"></div>
+
+    <button class="tab-btn active filter-tab" onclick="filterByType('All', this)">All</button>
+    <button class="tab-btn filter-tab" onclick="filterByType('Book', this)">Books</button>
+    <button class="tab-btn filter-tab" onclick="filterByType('Thesis', this)">Theses</button>
+    <button class="tab-btn filter-tab" onclick="filterByType('Journal', this)">Journals</button>
 </div>
 
 <div id="active-books" class="books-grid">
@@ -251,11 +266,8 @@
     {
         foreach (var item in Model.ActiveBorrowedBooks)
         {
-            // Calculate dynamic progress based on actual DB Due Date
             var dueDate = item.ExpectedReturnDate ?? item.BorrowDate.AddDays(14);
             var totalAllowedDays = (dueDate - item.BorrowDate).TotalDays;
-
-            // Fallback to avoid division by zero
             if (totalAllowedDays <= 0) totalAllowedDays = 14;
 
             var daysElapsed = (DateTime.Now - item.BorrowDate).TotalDays;
@@ -266,11 +278,10 @@
             var badgeClass = "badge-safe";
             var badgeText = $"{daysLeft} Days Left";
 
-            // Visual threat detection based on percentage of time eaten up
             if (percentElapsed > 80) { progressColorClass = "bg-red"; badgeClass = "badge-danger"; }
             else if (percentElapsed > 50) { progressColorClass = "bg-yellow"; badgeClass = "badge-warning"; }
 
-            <div class="book-card">
+            <div class="book-card" data-type="@item.Type">
                 <span class="badge @badgeClass">@badgeText</span>
                 <div class="book-title">@item.Title</div>
                 <div class="book-author">by @item.Author</div>
@@ -289,7 +300,6 @@
                     <form asp-controller="Books" asp-action="Return" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
                         <button type="submit" class="btn-action btn-return">Return</button>
                     </form>
-
                     <form asp-controller="Books" asp-action="Renew" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
                         <button type="submit" class="btn-action btn-renew">Renew</button>
                     </form>
@@ -299,7 +309,7 @@
     }
     else
     {
-        <div style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
+        <div class="no-data-msg" style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
             <p>You have no books borrowed at the moment. 📚</p>
         </div>
     }
@@ -310,7 +320,7 @@
     {
         foreach (var item in Model.PastReads)
         {
-            <div class="book-card">
+            <div class="book-card" data-type="@item.Type">
                 <span class="badge badge-history">Returned</span>
                 <div class="book-title">@item.Title</div>
                 <div class="book-author">by @item.Author</div>
@@ -328,7 +338,7 @@
     }
     else
     {
-        <div style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
+        <div class="no-data-msg" style="grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;">
             <p>Your reading history is empty.</p>
         </div>
     }
@@ -336,22 +346,63 @@
 
 @section Scripts {
     <script>
-        // JS to toggle front-end tabs without calling backend
-        function switchTab(tabType) {
-            const activeSection = document.getElementById('active-books');
-            const historySection = document.getElementById('history-books');
-            const buttons = document.querySelectorAll('.tab-btn');
+        let currentStatus = 'active';
+        let currentType = 'All';
 
-            if (tabType === 'active') {
-                activeSection.style.display = 'grid';
-                historySection.style.display = 'none';
-                buttons[0].classList.add('active');
-                buttons[1].classList.remove('active');
-            } else {
-                activeSection.style.display = 'none';
-                historySection.style.display = 'grid';
-                buttons[0].classList.remove('active');
-                buttons[1].classList.add('active');
+        function switchStatusTab(status, element) {
+            currentStatus = status;
+
+            // Toggle Tab Buttons
+            document.querySelectorAll('.status-tab').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            // Show/Hide Sections
+            document.getElementById('active-books').style.display = (status === 'active') ? 'grid' : 'none';
+            document.getElementById('history-books').style.display = (status === 'history') ? 'grid' : 'none';
+
+            // Re-apply type filter to the new visible section
+            applyFilters();
+        }
+
+        function filterByType(type, element) {
+            currentType = type;
+
+            // Toggle Filter Buttons
+            document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const containerId = (currentStatus === 'active') ? 'active-books' : 'history-books';
+            const cards = document.querySelectorAll(`#${containerId} .book-card`);
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                if (currentType === 'All' || cardType === currentType) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Handle "No results" message for sub-filtering
+            const container = document.getElementById(containerId);
+            let msg = container.querySelector('.filter-empty-msg');
+
+            if (visibleCount === 0) {
+                if (!msg) {
+                    msg = document.createElement('div');
+                    msg.className = 'filter-empty-msg';
+                    msg.style = "grid-column: 1 / -1; text-align: center; color: #718096; padding: 40px;";
+                    msg.innerHTML = `<p>No ${currentType}s found in this section.</p>`;
+                    container.appendChild(msg);
+                }
+            } else if (msg) {
+                msg.remove();
             }
         }
     </script>

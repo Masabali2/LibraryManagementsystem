@@ -2,358 +2,393 @@
 
 @{
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
-    ViewData["Title"] = "Search Books";
+    ViewData["Title"] = "Library Catalog";
     ViewData["ActivePage"] = "Books";
 
-    // 1. Group books by Department right at the top!
-    var groupedBooks = Model.GroupBy(b => b.Department);
+    var groupedItems = Model.GroupBy(b => b.Department);
+    var totalBooks = Model.Count(m => m.ItemType == "Book");
+    var totalJournals = Model.Count(m => m.ItemType == "Journal");
+    var totalTheses = Model.Count(m => m.ItemType == "Thesis");
 }
 
 @section Styles {
     <style>
+        /* 🎨 Filter Pill Styles */
+        .filter-pill {
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+        }
+
+            .filter-pill:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+
+            .filter-pill.active[data-type="ALL"] {
+                background: #3182ce;
+                color: white;
+                border-color: #3182ce;
+            }
+
+            .filter-pill.active[data-type="BOOK"] {
+                background: #4a5568;
+                color: white;
+                border-color: #4a5568;
+            }
+
+            .filter-pill.active[data-type="JOURNAL"] {
+                background: #3182ce;
+                color: white;
+                border-color: #3182ce;
+            }
+
+            .filter-pill.active[data-type="THESIS"] {
+                background: #805ad5;
+                color: white;
+                border-color: #805ad5;
+            }
+
+        /* 📊 Mini Stats */
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 15px;
+            border-left: 4px solid #cbd5e0;
+            min-width: 100px;
+        }
+
+        /* 📋 Table Styling */
         .styled-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            text-align: left;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            background: transparent;
+        }
+
+        .book-main-row {
             background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            margin-bottom: 30px; /* Space between department blocks */
-        }
-
-            .styled-table th {
-                background-color: #f7fafc;
-                color: #718096;
-                font-weight: 600;
-                padding: 15px;
-                border-bottom: 2px solid #edf2f7;
-                text-transform: uppercase;
-                font-size: 12px;
-                letter-spacing: 0.5px;
-            }
-
-            .styled-table td {
-                padding: 15px;
-                border-bottom: 1px solid #edf2f7;
-                color: #2d3748;
-            }
-
-        .clickable-row {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
-            .clickable-row:hover {
-                background-color: #f8fafc;
+            .book-main-row:hover {
+                transform: scale(1.005);
+                background: #fdfdfd;
             }
 
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
+            .book-main-row td:first-child {
+                border-radius: 10px 0 0 10px;
+            }
+
+            .book-main-row td:last-child {
+                border-radius: 0 10px 10px 0;
+            }
+
+        .type-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 4px;
+            display: inline-block;
         }
 
-        /* Status Badge Colors */
-        .status-available {
-            background: #e6fffa;
-            color: #319795;
+        .type-book {
+            background: #edf2f7;
+            color: #4a5568;
         }
 
-        .status-borrowed {
+        .type-journal {
             background: #ebf8ff;
             color: #3182ce;
         }
 
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
+        .type-thesis {
+            background: #faf5ff;
+            color: #6b46c1;
         }
 
-        .detail-box {
-            background: #f8fafc;
-            border: 1px solid #edf2f7;
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        /* Department block headers */
-        .dept-header {
-            font-size: 18px;
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
             font-weight: 700;
-            color: #2d3748;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            border-left: 4px solid #3182ce;
-            padding-left: 10px;
         }
 
-        /* 🚀 Feature: Auto-dismiss sliding animation */
-        .alert-dismissible-custom {
-            transition: opacity 0.5s ease, transform 0.5s ease;
+        .status-available {
+            background: #c6f6d5;
+            color: #22543d;
         }
 
-        .alert-hidden {
-            opacity: 0;
-            transform: translateY(-20px);
-            pointer-events: none;
+        .status-borrowed {
+            background: #fed7d7;
+            color: #822727;
         }
 
-        /* 🚀 Feature: Pulse effect for real-time copy counter */
-        .pulse-counter {
-            transition: all 0.3s ease;
-            display: inline-block;
+        /* Modal Customization */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
         }
 
-        .pulse-active {
-            transform: scale(1.4);
-            color: #e53e3e !important;
+        .modal-backdrop.show {
+            opacity: 0.7;
         }
     </style>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 style="font-size: 24px; color: #2d3748;">Library Catalog</h1>
-        <p style="color: #718096;">Browse and interact with available resources.</p>
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h1 class="h4 fw-bold text-dark mb-1">Library Catalog</h1>
+        <p class="text-muted small">Search and manage your resource requests.</p>
     </div>
-
-    <div id="alertContainer">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success py-2 px-3 mb-0 alert-dismissible-custom" style="border-radius: 10px;">
-                @TempData["Success"]
+    <div class="col-md-6">
+        <div class="d-flex gap-3 justify-content-end">
+            <div class="stat-card">
+                <span class="d-block small text-muted">Books</span>
+                <span class="fw-bold text-dark">@totalBooks</span>
             </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger py-2 px-3 mb-0 alert-dismissible-custom" style="border-radius: 10px;">
-                @TempData["Error"]
+            <div class="stat-card" style="border-left-color: #3182ce;">
+                <span class="d-block small text-muted">Journals</span>
+                <span class="fw-bold text-dark">@totalJournals</span>
             </div>
-        }
+            <div class="stat-card" style="border-left-color: #805ad5;">
+                <span class="d-block small text-muted">Theses</span>
+                <span class="fw-bold text-dark">@totalTheses</span>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="d-flex gap-3">
-        <select id="deptDropdownFilter" class="form-select" style="width: 200px; border-radius: 10px;">
-            <option value="">All Departments</option>
-            @foreach (var dept in groupedBooks.Select(g => g.Key).Distinct())
-            {
-                <option value="@dept.ToUpper()">@dept</option>
-            }
-        </select>
-
-        <input type="text" id="customSearch" class="form-control" placeholder="Quick search..." style="width: 200px; border-radius: 10px;">
+<div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 15px;">
+    <div class="row g-3 align-items-center">
+        <div class="col-lg-5">
+            <div class="d-flex gap-2" id="typeFilters">
+                <button class="filter-pill active" data-type="ALL">All Resources</button>
+                <button class="filter-pill" data-type="BOOK">Books</button>
+                <button class="filter-pill" data-type="JOURNAL">Journals</button>
+                <button class="filter-pill" data-type="THESIS">Theses</button>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <select id="deptDropdownFilter" class="form-select border-0 bg-light" style="border-radius: 10px;">
+                <option value="">All Departments</option>
+                @foreach (var dept in groupedItems.Select(g => g.Key).OrderBy(x => x))
+                {
+                    <option value="@dept.ToUpper()">@dept</option>
+                }
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <div class="input-group bg-light" style="border-radius: 10px;">
+                <span class="input-group-text border-0 bg-transparent text-muted"><i class="fas fa-search"></i></span>
+                <input type="text" id="customSearch" class="form-control border-0 bg-transparent" placeholder="Search title, author...">
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="catalogContainer">
-    @foreach (var group in groupedBooks)
+    @foreach (var group in groupedItems)
     {
-        <div class="dept-block" data-department="@group.Key.ToUpper()">
-            <h2 class="dept-header">Department: @group.Key</h2>
+        <div class="dept-block mb-5" data-department="@group.Key.ToUpper()">
+            <div class="d-flex align-items-center mb-2">
+                <div style="width: 4px; height: 20px; background: #3182ce; border-radius: 2px; margin-right: 10px;"></div>
+                <h2 class="h6 fw-bold m-0 text-uppercase letter-spacing-1">@group.Key</h2>
+            </div>
 
-            <div class="table-responsive">
-                <table class="styled-table">
-                    <thead>
-                        <tr>
-                            <th style="cursor:pointer;" onclick="sortTable(this, 0)">Title ↕</th>
-                            <th style="cursor:pointer;" onclick="sortTable(this, 1)">Author ↕</th>
-                            <th>Status</th>
+            <table class="styled-table">
+                <thead>
+                    <tr class="small text-muted">
+                        <th style="width: 45%;" class="ps-3">Resource</th>
+                        <th style="width: 30%;">Author / Contributor</th>
+                        <th style="width: 25%; text-align: right;" class="pe-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in group)
+                    {
+                        <tr class="book-main-row" data-bs-toggle="collapse" data-bs-target="#details-@item.Id">
+                            <td class="ps-3">
+                                <div class="fw-bold text-dark">@item.Title</div>
+                                <span class="type-badge @(item.ItemType == "Thesis" ? "type-thesis" : item.ItemType == "Journal" ? "type-journal" : "type-book")">
+                                    @item.ItemType.ToUpper()
+                                </span>
+                            </td>
+                            <td class="text-muted">@item.Author</td>
+                            <td class="text-end pe-3">
+                                <span class="status-badge @(item.IsAvailable ? "status-available" : "status-borrowed")">
+                                    @(item.IsAvailable ? "AVAILABLE" : "OUT OF STOCK")
+                                </span>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="booksTableBody">
-                        @foreach (var book in group)
-                        {
-                            <tr class="clickable-row book-main-row" data-bs-toggle="collapse" data-bs-target="#detail-@book.Id">
-                                <td class="fw-bold">@book.Title</td>
-                                <td>@book.Author</td>
-                                <td class="status-cell">
-                                    @if (book.IsAvailable)
-                                    {
-                                        <span class="status-badge status-available">Available</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="status-badge status-borrowed">Borrowed</span>
-                                    }
-                                </td>
-                            </tr>
 
-                            <tr id="detail-@book.Id" class="collapse bg-light">
-                                <td colspan="3">
-                                    <div class="detail-box mx-3 my-2">
-                                        <h6 class="fw-bold text-primary mb-3">Detailed Information</h6>
-
-                                        <div class="row text-sm mb-3">
-                                            <div class="col-md-4">
-                                                <p class="mb-1"><strong>Author Name:</strong> @book.Author</p>
-                                                <p class="mb-1"><strong>Edition:</strong> @book.Edition</p>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <p class="mb-1"><strong>Publication Year:</strong> @book.PublicationYear</p>
-                                                <p class="mb-1"><strong>Total Copies:</strong> @book.TotalCopies</p>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <p class="mb-1">
-                                                    <strong>Available Copies:</strong>
-                                                    <span id="count-@book.Id" class="@(book.AvailableCopies > 0 ? "text-success" : "text-danger") fw-bold pulse-counter">
-                                                        @book.AvailableCopies
-                                                    </span>
-                                                </p>
-                                                <p class="mb-1"><strong>Location:</strong> Shelf A-3</p>
-                                            </div>
+                        <tr id="details-@item.Id" class="collapse">
+                            <td colspan="3" class="p-0 border-0">
+                                <div class="m-2 p-4 bg-white shadow-sm border" style="border-radius: 12px;">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3 border-end">
+                                            <label class="text-muted small d-block">Publication</label>
+                                            <span class="fw-bold">@item.PublicationYear</span>
                                         </div>
-
-                                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
-                                            <p class="text-muted text-xs mb-0 notice-text"></p>
-
-                                            <div class="d-flex gap-2">
-                                                <form asp-action="Reserve" asp-controller="Books" asp-route-id="@book.Id" method="post" class="action-form" data-book-id="@book.Id">
-                                                    <button type="submit" class="btn btn-warning btn-sm px-4 action-btn">Reserve Book</button>
-                                                </form>
-
-                                                @if (book.IsAvailable)
-                                                {
-                                                    <form asp-action="Borrow" asp-controller="Books" asp-route-id="@book.Id" method="post" class="action-form" data-book-id="@book.Id">
-                                                        <button type="submit" class="btn btn-primary btn-sm px-4 action-btn">Borrow Book</button>
-                                                    </form>
-                                                }
-                                            </div>
+                                        <div class="col-md-3 border-end ps-4">
+                                            <label class="text-muted small d-block">Availability</label>
+                                            <span class="fw-bold @(item.AvailableCopies > 0 ? "text-success" : "text-danger")">
+                                                @item.AvailableCopies / @item.TotalCopies Copies
+                                            </span>
+                                        </div>
+                                        <div class="col-md-6 text-end d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-primary px-4 open-transaction-modal"
+                                                    data-id="@item.Id" data-title="@item.Title" data-type="@item.ItemType" data-action="Borrow"
+                                                    @(item.IsAvailable ? "" : "disabled")>
+                                                Borrow Now
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary px-4 open-transaction-modal"
+                                                    data-id="@item.Id" data-title="@item.Title" data-type="@item.ItemType" data-action="Reserve">
+                                                Reserve
+                                            </button>
                                         </div>
                                     </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 </div>
 
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalActionTitle">Confirm Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="p-3 mb-4 bg-light" style="border-radius: 15px;">
+                    <p class="text-muted small mb-1">Confirming Request For:</p>
+                    <h5 class="fw-bold text-primary mb-0" id="modalItemTitle">Item Title</h5>
+                    <span class="badge mt-2" id="modalItemBadge">Type</span>
+                </div>
+
+                <div class="row text-start mb-4">
+                    <div class="col-6">
+                        <label class="small text-muted d-block">Return Policy</label>
+                        <span class="fw-bold">14 Days Max</span>
+                    </div>
+                    <div class="col-6 border-start">
+                        <label class="small text-muted d-block">Late Fine</label>
+                        <span class="fw-bold text-danger">Rs. 50 / Day</span>
+                    </div>
+                </div>
+
+                <div class="form-check text-start p-3 border rounded mb-3">
+                    <input class="form-check-input ms-0 me-2" type="checkbox" id="termsCheck">
+                    <label class="form-check-label small text-muted" for="termsCheck">
+                        I agree to keep this @ViewData["Title"] safe and return it by the due date.
+                    </label>
+                </div>
+
+                <form id="confirmActionForm" asp-action="ProcessRequest" asp-controller="Books" method="post">
+                    <input type="hidden" name="Id" id="hiddenItemId" />
+                    <input type="hidden" name="ItemType" id="hiddenItemType" />
+                    <input type="hidden" name="RequestType" id="hiddenRequestType" />
+
+                    <button type="submit" id="finalConfirmBtn" class="btn btn-primary w-100 py-3 fw-bold" style="border-radius: 12px;" disabled>
+                        Confirm Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        // 🚀 Feature 1: Auto-Dismiss Alert Messages after 3 Seconds
-        const alerts = document.querySelectorAll('.alert-dismissible-custom');
-        alerts.forEach(alert => {
-            setTimeout(() => {
-                alert.classList.add('alert-hidden');
-                setTimeout(() => alert.remove(), 500);
-            }, 3000);
-        });
+        let currentType = "ALL";
+        const transModal = new bootstrap.Modal(document.getElementById('transactionModal'));
 
-        // 🚀 Feature 2: Wait for Approval State & Live Counter Animation
-        const actionForms = document.querySelectorAll('.action-form');
-        actionForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const bookId = this.getAttribute('data-book-id');
-                const detailBox = this.closest('.detail-box');
-                const mainRow = document.querySelector(`[data-bs-target="#${this.closest('.collapse').id}"]`);
-
-                // Update bottom notice text
-                const noticeText = detailBox.querySelector('.notice-text');
-                if (noticeText) {
-                    noticeText.innerHTML = "<span class='text-warning fw-bold'>Please wait while the admin approves...</span>";
-                }
-
-                // Update table row status badge visually
-                const statusCell = mainRow.querySelector('.status-cell');
-                if (statusCell) {
-                    statusCell.innerHTML = "<span class='status-badge status-pending'>Pending Approval</span>";
-                }
-
-                // 🚀 Feature 5: Real-time available copies counter animation
-                const counterSpan = document.getElementById(`count-${bookId}`);
-                if (counterSpan) {
-                    let currentCount = parseInt(counterSpan.textContent);
-                    if (currentCount > 0) {
-                        counterSpan.classList.add('pulse-active');
-                        setTimeout(() => {
-                            counterSpan.textContent = currentCount - 1;
-                            counterSpan.classList.remove('pulse-active');
-                            if (currentCount - 1 === 0) {
-                                counterSpan.className = "text-danger fw-bold pulse-counter";
-                            }
-                        }, 300);
-                    }
-                }
-
-                // Disable buttons to avoid spam clicking
-                const buttons = detailBox.querySelectorAll('.action-btn');
-                buttons.forEach(btn => btn.classList.add('disabled'));
+        // 1. Filter Logic
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                currentType = this.getAttribute('data-type');
+                applyFilters();
             });
         });
-
-        // 🚀 Feature 3: Combined Department & Search Filter
-        const customSearch = document.getElementById('customSearch');
-        const deptDropdownFilter = document.getElementById('deptDropdownFilter');
 
         function applyFilters() {
-            let searchVal = customSearch.value.toUpperCase();
-            let deptVal = deptDropdownFilter.value.toUpperCase();
-            let deptBlocks = document.querySelectorAll('.dept-block');
+            const query = document.getElementById('customSearch').value.toUpperCase();
+            const dept = document.getElementById('deptDropdownFilter').value.toUpperCase();
 
-            deptBlocks.forEach(block => {
-                let blockDept = block.getAttribute('data-department');
-                let rows = block.querySelectorAll('.book-main-row');
-                let visibleRowsInBlock = 0;
-
-                let matchesDept = (deptVal === "" || blockDept === deptVal);
+            document.querySelectorAll('.dept-block').forEach(block => {
+                const blockDept = block.getAttribute('data-department');
+                const rows = block.querySelectorAll('.book-main-row');
+                let visibleRows = 0;
 
                 rows.forEach(row => {
-                    let title = row.cells[0].textContent.toUpperCase();
-                    let author = row.cells[1].textContent.toUpperCase();
+                    const text = row.textContent.toUpperCase();
+                    const type = row.querySelector('.type-badge').textContent.trim().toUpperCase();
 
-                    let matchesSearch = (searchVal === "" || title.includes(searchVal) || author.includes(searchVal));
+                    const matchesSearch = text.includes(query);
+                    const matchesDept = (dept === "" || blockDept === dept);
+                    const matchesType = (currentType === "ALL" || type === currentType);
 
-                    if (matchesDept && matchesSearch) {
+                    if (matchesSearch && matchesDept && matchesType) {
                         row.style.display = "";
-                        visibleRowsInBlock++;
+                        visibleRows++;
                     } else {
                         row.style.display = "none";
-                        // Auto-close accordion if hidden
-                        let targetId = row.getAttribute('data-bs-target');
-                        let detailRow = document.querySelector(targetId);
-                        if (detailRow && detailRow.classList.contains('show')) {
-                            detailRow.classList.remove('show');
-                        }
+                        const target = document.querySelector(row.getAttribute('data-bs-target'));
+                        if(target) target.classList.remove('show');
                     }
                 });
-
-                // Hide entire department block if no books match
-                if (visibleRowsInBlock === 0) {
-                    block.style.display = "none";
-                } else {
-                    block.style.display = "";
-                }
+                block.style.display = (visibleRows > 0) ? "" : "none";
             });
         }
 
-        customSearch.addEventListener('input', applyFilters);
-        deptDropdownFilter.addEventListener('change', applyFilters);
+        document.getElementById('customSearch').addEventListener('input', applyFilters);
+        document.getElementById('deptDropdownFilter').addEventListener('change', applyFilters);
 
-        // Client-Side Table Sorting per Department Block
-        function sortTable(headerElement, n) {
-            let table = headerElement.closest('table');
-            let tbody = table.querySelector('.booksTableBody');
-            let rows = Array.from(tbody.rows).filter(r => r.classList.contains('book-main-row'));
+        // 2. Modal Logic
+        document.querySelectorAll('.open-transaction-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.dataset.action;
+                document.getElementById('modalActionTitle').innerText = `${action} Request`;
+                document.getElementById('modalItemTitle').innerText = this.dataset.title;
+                document.getElementById('modalItemBadge').innerText = this.dataset.type.toUpperCase();
+                document.getElementById('modalItemBadge').className = `badge mt-2 type-${this.dataset.type.toLowerCase()}`;
 
-            rows.sort((a, b) => {
-                let x = a.cells[n].textContent.toLowerCase();
-                let y = b.cells[n].textContent.toLowerCase();
-                return x.localeCompare(y);
+                document.getElementById('hiddenItemId').value = this.dataset.id;
+                document.getElementById('hiddenItemType').value = this.dataset.type;
+                document.getElementById('hiddenRequestType').value = action;
+
+                document.getElementById('termsCheck').checked = false;
+                document.getElementById('finalConfirmBtn').disabled = true;
+                transModal.show();
             });
+        });
 
-            rows.forEach(row => {
-                tbody.appendChild(row);
-                let detailRow = document.getElementById(row.getAttribute('data-bs-target').replace('#', ''));
-                if (detailRow) {
-                    tbody.appendChild(detailRow);
-                }
-            });
-        }
+        document.getElementById('termsCheck').addEventListener('change', function() {
+            document.getElementById('finalConfirmBtn').disabled = !this.checked;
+        });
+
+        // 3. Form Submission Feedback
+        document.getElementById('confirmActionForm').addEventListener('submit', function() {
+            const btn = document.getElementById('finalConfirmBtn');
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Processing... Please wait for Admin approval`;
+            btn.classList.replace('btn-primary', 'btn-warning');
+            btn.disabled = true;
+        });
     </script>
 }

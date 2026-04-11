@@ -22,85 +22,160 @@ public class BooksController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var booksFromDb = await _studentRepo.GetAllBooksAsync();
+        // Fetch them one by one to avoid Concurrency errors
+        var books = await _studentRepo.GetAllBooksAsync();
+        var journals = await _studentRepo.GetAllJournalsAsync();
+        var theses = await _studentRepo.GetAllThesesAsync();
 
-        var viewModel = booksFromDb.Select(book => new BookViewModel
+        // Map Books
+        var bookVMs = books.Select(b => new BookViewModel
         {
-            Id = book.BookId,
-            Title = book.Title,
-            Author = book.Author,
-            Department = book.Department,
-            Edition = book.Edition ?? "N/A",
-            IsAvailable = book.AvailableCopies.HasValue && book.AvailableCopies.Value > 0,
+            Id = b.BookId,
+            Title = b.Title,
+            Author = b.Author,
+            Department = b.Department,
+            Edition = b.Edition ?? "N/A",
+            PublicationYear = b.PublicationYear ?? "N/A",
+            AvailableCopies = b.AvailableCopies ?? 0,
+            TotalCopies = b.TotalCopies ?? 0,
+            IsAvailable = (b.AvailableCopies ?? 0) > 0,
+            ItemType = "Book"
+        });
 
-            // 🔥 Added the new mappings for your detailed description area
-            PublicationYear = book.PublicationYear ?? "N/A",
-            TotalCopies = book.TotalCopies ?? 0,
-            AvailableCopies = book.AvailableCopies ?? 0
-        }).ToList();
+        // Map Journals
+        var journalVMs = journals.Select(j => new BookViewModel
+        {
+            Id = j.JournalId,
+            Title = j.JournalName,
+            Author = j.Publisher ?? "N/A",
+            Department = j.Department ?? "General",
+            Edition = $"Vol. {j.Volume}",
+            PublicationYear = j.Year,
+            AvailableCopies = j.Quantity ?? 0,
+            TotalCopies = j.Quantity ?? 0,
+            IsAvailable = (j.Quantity ?? 0) > 0,
+            ItemType = "Journal"
+        });
 
-        return View("~/Views/Books/Index.cshtml", viewModel);
+        // Map Theses
+        var thesisVMs = theses.Select(t => new BookViewModel
+        {
+            Id = t.ThesisId,
+            Title = t.Title,
+            Author = t.StudentName,
+            Department = t.Department,
+            Edition = t.Batch,
+            PublicationYear = t.Year.ToString(),
+            AvailableCopies = 1,
+            TotalCopies = 1,
+            IsAvailable = true,
+            ItemType = "Thesis"
+        });
+
+        var finalModel = bookVMs.Concat(journalVMs).Concat(thesisVMs)
+                                .OrderBy(x => x.Title)
+                                .ToList();
+
+        return View(finalModel);
     }
 
+    /// <summary>
+    /// Unified method to handle Borrow and Reserve requests for all item types
+    /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Borrow(int id)
+    public async Task<IActionResult> ProcessRequest(int id, string itemType, string requestType)
     {
         int? currentStudentId = HttpContext.Session.GetInt32("CurrentStudentId");
         if (currentStudentId == null) return RedirectToAction("Login", "Account");
 
-        bool success = await _studentRepo.BorrowBookAsync(currentStudentId.Value, id);
+        bool success = false;
 
-        if (!success) TempData["Error"] = "Unable to borrow book. It may be out of stock.";
-        else TempData["Success"] = "Book borrowed successfully!";
+        // We pass itemType (Book, Journal, Thesis) so the Repository knows which table to hit
+        if (requestType == "Borrow")
+        {
+            success = await _studentRepo.BorrowItemAsync(currentStudentId.Value, id, itemType);
+        }
+        else if (requestType == "Reserve")
+        {
+            success = await _studentRepo.ReserveItemAsync(currentStudentId.Value, id, itemType);
+        }
+
+        if (!success)
+        {
+            TempData["Error"] = $"Unable to {requestType.ToLower()} this {itemType.ToLower()}.";
+        }
+        else
+        {
+            // Success message for "Wait for Admin" requirement
+            TempData["Success"] = $"Your {requestType} request for the {itemType} has been submitted. Please wait for Admin approval.";
+        }
 
         return RedirectToAction("Index");
     }
-
-    [HttpPost]
-    public async Task<IActionResult> Reserve(int id)
-    {
-        int? currentStudentId = HttpContext.Session.GetInt32("CurrentStudentId");
-        if (currentStudentId == null) return RedirectToAction("Login", "Account");
-
-        bool success = await _studentRepo.ReserveBookAsync(currentStudentId.Value, id);
-
-        if (!success) TempData["Error"] = "Unable to process reservation.";
-        else TempData["Success"] = "Book reserved successfully!";
-
-        return RedirectToAction("Index");
-    }
-
     [HttpGet]
     public async Task<IActionResult> MyBooks()
     {
         int? studentId = HttpContext.Session.GetInt32("CurrentStudentId");
         if (studentId == null) return RedirectToAction("Login", "Account");
 
+        // 1. Get the base records from BorrowingHistory
         var allRecords = await _bookRepo.GetFullBorrowingHistoryAsync(studentId.Value);
+
+        // 2. Fetch all catalogs to map the names (simpler than complex joins)
+        var books = await _studentRepo.GetAllBooksAsync();
+        var journals = await _studentRepo.GetAllJournalsAsync();
+        var theses = await _studentRepo.GetAllThesesAsync();
+
+        // 3. Map the data with specific titles and types
+        var mappedItems = allRecords.Select(r => {
+            string title = "Unknown";
+            string author = "Unknown";
+
+            if (r.ItemType == "Book")
+            {
+                var b = books.FirstOrDefault(x => x.BookId == r.ItemId);
+                title = b?.Title ?? "Unknown Book";
+                author = b?.Author ?? "N/A";
+            }
+            else if (r.ItemType == "Journal")
+            {
+                var j = journals.FirstOrDefault(x => x.JournalId == r.ItemId);
+                title = j?.JournalName ?? "Unknown Journal";
+                author = j?.Publisher ?? "N/A";
+            }
+            else if (r.ItemType == "Thesis")
+            {
+                var t = theses.FirstOrDefault(x => x.ThesisId == r.ItemId);
+                title = t?.Title ?? "Unknown Thesis";
+                author = t?.StudentName ?? "N/A";
+            }
+
+            return new { Record = r, Title = title, Author = author };
+        }).ToList();
 
         var viewModel = new MyBooksViewModel
         {
-            // Filter for Active (Not Returned)
-            ActiveBorrowedBooks = allRecords.Where(r => !r.IsReturned).Select(r => new ActiveBorrowedBookViewModel
+            ActiveBorrowedBooks = mappedItems.Where(x => !x.Record.IsReturned).Select(x => new ActiveBorrowedBookViewModel
             {
-                BorrowingRecordId = r.RecordId,
-                Title = r.Item?.Title ?? "Unknown Book",
-                Author = r.Item?.Author ?? "Unknown",
-                BorrowDate = r.BorrowDate,
-                ExpectedReturnDate = r.ExpectedReturnDate
+                BorrowingRecordId = x.Record.RecordId,
+                Title = x.Title,
+                Author = x.Author,
+                Type = x.Record.ItemType, 
+                BorrowDate = x.Record.BorrowDate,
+                ExpectedReturnDate = x.Record.ExpectedReturnDate
             }).ToList(),
 
-            // Filter for History (Returned)
-            PastReads = allRecords.Where(r => r.IsReturned).Select(r => new PastReadViewModel
+            PastReads = mappedItems.Where(x => x.Record.IsReturned).Select(x => new PastReadViewModel
             {
-                Title = r.Item?.Title ?? "Unknown Book",
-                Author = r.Item?.Author ?? "Unknown",
-                BorrowDate = r.BorrowDate,
-                ActualReturnDate = r.ActualReturnDate
+                Title = x.Title,
+                Author = x.Author,
+                Type = x.Record.ItemType,
+                BorrowDate = x.Record.BorrowDate,
+                ActualReturnDate = x.Record.ActualReturnDate
             }).ToList()
         };
 
-        return View("~/Views/Books/MyBooks.cshtml" , viewModel);
+        return View("~/Views/Books/MyBooks.cshtml", viewModel);
     }
 
     [HttpPost]
@@ -113,7 +188,7 @@ public class BooksController : Controller
     [HttpPost]
     public async Task<IActionResult> Renew(int id)
     {
-        await _bookRepo.RenewBookAsync(id, 7); // Extend by 1 week
+        await _bookRepo.RenewBookAsync(id, 7);
         return RedirectToAction("MyBooks");
     }
 }

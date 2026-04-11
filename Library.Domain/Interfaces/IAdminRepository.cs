@@ -12,4 +12,13 @@ public interface IAdminRepository
 {
     // We use Task for asynchronous database operations
     Task<Admin?> GetAdminByCredentialsAsync(string username, string password);
+  
+    Task<int> GetTotalBooksCountAsync();
+    Task<int> GetActiveStudentsCountAsync();
+    Task<int> GetBooksIssuedTodayCountAsync();
+    Task<int> GetOverdueReturnsCountAsync();
+    Task<decimal> GetTotalUnpaidFinesAsync();
+
+    // List for the Table
+    Task<List<Borrowingrecord>> GetRecentBorrowingRecordsAsync(int count);
 }

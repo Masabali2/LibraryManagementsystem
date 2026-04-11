@@ -21,6 +21,7 @@ public class LibraryDbContext : DbContext
     public DbSet<Thesis> Theses { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Fine> Fines { get; set; }
+    public DbSet<SeatAvailability> SeatAvailabilities { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

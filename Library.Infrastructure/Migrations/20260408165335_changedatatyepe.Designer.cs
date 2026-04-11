@@ -3,6 +3,7 @@ using System;
 using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,14 +11,53 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408165335_changedatatyepe")]
+    partial class changedatatyepe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("Borrowingrecord", b =>
+                {
+                    b.Property<int>("RecordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ActualReturnDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("BorrowDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("ExpectedReturnDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsReturned")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RecordId");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("BorrowingRecords");
+                });
 
             modelBuilder.Entity("Library.Domain.Entities.Admin", b =>
                 {
@@ -91,51 +131,6 @@ namespace Library.Infrastructure.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Library.Domain.Entities.Borrowingrecord", b =>
-                {
-                    b.Property<int>("RecordId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ActualReturnDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("BorrowDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("ExpectedReturnDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("IsReturned")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ItemType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RequestType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RecordId");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("BorrowingRecords");
-                });
-
             modelBuilder.Entity("Library.Domain.Entities.Fine", b =>
                 {
                     b.Property<int>("FineId")
@@ -202,9 +197,6 @@ namespace Library.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
@@ -227,26 +219,6 @@ namespace Library.Infrastructure.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Reservations");
-                });
-
-            modelBuilder.Entity("Library.Domain.Entities.SeatAvailability", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("PersonsOccupied")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalChairs")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SeatAvailabilities");
                 });
 
             modelBuilder.Entity("Library.Domain.Entities.Student", b =>
@@ -330,7 +302,7 @@ namespace Library.Infrastructure.Migrations
                     b.ToTable("Theses");
                 });
 
-            modelBuilder.Entity("Library.Domain.Entities.Borrowingrecord", b =>
+            modelBuilder.Entity("Borrowingrecord", b =>
                 {
                     b.HasOne("Library.Domain.Entities.Book", "Item")
                         .WithMany()

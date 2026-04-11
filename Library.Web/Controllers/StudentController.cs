@@ -14,57 +14,45 @@ public class StudentController : Controller
     {
         _studentRepo = studentRepo;
     }
-
     [HttpGet]
     public async Task<IActionResult> Dashboard()
     {
         int? currentStudentId = HttpContext.Session.GetInt32("CurrentStudentId");
+        if (currentStudentId == null) return RedirectToAction("Login", "Account");
 
-        if (currentStudentId == null)
-        {
-            return RedirectToAction("Login", "Account");
-        }
+        // 1. Fetch from BOTH tables
+        var borrowedRecords = await _studentRepo.GetBorrowedItemsByStudentIdAsync(currentStudentId.Value);
+        var reservationRecords = await _studentRepo.GetActiveReservationsByStudentIdAsync(currentStudentId.Value);
 
-        // 1. Fetching counts and student name
-        var borrowedCount = await _studentRepo.GetBorrowedBooksCountAsync(currentStudentId.Value);
-        var reservationCount = await _studentRepo.GetActiveReservationsCountAsync(currentStudentId.Value);
-        var pendingFines = await _studentRepo.GetPendingFinesAsync(currentStudentId.Value);
-        var studentName = HttpContext.Session.GetString("StudentName")
-            ?? await _studentRepo.GetStudentNameByIdAsync(currentStudentId.Value);
-
-        // 2. Fetching the raw borrowed items AND all books 
-        var dbBorrowedItems = await _studentRepo.GetBorrowedItemsByStudentIdAsync(currentStudentId.Value);
-        var allBooks = await _studentRepo.GetAllBooksAsync(); // 👈 This grabs all books to compare titles
-
-        // 3. Mapping the DB data over to your pretty Frontend ViewModel
         var viewModel = new StudentDashboardViewModel
         {
-            StudentName = studentName,
-            BorrowedBooksCount = borrowedCount,
-            ActiveReservationsCount = reservationCount,
-            PendingFines = pendingFines,
-            BorrowedItems = dbBorrowedItems.Select(item =>
+            StudentName = HttpContext.Session.GetString("StudentName") ?? "Student",
+
+            // 2. Fix Counts: Combine both lists to see total interaction per category
+            BooksCount = borrowedRecords.Count(i => i.ItemType == "Book") + reservationRecords.Count(i => i.ItemType == "Book"),
+            ThesesCount = borrowedRecords.Count(i => i.ItemType == "Thesis") + reservationRecords.Count(i => i.ItemType == "Thesis"),
+            JournalsCount = borrowedRecords.Count(i => i.ItemType == "Journal") + reservationRecords.Count(i => i.ItemType == "Journal"),
+
+            // 3. Fix Reservation Count
+            ActiveReservationsCount = reservationRecords.Count(),
+            PendingApprovalsCount = borrowedRecords.Count(i => i.Status == "Pending") + reservationRecords.Count(i => i.Status == "Pending"),
+
+            PendingFines = await _studentRepo.GetPendingFinesAsync(currentStudentId.Value),
+
+            // 4. Map the lists correctly
+            BorrowedItems = borrowedRecords.Select(item => new BorrowedItemViewModel
             {
-                // Find the book in your database where the IDs match
-                var matchingBook = allBooks.FirstOrDefault(b => b.BookId == item.ItemId);
+                Title = item.Title, // Use the Title filled by your Repository foreach loop
+                Type = item.ItemType,
+                BorrowedDate = item.BorrowDate,
+                DueDate = item.ExpectedReturnDate ?? item.BorrowDate.AddDays(14),
+                Status = item.Status
+            }).ToList(),
 
-                return new BorrowedItemViewModel
-                {
-                    // Grabs the real title!
-                    Title = matchingBook != null ? matchingBook.Title : $"{item.ItemType} #{item.ItemId}",
-                    ItemType = item.ItemType,
-                    BorrowedDate = item.BorrowDate,
-
-                    //  FIXED: Dynamically calculates the 14-day due date from the day it was borrowed
-                    DueDate = item.BorrowDate.AddDays(14),
-
-                    //  FIXED: Calculates if the book is due in 3 days or less
-                    IsDueSoon = item.BorrowDate.AddDays(14) <= DateTime.Now.AddDays(3)
-                };
-            }).ToList()
+            ReservedItems = reservationRecords
         };
 
-        return View("~/Views/Student/Dashboard.cshtml", viewModel);
+        return View(viewModel);
     }
     [HttpGet]
     public async Task<IActionResult> Profile()
@@ -111,5 +99,40 @@ public class StudentController : Controller
 
         // If something fails, return to the profile view with the errors
         return View("Profile", updatedStudent);
+    }
+    [HttpGet]
+    public async Task<IActionResult> Seats()
+    {
+        ViewData["ActivePage"] = "Seats";
+        var availability = await _studentRepo.GetSeatAvailabilityAsync();
+
+        if (availability == null)
+        {
+            // Don't try to set FreeChairs here; 
+            // it will calculate itself as (50 - 0) automatically
+            return View(new SeatAvailability
+            {
+                TotalChairs = 50,
+                PersonsOccupied = 0
+            });
+        }
+
+        return View(availability);
+    }
+
+    [HttpGet]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)] // Prevents stale data
+    public async Task<JsonResult> GetLiveSeatData()
+    {
+        var data = await _studentRepo.GetSeatAvailabilityAsync();
+
+        // We return the full set of data required by the new "Dashing" UI
+        return Json(new
+        {
+            occupied = data?.PersonsOccupied ?? 0,
+            total = data?.TotalChairs ?? 50,
+            free = data?.FreeChairs ?? (data?.TotalChairs - data?.PersonsOccupied) ?? 50,
+            lastSync = DateTime.Now.ToString("h:mm:ss tt") // Send server time for the "Last Update" label
+        });
     }
 }

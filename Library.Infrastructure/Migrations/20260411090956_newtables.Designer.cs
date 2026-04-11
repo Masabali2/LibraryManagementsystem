@@ -3,6 +3,7 @@ using System;
 using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411090956_newtables")]
+    partial class newtables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -235,14 +238,20 @@ namespace Library.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("BoysOccupied")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BoysTotal")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GirlsOccupied")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GirlsTotal")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("PersonsOccupied")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalChairs")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

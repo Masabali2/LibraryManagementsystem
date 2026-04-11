@@ -28,9 +28,8 @@ public class AccountController : Controller
         {
             HttpContext.Session.SetString("UserRole", "Admin");
             HttpContext.Session.SetString("Username", username);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Admin");
         }
-
         // 2. Student Authentication
         bool isStudent = await _authService.AuthenticateStudentAsync(username, password);
         if (isStudent)

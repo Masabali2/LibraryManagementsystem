@@ -1,0 +1,273 @@
+﻿@model Library.Domain.Entities.SeatAvailability
+@{
+    Layout = "_StudentLayout";
+    ViewData["Title"] = "AI Seat Intelligence";
+}
+
+<style>
+    :root {
+        --bg-dark: #4cc9f0;
+        /* Panels */
+        --panel-bg: rgba(20, 24, 45, 0.85);
+        /* Primary theme (matches sidebar gradient) */
+        --accent-primary: #7c5cff; /* Purple */
+        --accent-secondary: #4cc9f0; /* Soft blue */
+        --accent-success: #22c55e; /* Green */
+        --accent-warning: #f59e0b; /* Orange */
+        --accent-danger: #ef4444; /* Red */
+
+        --text-main: #ffffff;
+        --text-muted: #9ca3af;
+    }
+
+    .ai-wrapper {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: radial-gradient(circle at top right, #1a1c2c, var(--bg-dark));
+        color: var(--text-main);
+        padding: 30px;
+        min-height: 100vh;
+        border-radius: 20px;
+    }
+
+    /* Header & Live Scanner */
+    .ai-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .glow-text {
+        font-weight: 800;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .live-scanner {
+        background: rgba(0, 255, 136, 0.1);
+        padding: 10px 25px;
+        border-radius: 50px;
+        border: 1px solid var(--accent-green);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.4), transparent);
+        animation: scan 2.5s infinite;
+    }
+
+    @@keyframes scan {
+        0% {
+            left: -100%;
+        }
+
+    100% {
+        left: 100%;
+    }
+
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+        background: var(--panel-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    /* Gauge Styling */
+    .svg-container {
+        position: relative;
+        width: 250px;
+        margin: 0 auto;
+    }
+
+    .main-gauge {
+        transform: rotate(-90deg);
+    }
+
+    .gauge-base {
+        fill: none;
+        stroke: rgba(255,255,255,0.05);
+        stroke-width: 6;
+    }
+
+    .gauge-progress {
+        fill: none;
+        stroke: var(--accent-blue);
+        stroke-width: 7;
+        stroke-linecap: round;
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1), stroke 1s ease;
+    }
+
+    .gauge-info {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+        .gauge-info h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+    /* Metrics Grid */
+    .metric-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: rgba(255,255,255,0.03);
+        padding: 20px;
+        border-radius: 20px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .metric-icon {
+        font-size: 1.8rem;
+        color: var(--accent-blue);
+    }
+
+    .label {
+        color: var(--text-muted);
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(0, 255, 136, 0.05));
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px dashed var(--accent-blue);
+    }
+</style>
+
+<div class="ai-wrapper">
+    <header class="ai-header">
+        <div>
+            <h1 class="glow-text">Seat Intelligence</h1>
+            <span style="color: var(--accent-blue)">AI-Assisted Occupancy Monitoring</span>
+        </div>
+        <div class="live-scanner">
+            <div class="scan-line"></div>
+            <span style="color: var(--accent-green); font-weight: bold; font-size: 0.8rem;">● SYSTEM LIVE</span>
+        </div>
+    </header>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="glass-panel h-100 d-flex flex-column align-items-center justify-content-center">
+                <div class="svg-container">
+                    <svg viewBox="0 0 100 100" class="main-gauge">
+                        <circle class="gauge-base" cx="50" cy="50" r="45"></circle>
+                        <circle id="occupancyCircle" class="gauge-progress" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="gauge-info">
+                        <h2 id="percentDisplay">0%</h2>
+                        <small id="statusLabel" style="letter-spacing: 2px;">SYNCING</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="glass-panel h-100">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <span class="label">Occupied Seats</span>
+                        <span class="value" id="numOccupied">@Model.PersonsOccupied</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon" style="color: var(--accent-green)"><i class="fas fa-chair"></i></div>
+                    <div>
+                        <span class="label">Available Seats</span>
+                        <span class="value" id="numFree">@Model.FreeChairs</span>
+                    </div>
+                </div>
+
+                <div class="insight-box mt-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-robot me-2" style="color: var(--accent-blue)"></i>
+                        <span style="font-weight: 700; font-size: 0.9rem;">AI ANALYTICS</span>
+                    </div>
+                    <p id="aiSuggestion" style="font-size: 0.95rem; color: var(--text-muted);">
+                        Fetching real-time data from the vision model...
+                    </p>
+                    <hr style="border-color: rgba(255,255,255,0.1)">
+                    <small style="color: var(--accent-blue)">Last Update: <span id="syncTime">--:--</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function fetchLiveIntelligence() {
+            fetch('/Student/GetLiveSeatData')
+                .then(response => response.json())
+                .then(data => {
+                    const percent = Math.round((data.occupied / data.total) * 100);
+
+                    // Update Text
+                    document.getElementById('numOccupied').innerText = data.occupied;
+                    document.getElementById('numFree').innerText = data.free;
+                    document.getElementById('percentDisplay').innerText = percent + "%";
+                    document.getElementById('syncTime').innerText = new Date().toLocaleTimeString();
+
+                    // Animate Gauge (Circumference 2*PI*r = ~283)
+                    const circle = document.getElementById('occupancyCircle');
+                    const offset = 283 - (283 * percent / 100);
+                    circle.style.strokeDashoffset = offset;
+
+                    // AI Visual Feedback
+                    const status = document.getElementById('statusLabel');
+                    const suggestion = document.getElementById('aiSuggestion');
+
+                    if (percent > 85) {
+                        circle.style.stroke = "var(--accent-red)";
+                        status.innerText = "OVERCROWDED";
+                        status.style.color = "var(--accent-red)";
+                        suggestion.innerText = "AI detects high student density. We recommend waiting for the next study window.";
+                    } else if (percent > 40) {
+                        circle.style.stroke = "#ffa502";
+                        status.innerText = "MODERATE";
+                        status.style.color = "#ffa502";
+                        suggestion.innerText = "Moderate traffic detected. You can still find seats in the corners and silent zones.";
+                    } else {
+                        circle.style.stroke = "var(--accent-blue)";
+                        status.innerText = "OPTIMAL";
+                        status.style.color = "var(--accent-blue)";
+                        suggestion.innerText = "Optimal study conditions. Library is currently quiet with plenty of workspace.";
+                    }
+                })
+                .catch(err => console.error("Sync Error:", err));
+        }
+
+        // Live refresh every 3 seconds to match Python interval
+        setInterval(fetchLiveIntelligence, 3000);
+        document.addEventListener('DOMContentLoaded', fetchLiveIntelligence);
+    </script>
+}

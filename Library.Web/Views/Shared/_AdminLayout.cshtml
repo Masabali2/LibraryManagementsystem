@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Intelligence</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --bg-soft: #f4f7fe;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-soft);
+            color: var(--text-main);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #ffffff;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 24px;
+            border-right: 1px solid #e2e8f0;
+            z-index: 1100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-grad);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            gap: 15px;
+        }
+
+            .nav-link-custom:hover {
+                background: #f8fafc;
+                color: #6366f1;
+                transform: translateX(4px);
+            }
+
+        .nav-item.active .nav-link-custom {
+            background: var(--primary-grad);
+            color: white;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25);
+        }
+
+        /* --- TOPBAR --- */
+        .topbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            height: 80px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+        }
+
+        .search-container {
+            position: relative;
+            width: 400px;
+        }
+
+            .search-container input {
+                width: 100%;
+                padding: 12px 20px 12px 45px;
+                border-radius: 15px;
+                border: 1px solid #e2e8f0;
+                background: #f8fafc;
+                outline: none;
+                font-size: 14px;
+            }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 100px 40px 40px 40px; /* Top padding accounts for fixed topbar */
+            min-height: 100vh;
+        }
+
+        /* Advanced UI Elements */
+        .profile-pill {
+            background: white;
+            padding: 6px 6px 6px 16px;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .profile-pill:hover {
+                border-color: #6366f1;
+            }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-grad);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        @@keyframes pageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-page {
+            animation: pageSlide 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand-section">
+            <div class="brand-logo">B</div>
+            <h4 class="mb-0 fw-bold">LibIntel</h4>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")">
+                <a class="nav-link-custom" asp-controller="Admin" asp-action="Index">
+                    <i>📊</i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Inventory" ? "active" : "")">
+                <a class="nav-link-custom" asp-controller="Admin" asp-action="ManageBooks">
+                    <i>📚</i> Inventory
+                </a>
+            </li>
+            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")">
+                <a class="nav-link-custom" asp-controller="Admin" asp-action="Users">
+                    <i>👥</i> Users
+                </a>
+            </li>
+            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Fines" ? "active" : "")">
+                <a class="nav-link-custom" asp-controller="Admin" asp-action="Fines">
+                    <i>💰</i> Revenue
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: 50px;">
+                <a class="nav-link-custom text-danger" asp-controller="Account" asp-action="Logout">
+                    <i>🚪</i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <nav class="topbar">
+        <div class="search-container">
+            <input type="text" placeholder="Search anything (Books, Students, Transactions)..." />
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+            <div class="notifications">🔔</div>
+            <div class="profile-pill">
+                <span class="fw-bold small">Administrator</span>
+                <div class="avatar">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="animate-page">
+            @RenderBody()
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

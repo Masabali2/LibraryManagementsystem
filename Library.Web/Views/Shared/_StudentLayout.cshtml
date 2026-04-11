@@ -174,20 +174,28 @@
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div>
-            <div class="logo-area"><span>📖</span> Smart Library</div>
+            <div class="logo-area"><span>📖</span> Library of Uskt</div>
 
             <ul class="nav-links">
                 <li class="@(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")">
                     <a asp-controller="Student" asp-action="Dashboard">🏠 Dashboard</a>
                 </li>
                 <li class="@(ViewData["ActivePage"]?.ToString() == "Books" ? "active" : "")">
-                    <a asp-controller="Books" asp-action="Index">📚 Search Books</a>
+                    <a asp-controller="Books" asp-action="Index">🔍 Library Catalog</a>
                 </li>
                 <li class="@(ViewData["ActivePage"]?.ToString() == "MyBooks" ? "active" : "")">
-                    <a asp-controller="Books" asp-action="MyBooks">📖 My Books</a>
+                    <a asp-controller="Books" asp-action="MyBooks">📖 My Library</a>
                 </li>
                 <li><a href="#">🧠 AI Suggestions</a></li>
-                <li><a href="#">🪑 Seat Availability</a></li>
+                <li class="@(ViewData["ActivePage"]?.ToString() == "Seats" ? "active" : "")">
+                    <a asp-controller="Student" asp-action="Seats" class="nav-link-custom">
+                        <div class="nav-icon-wrapper">
+                            <span class="nav-icon">🪑</span>
+                            <span class="nav-text">Seat Availability</span>
+                        </div>
+                        <span class="live-dot-mini"></span>
+                    </a>
+                </li>
                 <li><a href="#">🔔 Notifications</a></li>
                 <li class="@(ViewData["ActivePage"]?.ToString() == "Profile" ? "active" : "")">
                     <a asp-controller="Student" asp-action="Profile"><span>⚙️</span> Profile</a>
@@ -205,7 +213,7 @@
         <div class="top-bar">
 
             <div class="search-wrapper">
-                <input type="text" placeholder="Search book by title..." />
+                <input type="text" placeholder="Search book , thesis and journals by title..." />
             </div>
 
             <div class="user-profile">

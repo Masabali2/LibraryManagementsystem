@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +15,10 @@ namespace Library.Domain.Entities
        
         public int ItemId { get; set; }
         public string ItemType { get; set; } = null!;
-
+        public DateTime ExpiryDate { get; set; }
         public DateTime ReservationDate { get; set; }
+        [NotMapped]
+        public string Title { get; set; }
         public string Status { get; set; } = "Active"; // "Active", "Completed", "Cancelled"
 
         // Relationship

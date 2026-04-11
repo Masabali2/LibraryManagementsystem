@@ -12,6 +12,6 @@ public class Journal
     public string? Publisher { get; set; }
     public int? Volume { get; set; }
     public string? Edition { get; set; }
-    public int Year { get; set; }
+    public string Year { get; set; }
     public int? Quantity { get; set; }
 }

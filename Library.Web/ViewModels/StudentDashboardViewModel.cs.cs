@@ -1,13 +1,21 @@
-﻿using System.Collections.Generic;
-using Library.Domain.Entities; 
+﻿using Library.Domain.Entities;
 
-namespace Library.Web.ViewModels;
-
-public class StudentDashboardViewModel
+namespace Library.Web.ViewModels
 {
-    public string StudentName { get; set; } = string.Empty;
-    public int BorrowedBooksCount { get; set; }
-    public int ActiveReservationsCount { get; set; }
-    public decimal PendingFines { get; set; }
-    public List<BorrowedItemViewModel> BorrowedItems { get; set; } = new List<BorrowedItemViewModel>();
+    public class StudentDashboardViewModel
+    {
+        public string StudentName { get; set; } = string.Empty;
+
+        // New Properties for the Multi-Asset Card
+        public int BooksCount { get; set; }
+        public int ThesesCount { get; set; }
+        public int JournalsCount { get; set; }
+
+        public int ActiveReservationsCount { get; set; }
+        public decimal PendingFines { get; set; }
+        public int PendingApprovalsCount { get; set; } 
+
+        public List<BorrowedItemViewModel> BorrowedItems { get; set; } = new List<BorrowedItemViewModel>();
+        public IEnumerable<Reservation> ReservedItems { get; set; } = new List<Reservation>();
+    }
 }
