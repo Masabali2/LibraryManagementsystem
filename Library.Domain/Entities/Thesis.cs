@@ -14,4 +14,6 @@ public class Thesis
     public string RollNo { get; set; } = null!;
     public string Batch { get; set; } = null!;
     public int Year { get; set; }
+    public int? ShelfId { get; set; } // Nullable so old data doesn't crash
+    public virtual Shelf? Shelf { get; set; }
 }

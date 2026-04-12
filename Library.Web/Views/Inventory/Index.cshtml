@@ -1,0 +1,498 @@
+﻿@model Dictionary<string, List<Library.Domain.DTOs.UnifiedInventoryDto>>
+@{
+    Layout = "_AdminLayout";
+    ViewData["ActivePage"] = "Inventory";
+
+    int totalItems = Model.Values.SelectMany(v => v).Count();
+}
+
+<style>
+    .inventory-utility-bar {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        flex-wrap: wrap;
+    }
+
+    .filter-pill {
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #475569;
+        padding: 6px 20px;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+        .filter-pill.active {
+            background: #3182ce;
+            color: white;
+            border-color: #3182ce;
+        }
+
+    .dept-block {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        border: 1px solid #eef2f6;
+        overflow: hidden;
+    }
+
+    .dept-header {
+        background: #f8fafc;
+        padding: 15px 25px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .inventory-table {
+        width: 100%;
+    }
+
+    .master-row {
+        cursor: pointer;
+    }
+
+    .detail-drawer {
+        display: none;
+    }
+
+    .type-badge {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-left: 10px;
+    }
+
+    .bg-book {
+        background: #e0e7ff;
+    }
+
+    .bg-thesis {
+        background: #fef3c7;
+    }
+
+    .bg-journal {
+        background: #d1fae5;
+    }
+
+    /* Minimal modal fix – only ensure proper z-index and stacking */
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+
+    .modal {
+        z-index: 1050 !important;
+    }
+</style>
+
+<div class="container-fluid px-4 mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-dark">Inventory Control</h4>
+            <p class="text-muted small mb-0">Total: @totalItems items across @Model.Count Departments</p>
+        </div>
+
+        <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+            <i class="fas fa-plus me-2"></i> Add New Asset
+        </button>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="inventory-utility-bar mb-4">
+
+        <!-- TYPE FILTER -->
+        <div class="d-flex gap-2" id="typeFilters">
+            <button class="filter-pill active" data-filter="all">All Resources</button>
+            <button class="filter-pill" data-filter="book">Books</button>
+            <button class="filter-pill" data-filter="journal">Journals</button>
+            <button class="filter-pill" data-filter="thesis">Theses</button>
+        </div>
+
+        <!-- DEPARTMENT DROPDOWN -->
+        <div class="dropdown">
+            <button id="deptDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
+                Department
+            </button>
+            <ul class="dropdown-menu" id="deptFilterMenu">
+                <li><a class="dropdown-item active" href="#" data-dept="all">All Departments</a></li>
+                @foreach (var dept in Model.Keys)
+                {
+                    <li><a class="dropdown-item" href="#" data-dept="@dept.Trim()">@dept</a></li>
+                }
+            </ul>
+        </div>
+
+        <!-- YEAR DROPDOWN -->
+        <div class="dropdown">
+            <button id="yearDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
+                Year
+            </button>
+            <ul class="dropdown-menu" id="yearFilterMenu">
+                <li><a class="dropdown-item active" href="#" data-year="all">All Years</a></li>
+                @for (int y = 2026; y >= 2000; y--)
+                {
+                    <li><a class="dropdown-item" href="#" data-year="@y">@y</a></li>
+                }
+            </ul>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="position-relative flex-grow-1">
+            <input type="text" id="mainSearch" class="form-control" placeholder="Search title, author or ID">
+        </div>
+    </div>
+
+    <!-- DATA -->
+    @foreach (var group in Model)
+    {
+        <div class="dept-block department-section" data-dept="@group.Key.Trim()">
+            <div class="dept-header">
+                <span class="fw-bold">@group.Key Department</span>
+                <span>@group.Value.Count Items</span>
+            </div>
+
+            <table class="inventory-table">
+                <tbody>
+                    @foreach (var item in group.Value)
+                    {
+                        <tr class="master-row inventory-item" data-type="@item.Type?.ToLower()">
+                            <td class="ps-4 py-3">
+                                <b>@item.Title</b>
+                                <span class="type-badge bg-@item.Type?.ToLower()">@item.Type</span>
+                                <div class="text-muted small">@item.Author</div>
+                            </td>
+                            <td class="text-secondary">@item.Year</td>
+                            <td class="fw-bold">@item.TotalCopies</td>
+                            <td>
+                                <span class="badge @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")">
+                                    @(item.AvailableCopies > 0 ? item.AvailableCopies + " Available" : "Out")
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <i class="fas fa-chevron-circle-down transition-icon"></i>
+                            </td>
+                        </tr>
+
+                        <tr class="detail-drawer">
+                            <td colspan="5">
+                                <div class="p-4 border-top bg-light">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <label class="text-muted border-bottom small d-block mb-2 text-uppercase fw-bold">Physical Location</label>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-white text-dark border p-2">
+                                                    <i class="fas fa-layer-group me-1 text-primary"></i> @item.BlockName
+                                                </span>
+                                                <span class="badge bg-white text-dark border p-2">
+                                                    <i class="fas fa-th me-1 text-primary"></i> @item.ShelfCode
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label class="text-muted small d-block mb-1 text-uppercase fw-bold">Stock Status</label>
+                                            <span class="fw-bold text-dark">
+                                                @item.AvailableCopies / @item.TotalCopies Copies available
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-4 text-end">
+                                            <button type="button"
+                                                    onclick="openEditModal(@item.Id, '@item.Type?.ToLower()')"
+                                                    class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2">
+                                                <i class="fas fa-edit me-1"></i> Edit
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                                    onclick="confirmDelete(@item.Id, '@item.Type?.ToLower()', this)">
+                                                <i class="fas fa-trash me-1"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- MODALS (will be moved to <body> by script) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pb-4">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem; opacity: 0.2;"></i>
+                </div>
+                <h4 class="fw-bold text-dark">Confirm Deletion</h4>
+                <p class="text-muted px-4">You are about to remove the following <span id="modalAssetType" class="fw-bold text-primary">asset</span> from the library records:</p>
+
+                <div class="bg-light p-3 rounded-3 mx-4 mb-4">
+                    <h6 id="modalAssetTitle" class="fw-bold mb-1">Asset Title</h6>
+                    <span id="modalAssetId" class="text-muted small">ID: #000</span>
+                </div>
+
+                <p class="small text-danger mb-0"><i class="fas fa-info-circle me-1"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger rounded-pill px-4 shadow-sm">
+                    <span id="deleteBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold ms-3 mt-3">Edit Resource Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="editModalBody" class="modal-body p-4">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Fetching record details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ============================================================
+        // STEP 1: Move modals directly under <body> to avoid stacking issues
+        // ============================================================
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            document.body.appendChild(modal);
+        });
+
+        // ============================================================
+        // STEP 2: Initialize modals safely (dispose any existing instances)
+        // ============================================================
+        let deleteModal, editModal;
+        function initModals() {
+            const deleteEl = document.getElementById('deleteModal');
+            const editEl = document.getElementById('editModal');
+            if (deleteEl && typeof bootstrap !== 'undefined') {
+                if (bootstrap.Modal.getInstance(deleteEl)) bootstrap.Modal.getInstance(deleteEl).dispose();
+                deleteModal = new bootstrap.Modal(deleteEl, { backdrop: 'static', keyboard: true });
+            }
+            if (editEl && typeof bootstrap !== 'undefined') {
+                if (bootstrap.Modal.getInstance(editEl)) bootstrap.Modal.getInstance(editEl).dispose();
+                editModal = new bootstrap.Modal(editEl, { backdrop: 'static', keyboard: true });
+            }
+        }
+        initModals();
+
+        // ============================================================
+        // 3. FILTER & UI LOGIC (unchanged)
+        // ============================================================
+        const typePills = document.querySelectorAll('#typeFilters .filter-pill');
+        const deptOptions = document.querySelectorAll('#deptFilterMenu .dropdown-item');
+        const yearOptions = document.querySelectorAll('#yearFilterMenu .dropdown-item');
+        const searchInput = document.getElementById('mainSearch');
+
+        let selectedDept = 'all';
+        let selectedYear = 'all';
+        let assetIdToDelete = null;
+        let assetTypeToDelete = null;
+        let rowToRemove = null;
+
+        function applyFilters() {
+            const activeType = document.querySelector('#typeFilters .active').dataset.filter;
+            const search = searchInput.value.toLowerCase();
+
+            document.querySelectorAll('.department-section').forEach(section => {
+                let visible = 0;
+                const dept = section.dataset.dept;
+
+                section.querySelectorAll('.inventory-item').forEach(item => {
+                    const type = (item.dataset.type || '').toLowerCase();
+                    const text = item.innerText.toLowerCase();
+                    const year = item.children[1] ? item.children[1].innerText.trim() : '';
+
+                    const match =
+                        (activeType === 'all' || type === activeType) &&
+                        (selectedDept === 'all' || dept === selectedDept) &&
+                        (selectedYear === 'all' || year === selectedYear) &&
+                        text.includes(search);
+
+                    if (match) {
+                        item.style.display = '';
+                        visible++;
+                    } else {
+                        item.style.display = 'none';
+                        if (item.nextElementSibling && item.nextElementSibling.classList.contains('detail-drawer')) {
+                            item.nextElementSibling.style.display = 'none';
+                        }
+                    }
+                });
+                section.style.display = visible ? '' : 'none';
+            });
+        }
+
+        typePills.forEach(p => p.onclick = () => {
+            typePills.forEach(x => x.classList.remove('active'));
+            p.classList.add('active');
+            applyFilters();
+        });
+
+        deptOptions.forEach(o => o.onclick = (e) => {
+            e.preventDefault();
+            deptOptions.forEach(x => x.classList.remove('active'));
+            o.classList.add('active');
+            selectedDept = o.dataset.dept.trim();
+            document.getElementById('deptDropdown').innerText = o.innerText;
+            applyFilters();
+        });
+
+        yearOptions.forEach(o => o.onclick = (e) => {
+            e.preventDefault();
+            yearOptions.forEach(x => x.classList.remove('active'));
+            o.classList.add('active');
+            selectedYear = o.dataset.year;
+            document.getElementById('yearDropdown').innerText = o.innerText;
+            applyFilters();
+        });
+
+        searchInput.addEventListener('input', applyFilters);
+
+        // Drawer toggle
+        document.querySelectorAll('.master-row').forEach(row => {
+            row.addEventListener('click', function (e) {
+                if (e.target.closest('button') || e.target.closest('a')) return;
+                const drawer = this.nextElementSibling;
+                if (drawer && drawer.classList.contains('detail-drawer')) {
+                    const isOpen = drawer.style.display === 'table-row';
+                    drawer.style.display = isOpen ? 'none' : 'table-row';
+                    const icon = this.querySelector('.transition-icon');
+                    if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+                }
+            });
+        });
+
+        // ============================================================
+        // 4. DELETE MODAL HANDLER
+        // ============================================================
+        window.confirmDelete = function (id, type, btnElement) {
+            const drawerRow = btnElement.closest('.detail-drawer');
+            const masterRow = drawerRow.previousElementSibling;
+            const title = masterRow.querySelector('b').innerText;
+
+            assetIdToDelete = id;
+            assetTypeToDelete = type;
+            rowToRemove = masterRow;
+
+            document.getElementById('modalAssetTitle').innerText = title;
+            document.getElementById('modalAssetType').innerText = type.toUpperCase();
+            document.getElementById('modalAssetId').innerText = `ID: #${type.charAt(0).toUpperCase()}-${id}`;
+
+            if (deleteModal) deleteModal.show();
+            else console.error('Delete modal not initialized');
+        };
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
+            const btn = this;
+            const spinner = document.getElementById('deleteBtnSpinner');
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch(`/Inventory/Delete?id=${assetIdToDelete}&type=${assetTypeToDelete}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const drawerRow = rowToRemove.nextElementSibling;
+                    if (drawerRow) drawerRow.remove();
+                    rowToRemove.remove();
+                    if (deleteModal) deleteModal.hide();
+                } else {
+                    alert("Delete failed.");
+                }
+            } catch (err) {
+                alert("Server error.");
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+
+        // ============================================================
+        // 5. EDIT MODAL LOAD
+        // ============================================================
+        window.openEditModal = async function (id, type) {
+            const modalBody = document.getElementById('editModalBody');
+            modalBody.innerHTML = `
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2 text-muted">Loading...</p>
+                </div>`;
+
+            if (editModal) editModal.show();
+            else console.error('Edit modal not initialized');
+
+            try {
+                const fixedType = type.charAt(0).toUpperCase() + type.slice(1);
+                const response = await fetch(`/Inventory/GetEditPartial?id=${id}&type=${fixedType}`);
+                if (response.ok) {
+                    modalBody.innerHTML = await response.text();
+                } else {
+                    modalBody.innerHTML = `<div class="alert alert-warning">Failed to load form</div>`;
+                }
+            } catch {
+                modalBody.innerHTML = `<div class="alert alert-danger">Server error</div>`;
+            }
+        };
+
+        // ============================================================
+        // 6. EDIT FORM SUBMIT
+        // ============================================================
+        document.addEventListener('submit', async function (e) {
+            if (e.target.closest('#editModalBody form')) {
+                e.preventDefault();
+                const form = e.target;
+                const btn = form.querySelector('button[type="submit"]');
+                if (btn) btn.disabled = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (response.ok) {
+                        if (editModal) editModal.hide();
+                        location.reload();
+                    } else {
+                        alert("Update failed.");
+                    }
+                } catch {
+                    alert("Server error.");
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            }
+        });
+    });
+</script>

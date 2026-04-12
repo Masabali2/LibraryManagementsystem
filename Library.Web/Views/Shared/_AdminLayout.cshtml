@@ -6,16 +6,18 @@
     <title>@ViewData["Title"] - Admin Intelligence</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <style>
         :root {
             --sidebar-width: 280px;
             --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-bg: rgba(255, 255, 255, 0.85);
             --bg-soft: #f4f7fe;
             --text-main: #1e293b;
             --text-muted: #64748b;
+            --accent-purple: #8b5cf6;
         }
 
         body {
@@ -34,7 +36,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            padding: 24px;
+            padding: 30px 20px;
             border-right: 1px solid #e2e8f0;
             z-index: 1100;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -43,21 +45,21 @@
         .brand-section {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px;
-            margin-bottom: 40px;
+            gap: 15px;
+            padding: 0 10px;
+            margin-bottom: 50px;
         }
 
         .brand-logo {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             background: var(--primary-grad);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 22px;
             box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
         }
 
@@ -67,7 +69,7 @@
         }
 
         .nav-item {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .nav-link-custom {
@@ -78,20 +80,27 @@
             text-decoration: none;
             border-radius: 14px;
             font-weight: 600;
-            transition: 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
             gap: 15px;
         }
 
+            .nav-link-custom i {
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
             .nav-link-custom:hover {
-                background: #f8fafc;
-                color: #6366f1;
-                transform: translateX(4px);
+                background: #f1f5f9;
+                color: var(--accent-purple);
+                transform: translateX(5px);
             }
 
         .nav-item.active .nav-link-custom {
             background: var(--primary-grad);
-            color: white;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25);
+            color: white !important;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
         }
 
         /* --- TOPBAR --- */
@@ -100,9 +109,10 @@
             top: 0;
             right: 0;
             left: var(--sidebar-width);
-            height: 80px;
+            height: 85px;
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
             display: flex;
             align-items: center;
@@ -113,30 +123,44 @@
 
         .search-container {
             position: relative;
-            width: 400px;
+            width: 450px;
         }
+
+            .search-container i {
+                position: absolute;
+                left: 18px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-muted);
+            }
 
             .search-container input {
                 width: 100%;
-                padding: 12px 20px 12px 45px;
-                border-radius: 15px;
+                padding: 12px 20px 12px 48px;
+                border-radius: 16px;
                 border: 1px solid #e2e8f0;
-                background: #f8fafc;
+                background: #ffffff;
                 outline: none;
                 font-size: 14px;
+                transition: 0.3s;
             }
+
+                .search-container input:focus {
+                    border-color: #6366f1;
+                    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+                }
 
         /* --- MAIN CONTENT --- */
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 100px 40px 40px 40px; /* Top padding accounts for fixed topbar */
+            padding: 115px 40px 40px 40px;
             min-height: 100vh;
         }
 
-        /* Advanced UI Elements */
+        /* UI Elements */
         .profile-pill {
             background: white;
-            padding: 6px 6px 6px 16px;
+            padding: 6px 6px 6px 18px;
             border-radius: 50px;
             border: 1px solid #e2e8f0;
             display: flex;
@@ -147,25 +171,58 @@
         }
 
             .profile-pill:hover {
-                border-color: #6366f1;
+                border-color: var(--accent-purple);
+                background: #f8fafc;
             }
 
         .avatar {
-            width: 35px;
-            height: 35px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: var(--primary-grad);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .notif-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+            .notif-btn:hover {
+                color: #6366f1;
+                border-color: #6366f1;
+            }
+
+        .notif-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
         }
 
         @@keyframes pageSlide {
             from {
                 opacity: 0;
-                transform: translateY(15px);
+                transform: translateY(20px);
             }
 
             to {
@@ -175,7 +232,7 @@
         }
 
         .animate-page {
-            animation: pageSlide 0.5s ease forwards;
+            animation: pageSlide 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
     </style>
 </head>
@@ -183,34 +240,41 @@
 
     <aside class="sidebar">
         <div class="brand-section">
-            <div class="brand-logo">B</div>
-            <h4 class="mb-0 fw-bold">LibIntel</h4>
+            <div class="brand-logo">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold">USKT Library</h5>
+                <small class="text-muted fw-semibold">Admin Panel</small>
+            </div>
         </div>
 
         <ul class="nav-links">
             <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")">
                 <a class="nav-link-custom" asp-controller="Admin" asp-action="Index">
-                    <i>📊</i> Dashboard
+                    <i class="fas fa-chart-pie"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Inventory" ? "active" : "")">
-                <a class="nav-link-custom" asp-controller="Admin" asp-action="ManageBooks">
-                    <i>📚</i> Inventory
+                <a class="nav-link-custom" asp-controller="Inventory" asp-action="Index"">
+                    <i class="fas fa-boxes-stacked"></i> Inventory
                 </a>
             </li>
             <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")">
                 <a class="nav-link-custom" asp-controller="Admin" asp-action="Users">
-                    <i>👥</i> Users
+                    <i class="fas fa-user-group"></i> User Management
                 </a>
             </li>
             <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Fines" ? "active" : "")">
                 <a class="nav-link-custom" asp-controller="Admin" asp-action="Fines">
-                    <i>💰</i> Revenue
+                    <i class="fas fa-file-invoice-dollar"></i> Revenue Tracking
                 </a>
             </li>
-            <li class="nav-item" style="margin-top: 50px;">
+
+            <li class="nav-item" style="margin-top: 100px;">
+                <hr class="mx-3 opacity-10">
                 <a class="nav-link-custom text-danger" asp-controller="Account" asp-action="Logout">
-                    <i>🚪</i> Sign Out
+                    <i class="fas fa-arrow-right-from-bracket"></i> Sign Out
                 </a>
             </li>
         </ul>
@@ -218,14 +282,22 @@
 
     <nav class="topbar">
         <div class="search-container">
-            <input type="text" placeholder="Search anything (Books, Students, Transactions)..." />
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Global search for items, users, or records..." />
         </div>
 
-        <div class="d-flex align-items-center gap-4">
-            <div class="notifications">🔔</div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="notif-btn">
+                <i class="far fa-bell"></i>
+                <div class="notif-dot"></div>
+            </div>
+
             <div class="profile-pill">
-                <span class="fw-bold small">Administrator</span>
-                <div class="avatar">A</div>
+                <div class="text-end d-none d-sm-block">
+                    <p class="mb-0 fw-bold small lh-1">Admin User</p>
+                    <small class="text-muted" style="font-size: 11px;">Super Control</small>
+                </div>
+                <div class="avatar">AD</div>
             </div>
         </div>
     </nav>

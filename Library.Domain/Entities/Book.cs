@@ -17,4 +17,6 @@
         public string? Edition { get; set; }
         public int? TotalCopies { get; set; }
         public int? AvailableCopies { get; set; }
-    }
+    public int? ShelfId { get; set; } // Nullable so old data doesn't crash
+    public virtual Shelf? Shelf { get; set; }
+}

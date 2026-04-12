@@ -14,4 +14,6 @@ public class Journal
     public string? Edition { get; set; }
     public string Year { get; set; }
     public int? Quantity { get; set; }
+    public int? ShelfId { get; set; } // Nullable so old data doesn't crash
+    public virtual Shelf? Shelf { get; set; }
 }

@@ -22,6 +22,8 @@ public class LibraryDbContext : DbContext
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Fine> Fines { get; set; }
     public DbSet<SeatAvailability> SeatAvailabilities { get; set; }
+    public DbSet<LocationBlock> LocationBlocks { get; set; }
+    public DbSet<Shelf> Shelves { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,7 +34,7 @@ public class LibraryDbContext : DbContext
         
         modelBuilder.Entity<Reservation>().HasKey(r => r.ReservationId);
         modelBuilder.Entity<Fine>().HasKey(f => f.FineId);
-    
+        modelBuilder.Entity<Shelf>().ToTable("shelf");
         modelBuilder.Entity<Admin>().HasData(
             new Admin
             {

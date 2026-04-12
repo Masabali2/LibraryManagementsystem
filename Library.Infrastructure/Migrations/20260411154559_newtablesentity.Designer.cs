@@ -3,6 +3,7 @@ using System;
 using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411154559_newtablesentity")]
+    partial class newtablesentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,7 +225,7 @@ namespace Library.Infrastructure.Migrations
 
                     b.HasKey("LocationBlockId");
 
-                    b.ToTable("LocationBlocks");
+                    b.ToTable("LocationBlock");
                 });
 
             modelBuilder.Entity("Library.Domain.Entities.Reservation", b =>
@@ -296,7 +299,7 @@ namespace Library.Infrastructure.Migrations
 
                     b.HasIndex("LocationBlockId");
 
-                    b.ToTable("shelf", (string)null);
+                    b.ToTable("Shelf");
                 });
 
             modelBuilder.Entity("Library.Domain.Entities.Student", b =>
