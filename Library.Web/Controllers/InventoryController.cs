@@ -101,4 +101,53 @@ public class InventoryController : Controller
             return Json(new { success = false, message = "A server error occurred." });
         }
     }
+    // GET: Return empty create partials
+    [HttpGet]
+    public IActionResult GetCreatePartial(string type)
+    {
+        return type?.ToLower() switch
+        {
+            "book" => PartialView("_CreateBookPartial", new Book()),
+            "thesis" => PartialView("_CreateThesisPartial", new Thesis()),
+            "journal" => PartialView("_CreateJournalPartial", new Journal()),
+            _ => BadRequest()
+        };
+    }
+
+    // POST: Create handlers
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateBook(Book book, string LocationBlockName, string ShelfCode)
+    {
+        if (ModelState.IsValid)
+        {
+            await _inventoryRepo.AddBookAsync(book, LocationBlockName, ShelfCode);
+            return RedirectToAction(nameof(Index));
+        }
+        return PartialView("_CreateBookPartial", book);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateThesis(Thesis thesis, string LocationBlockName, string ShelfCode)
+    {
+        if (ModelState.IsValid)
+        {
+            await _inventoryRepo.AddThesisAsync(thesis, LocationBlockName, ShelfCode);
+            return RedirectToAction(nameof(Index));
+        }
+        return PartialView("_CreateThesisPartial", thesis);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateJournal(Journal journal, string LocationBlockName, string ShelfCode)
+    {
+        if (ModelState.IsValid)
+        {
+            await _inventoryRepo.AddJournalAsync(journal, LocationBlockName, ShelfCode);
+            return RedirectToAction(nameof(Index));
+        }
+        return PartialView("_CreateJournalPartial", journal);
+    }
 }

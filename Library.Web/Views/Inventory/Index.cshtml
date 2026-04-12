@@ -90,17 +90,19 @@
         z-index: 1050 !important;
     }
 </style>
-
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery AntiForgery
+@{
+    var token = AntiForgery.GetAndStoreTokens(Context).RequestToken;
+}
 <div class="container-fluid px-4 mt-4">
-
+    <input type="hidden" id="__RequestVerificationToken" value="@token" />
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold m-0 text-dark">Inventory Control</h4>
             <p class="text-muted small mb-0">Total: @totalItems items across @Model.Count Departments</p>
         </div>
-
-        <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+        <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onclick="showTypeSelectModal()">
             <i class="fas fa-plus me-2"></i> Add New Asset
         </button>
     </div>
@@ -277,23 +279,65 @@
     </div>
 </div>
 
+<!-- Type Selection Modal -->
+<div class="modal fade" id="typeSelectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold">Select Asset Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <button type="button" class="btn btn-outline-primary rounded-pill px-4 py-2" data-type="book">
+                        <i class="fas fa-book me-2"></i> Book
+                    </button>
+                    <button type="button" class="btn btn-outline-success rounded-pill px-4 py-2" data-type="thesis">
+                        <i class="fas fa-graduation-cap me-2"></i> Thesis
+                    </button>
+                    <button type="button" class="btn btn-outline-info rounded-pill px-4 py-2" data-type="journal">
+                        <i class="fas fa-newspaper me-2"></i> Journal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Create Modal (reused for all types) -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold ms-3 mt-2" id="createModalTitle">Create New Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="createModalBody" class="modal-body p-4">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2">Loading form...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // ============================================================
-        // STEP 1: Move modals directly under <body> to avoid stacking issues
-        // ============================================================
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
+           document.addEventListener('DOMContentLoaded', function () {
+        // 1. Move all modals to <body> to avoid stacking issues
+        document.querySelectorAll('.modal').forEach(modal => {
             document.body.appendChild(modal);
         });
 
-        // ============================================================
-        // STEP 2: Initialize modals safely (dispose any existing instances)
-        // ============================================================
-        let deleteModal, editModal;
+        // 2. Initialize all modals
+        let deleteModal, editModal, typeSelectModal, createModal;
+
         function initModals() {
             const deleteEl = document.getElementById('deleteModal');
             const editEl = document.getElementById('editModal');
+            const typeSelectEl = document.getElementById('typeSelectModal');
+            const createEl = document.getElementById('createModal');
+
             if (deleteEl && typeof bootstrap !== 'undefined') {
                 if (bootstrap.Modal.getInstance(deleteEl)) bootstrap.Modal.getInstance(deleteEl).dispose();
                 deleteModal = new bootstrap.Modal(deleteEl, { backdrop: 'static', keyboard: true });
@@ -302,42 +346,57 @@
                 if (bootstrap.Modal.getInstance(editEl)) bootstrap.Modal.getInstance(editEl).dispose();
                 editModal = new bootstrap.Modal(editEl, { backdrop: 'static', keyboard: true });
             }
+            if (typeSelectEl && typeof bootstrap !== 'undefined') {
+                if (bootstrap.Modal.getInstance(typeSelectEl)) bootstrap.Modal.getInstance(typeSelectEl).dispose();
+                typeSelectModal = new bootstrap.Modal(typeSelectEl);
+            }
+            if (createEl && typeof bootstrap !== 'undefined') {
+                if (bootstrap.Modal.getInstance(createEl)) bootstrap.Modal.getInstance(createEl).dispose();
+                createModal = new bootstrap.Modal(createEl);
+            }
         }
         initModals();
 
-        // ============================================================
-        // 3. FILTER & UI LOGIC (unchanged)
-        // ============================================================
+        // Helper to show type selection modal (called from button)
+        window.showTypeSelectModal = function() {
+            if (typeSelectModal) {
+                typeSelectModal.show();
+            } else {
+                console.error("Type select modal not initialized");
+                // Fallback: try to reinitialize
+                const typeSelectEl = document.getElementById('typeSelectModal');
+                if (typeSelectEl && typeof bootstrap !== 'undefined') {
+                    typeSelectModal = new bootstrap.Modal(typeSelectEl);
+                    typeSelectModal.show();
+                } else {
+                    alert("Modal system not ready. Please refresh the page.");
+                }
+            }
+        };
+
+        // 3. Filter logic (unchanged – keep your existing applyFilters etc.)
         const typePills = document.querySelectorAll('#typeFilters .filter-pill');
         const deptOptions = document.querySelectorAll('#deptFilterMenu .dropdown-item');
         const yearOptions = document.querySelectorAll('#yearFilterMenu .dropdown-item');
         const searchInput = document.getElementById('mainSearch');
-
         let selectedDept = 'all';
         let selectedYear = 'all';
-        let assetIdToDelete = null;
-        let assetTypeToDelete = null;
-        let rowToRemove = null;
+        let assetIdToDelete = null, assetTypeToDelete = null, rowToRemove = null;
 
         function applyFilters() {
             const activeType = document.querySelector('#typeFilters .active').dataset.filter;
             const search = searchInput.value.toLowerCase();
-
             document.querySelectorAll('.department-section').forEach(section => {
                 let visible = 0;
                 const dept = section.dataset.dept;
-
                 section.querySelectorAll('.inventory-item').forEach(item => {
                     const type = (item.dataset.type || '').toLowerCase();
                     const text = item.innerText.toLowerCase();
                     const year = item.children[1] ? item.children[1].innerText.trim() : '';
-
-                    const match =
-                        (activeType === 'all' || type === activeType) &&
-                        (selectedDept === 'all' || dept === selectedDept) &&
-                        (selectedYear === 'all' || year === selectedYear) &&
-                        text.includes(search);
-
+                    const match = (activeType === 'all' || type === activeType) &&
+                                  (selectedDept === 'all' || dept === selectedDept) &&
+                                  (selectedYear === 'all' || year === selectedYear) &&
+                                  text.includes(search);
                     if (match) {
                         item.style.display = '';
                         visible++;
@@ -357,7 +416,6 @@
             p.classList.add('active');
             applyFilters();
         });
-
         deptOptions.forEach(o => o.onclick = (e) => {
             e.preventDefault();
             deptOptions.forEach(x => x.classList.remove('active'));
@@ -366,7 +424,6 @@
             document.getElementById('deptDropdown').innerText = o.innerText;
             applyFilters();
         });
-
         yearOptions.forEach(o => o.onclick = (e) => {
             e.preventDefault();
             yearOptions.forEach(x => x.classList.remove('active'));
@@ -375,7 +432,6 @@
             document.getElementById('yearDropdown').innerText = o.innerText;
             applyFilters();
         });
-
         searchInput.addEventListener('input', applyFilters);
 
         // Drawer toggle
@@ -392,24 +448,18 @@
             });
         });
 
-        // ============================================================
-        // 4. DELETE MODAL HANDLER
-        // ============================================================
+        // 4. DELETE logic
         window.confirmDelete = function (id, type, btnElement) {
             const drawerRow = btnElement.closest('.detail-drawer');
             const masterRow = drawerRow.previousElementSibling;
             const title = masterRow.querySelector('b').innerText;
-
             assetIdToDelete = id;
             assetTypeToDelete = type;
             rowToRemove = masterRow;
-
             document.getElementById('modalAssetTitle').innerText = title;
             document.getElementById('modalAssetType').innerText = type.toUpperCase();
             document.getElementById('modalAssetId').innerText = `ID: #${type.charAt(0).toUpperCase()}-${id}`;
-
             if (deleteModal) deleteModal.show();
-            else console.error('Delete modal not initialized');
         };
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
@@ -417,81 +467,140 @@
             const spinner = document.getElementById('deleteBtnSpinner');
             btn.disabled = true;
             spinner.classList.remove('d-none');
-
+            const token = document.getElementById('__RequestVerificationToken')?.value;
+            if (!token) {
+                alert("Security token missing. Please refresh the page.");
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                return;
+            }
             try {
                 const response = await fetch(`/Inventory/Delete?id=${assetIdToDelete}&type=${assetTypeToDelete}`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }
                 });
                 if (response.ok) {
-                    const drawerRow = rowToRemove.nextElementSibling;
-                    if (drawerRow) drawerRow.remove();
-                    rowToRemove.remove();
-                    if (deleteModal) deleteModal.hide();
+                    const data = await response.json();
+                    if (data.success) {
+                        const drawerRow = rowToRemove.nextElementSibling;
+                        if (drawerRow) drawerRow.remove();
+                        rowToRemove.remove();
+                        deleteModal.hide();
+                    } else {
+                        alert(data.message || "Delete failed.");
+                    }
                 } else {
-                    alert("Delete failed.");
+                    alert(`Server error (${response.status})`);
                 }
             } catch (err) {
-                alert("Server error.");
+                alert("Network error: " + err.message);
             } finally {
                 btn.disabled = false;
                 spinner.classList.add('d-none');
             }
         });
 
-        // ============================================================
-        // 5. EDIT MODAL LOAD
-        // ============================================================
+        // 5. EDIT logic
         window.openEditModal = async function (id, type) {
             const modalBody = document.getElementById('editModalBody');
-            modalBody.innerHTML = `
-                <div class="text-center p-5">
-                    <div class="spinner-border text-primary"></div>
-                    <p class="mt-2 text-muted">Loading...</p>
-                </div>`;
-
+            modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Loading...</p></div>`;
             if (editModal) editModal.show();
-            else console.error('Edit modal not initialized');
-
             try {
                 const fixedType = type.charAt(0).toUpperCase() + type.slice(1);
                 const response = await fetch(`/Inventory/GetEditPartial?id=${id}&type=${fixedType}`);
-                if (response.ok) {
-                    modalBody.innerHTML = await response.text();
-                } else {
-                    modalBody.innerHTML = `<div class="alert alert-warning">Failed to load form</div>`;
-                }
-            } catch {
-                modalBody.innerHTML = `<div class="alert alert-danger">Server error</div>`;
-            }
+                if (response.ok) modalBody.innerHTML = await response.text();
+                else modalBody.innerHTML = `<div class="alert alert-warning">Failed to load form</div>`;
+            } catch { modalBody.innerHTML = `<div class="alert alert-danger">Server error</div>`; }
         };
 
-        // ============================================================
-        // 6. EDIT FORM SUBMIT
-        // ============================================================
+        // 6. CREATE (ADD NEW ASSET) logic
+        // Listen for type selection buttons (inside the typeSelectModal)
+        document.querySelectorAll('#typeSelectModal [data-type]').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const assetType = this.getAttribute('data-type');
+                if (typeSelectModal) typeSelectModal.hide();
+
+                // Load create partial
+                const modalBody = document.getElementById('createModalBody');
+                const modalTitle = document.getElementById('createModalTitle');
+                modalTitle.innerText = `Create New ${assetType.charAt(0).toUpperCase() + assetType.slice(1)}`;
+                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p>Loading form...</p></div>`;
+                if (createModal) createModal.show();
+
+                try {
+                    const response = await fetch(`/Inventory/GetCreatePartial?type=${assetType}`);
+                    if (response.ok) {
+                        modalBody.innerHTML = await response.text();
+                        // Ensure anti-forgery token is present in the form
+                        const form = modalBody.querySelector('form');
+                        if (form && !form.querySelector('input[name="__RequestVerificationToken"]')) {
+                            const tokenInput = document.createElement('input');
+                            tokenInput.type = 'hidden';
+                            tokenInput.name = '__RequestVerificationToken';
+                            tokenInput.value = document.getElementById('__RequestVerificationToken')?.value || '';
+                            form.appendChild(tokenInput);
+                        }
+                    } else {
+                        modalBody.innerHTML = `<div class="alert alert-danger">Failed to load form. Please try again.</div>`;
+                    }
+                } catch (err) {
+                    modalBody.innerHTML = `<div class="alert alert-danger">Network error: ${err.message}</div>`;
+                }
+            });
+        });
+
+        // Handle create form submission
+        document.addEventListener('submit', async function (e) {
+            const form = e.target.closest('#createModalBody form');
+            if (!form) return;
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.getElementById('__RequestVerificationToken')?.value || ''
+                    }
+                });
+                if (response.ok) {
+                    if (createModal) createModal.hide();
+                    location.reload(); // refresh to show new item
+                } else {
+                    const text = await response.text();
+                    if (response.status === 400 || text.includes('validation-summary')) {
+                        document.getElementById('createModalBody').innerHTML = text;
+                    } else {
+                        alert('Creation failed. Please check your inputs.');
+                    }
+                }
+            } catch (err) {
+                alert('Network error: ' + err.message);
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+
+        // Edit form submission
         document.addEventListener('submit', async function (e) {
             if (e.target.closest('#editModalBody form')) {
                 e.preventDefault();
                 const form = e.target;
                 const btn = form.querySelector('button[type="submit"]');
                 if (btn) btn.disabled = true;
-
                 try {
                     const formData = new FormData(form);
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData
-                    });
+                    const response = await fetch(form.action, { method: 'POST', body: formData });
                     if (response.ok) {
                         if (editModal) editModal.hide();
                         location.reload();
-                    } else {
-                        alert("Update failed.");
-                    }
-                } catch {
-                    alert("Server error.");
-                } finally {
-                    if (btn) btn.disabled = false;
-                }
+                    } else alert("Update failed.");
+                } catch { alert("Server error."); }
+                finally { if (btn) btn.disabled = false; }
             }
         });
     });

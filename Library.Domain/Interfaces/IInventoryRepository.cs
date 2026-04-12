@@ -12,6 +12,9 @@ public interface IInventoryRepository
     Task<Book?> GetBookByIdAsync(int id);
     Task<Thesis?> GetThesisByIdAsync(int id);
     Task<Journal?> GetJournalByIdAsync(int id);
+    Task<bool> AddBookAsync(Book book, string? blockName, string? shelfCode);
+    Task<bool> AddThesisAsync(Thesis thesis, string? blockName, string? shelfCode);
+    Task<bool> AddJournalAsync(Journal journal, string? blockName, string? shelfCode);
 
     Task<bool> UpdateBookAsync(Book book, string? blockName, string? shelfCode);
     Task<bool> UpdateThesisAsync(Thesis thesis, string? blockName, string? shelfCode);

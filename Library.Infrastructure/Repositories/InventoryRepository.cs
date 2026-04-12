@@ -164,4 +164,26 @@ public class InventoryRepository : IInventoryRepository
 
         return await bookQuery.Union(journalQuery).Union(thesisQuery).ToListAsync();
     }
+    // --- CREATE METHODS (Add New Asset) ---
+
+    public async Task<bool> AddBookAsync(Book book, string? blockName, string? shelfCode)
+    {
+        book.ShelfId = await GetOrCreateShelfIdAsync(blockName, shelfCode);
+        await _context.Books.AddAsync(book);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> AddThesisAsync(Thesis thesis, string? blockName, string? shelfCode)
+    {
+        thesis.ShelfId = await GetOrCreateShelfIdAsync(blockName, shelfCode);
+        await _context.Theses.AddAsync(thesis);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> AddJournalAsync(Journal journal, string? blockName, string? shelfCode)
+    {
+        journal.ShelfId = await GetOrCreateShelfIdAsync(blockName, shelfCode);
+        await _context.Journals.AddAsync(journal);
+        return await _context.SaveChangesAsync() > 0;
+    }
 }
