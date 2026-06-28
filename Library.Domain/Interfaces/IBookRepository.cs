@@ -12,5 +12,6 @@ namespace Library.Domain.Interfaces
         Task<IEnumerable<Borrowingrecord>> GetFullBorrowingHistoryAsync(int studentId);
         Task<bool> ReturnBookAsync(int recordId);
         Task<bool> RenewBookAsync(int recordId, int daysToExtend);
+        Task<IEnumerable<Book>> GetFeaturedBooksAsync(int count);
     }
 }

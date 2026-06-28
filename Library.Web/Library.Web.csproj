@@ -29,4 +29,11 @@
     <ProjectReference Include="..\Library.Infrastructure\Library.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\books\" />
+    <Folder Include="wwwroot\images\hero\" />
+    <Folder Include="wwwroot\images\journal\" />
+    <Folder Include="wwwroot\images\thesis\" />
+  </ItemGroup>
+
 </Project>

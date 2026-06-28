@@ -27,7 +27,13 @@
         font-weight: 500;
         font-size: 0.85rem;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
+
+        .filter-pill:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
 
         .filter-pill.active {
             background: #3182ce;
@@ -35,53 +41,156 @@
             border-color: #3182ce;
         }
 
-    .dept-block {
+    /* Student-Dashboard Inspired Card Layout Styles */
+    .dept-title-divider {
+        font-size: 1.15rem;
+        color: #1e293b;
+        font-weight: 700;
+        position: relative;
+        padding-bottom: 5px;
+    }
+
+    .asset-card {
         background: white;
+        border: 1px solid #e2e8f0;
         border-radius: 16px;
-        margin-bottom: 30px;
-        border: 1px solid #eef2f6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+        /* Elegant Type Highlights */
+        .asset-card.card-book {
+            border-left: 4px solid #4338ca;
+        }
+
+        .asset-card.card-thesis {
+            border-left: 4px solid #b45309;
+        }
+
+        .asset-card.card-journal {
+            border-left: 4px solid #047857;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+        }
+
+    .asset-card-body {
+        padding: 16px;
+        display: flex;
+        gap: 16px;
+        flex-grow: 1;
+    }
+
+    .asset-cover-wrapper {
+        width: 85px;
+        height: 120px;
+        flex-shrink: 0;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .asset-cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .asset-cover-icon {
+        font-size: 1.8rem;
+        transition: transform 0.2s ease;
+    }
+
+    .asset-card:hover .asset-cover-icon {
+        transform: scale(1.1);
+    }
+
+    .asset-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .asset-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    .dept-header {
-        background: #f8fafc;
-        padding: 15px 25px;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .inventory-table {
-        width: 100%;
-    }
-
-    .master-row {
-        cursor: pointer;
-    }
-
-    .detail-drawer {
-        display: none;
+    .asset-author {
+        font-size: 0.8rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .type-badge {
         font-size: 0.65rem;
-        padding: 2px 8px;
-        border-radius: 4px;
-        margin-left: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        display: inline-block;
+        width: fit-content;
     }
 
     .bg-book {
         background: #e0e7ff;
+        color: #4338ca;
     }
 
     .bg-thesis {
         background: #fef3c7;
+        color: #b45309;
     }
 
     .bg-journal {
         background: #d1fae5;
+        color: #047857;
     }
 
-    /* Minimal modal fix – only ensure proper z-index and stacking */
+    .location-tag {
+        font-size: 0.72rem;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        max-width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .asset-card-footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
     .modal-backdrop {
         z-index: 1040 !important;
     }
@@ -90,35 +199,33 @@
         z-index: 1050 !important;
     }
 </style>
+
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery AntiForgery
 @{
     var token = AntiForgery.GetAndStoreTokens(Context).RequestToken;
 }
+
 <div class="container-fluid px-4 mt-4">
     <input type="hidden" id="__RequestVerificationToken" value="@token" />
-    <!-- HEADER -->
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold m-0 text-dark">Inventory Control</h4>
-            <p class="text-muted small mb-0">Total: @totalItems items across @Model.Count Departments</p>
+            <h4 class="fw-bold m-0 text-dark">Library Inventory</h4>
+            <p class="text-muted small mb-0">Total Catalogue Count: @totalItems assets catalogued</p>
         </div>
         <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" onclick="showTypeSelectModal()">
-            <i class="fas fa-plus me-2"></i> Add New Asset
+            <i class="fas fa-plus me-2"></i> Add Asset
         </button>
     </div>
 
-    <!-- FILTER BAR -->
     <div class="inventory-utility-bar mb-4">
-
-        <!-- TYPE FILTER -->
         <div class="d-flex gap-2" id="typeFilters">
-            <button class="filter-pill active" data-filter="all">All Resources</button>
+            <button class="filter-pill active" data-filter="all">All Items</button>
             <button class="filter-pill" data-filter="book">Books</button>
             <button class="filter-pill" data-filter="journal">Journals</button>
             <button class="filter-pill" data-filter="thesis">Theses</button>
         </div>
 
-        <!-- DEPARTMENT DROPDOWN -->
         <div class="dropdown">
             <button id="deptDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
                 Department
@@ -132,7 +239,6 @@
             </ul>
         </div>
 
-        <!-- YEAR DROPDOWN -->
         <div class="dropdown">
             <button id="yearDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
                 Year
@@ -146,91 +252,106 @@
             </ul>
         </div>
 
-        <!-- SEARCH -->
         <div class="position-relative flex-grow-1">
-            <input type="text" id="mainSearch" class="form-control" placeholder="Search title, author or ID">
+            <input type="text" id="mainSearch" class="form-control" style="border-radius: 50px; padding-left: 20px;" placeholder="Search by book title, author, or keywords...">
         </div>
     </div>
 
-    <!-- DATA -->
     @foreach (var group in Model)
     {
-        <div class="dept-block department-section" data-dept="@group.Key.Trim()">
-            <div class="dept-header">
-                <span class="fw-bold">@group.Key Department</span>
-                <span>@group.Value.Count Items</span>
+        <div class="department-section mb-5" data-dept="@group.Key.Trim()">
+            <div class="dept-title-divider mb-3 d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-folder me-2 text-primary"></i>@group.Key Department</span>
+                <span class="badge bg-secondary rounded-pill font-monospace" style="font-size:0.75rem;">@group.Value.Count Items</span>
             </div>
 
-            <table class="inventory-table">
-                <tbody>
-                    @foreach (var item in group.Value)
-                    {
-                        <tr class="master-row inventory-item" data-type="@item.Type?.ToLower()">
-                            <td class="ps-4 py-3">
-                                <b>@item.Title</b>
-                                <span class="type-badge bg-@item.Type?.ToLower()">@item.Type</span>
-                                <div class="text-muted small">@item.Author</div>
-                            </td>
-                            <td class="text-secondary">@item.Year</td>
-                            <td class="fw-bold">@item.TotalCopies</td>
-                            <td>
-                                <span class="badge @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")">
-                                    @(item.AvailableCopies > 0 ? item.AvailableCopies + " Available" : "Out")
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <i class="fas fa-chevron-circle-down transition-icon"></i>
-                            </td>
-                        </tr>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+                @foreach (var item in group.Value)
+                {
+                    var itemTypeLower = item.Type?.ToLower() ?? "book";
 
-                        <tr class="detail-drawer">
-                            <td colspan="5">
-                                <div class="p-4 border-top bg-light">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-5">
-                                            <label class="text-muted border-bottom small d-block mb-2 text-uppercase fw-bold">Physical Location</label>
-                                            <div class="d-flex gap-2">
-                                                <span class="badge bg-white text-dark border p-2">
-                                                    <i class="fas fa-layer-group me-1 text-primary"></i> @item.BlockName
-                                                </span>
-                                                <span class="badge bg-white text-dark border p-2">
-                                                    <i class="fas fa-th me-1 text-primary"></i> @item.ShelfCode
-                                                </span>
-                                            </div>
+                    <div class="col inventory-item" data-type="@itemTypeLower">
+                        <div class="asset-card card-@itemTypeLower">
+                            <div class="asset-card-body">
+
+                                <div class="asset-cover-wrapper shadow-sm">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Title" class="asset-cover-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        <div class="d-none w-100 h-100 align-items-center justify-content-center">
+                                            <i class="fas @(itemTypeLower == "book" ? "fa-book text-indigo" : itemTypeLower == "thesis" ? "fa-graduation-cap text-warning" : "fa-newspaper text-success") asset-cover-icon"></i>
                                         </div>
+                                    }
+                                    else
+                                    {
+                                        if (itemTypeLower == "book")
+                                        {
+                                            <i class="fas fa-book asset-cover-icon" style="color: #4338ca;"></i>
+                                        }
+                                        else if (itemTypeLower == "thesis")
+                                        {
+                                            <i class="fas fa-graduation-cap asset-cover-icon" style="color: #b45309;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-newspaper asset-cover-icon" style="color: #047857;"></i>
+                                        }
+                                    }
+                                </div>
 
-                                        <div class="col-md-3">
-                                            <label class="text-muted small d-block mb-1 text-uppercase fw-bold">Stock Status</label>
-                                            <span class="fw-bold text-dark">
-                                                @item.AvailableCopies / @item.TotalCopies Copies available
-                                            </span>
-                                        </div>
+                                <div class="asset-details">
+                                    <div>
+                                        <span class="type-badge bg-@itemTypeLower mb-1">@item.Type</span>
+                                        <div class="asset-title asset-title-text" title="@item.Title">@item.Title</div>
+                                        <div class="asset-author" title="@item.Author">@item.Author</div>
+                                        <div class="text-muted extra-small mt-1 font-monospace" style="font-size:0.7rem;">Pub. Year: <span class="asset-year-val">@item.Year</span></div>
+                                    </div>
 
-                                        <div class="col-md-4 text-end">
-                                            <button type="button"
-                                                    onclick="openEditModal(@item.Id, '@item.Type?.ToLower()')"
-                                                    class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2">
-                                                <i class="fas fa-edit me-1"></i> Edit
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                                    onclick="confirmDelete(@item.Id, '@item.Type?.ToLower()', this)">
-                                                <i class="fas fa-trash me-1"></i> Remove
-                                            </button>
-                                        </div>
+                                    <div class="d-flex gap-1 mt-2 flex-wrap">
+                                        @if (!string.IsNullOrEmpty(item.BlockName))
+                                        {
+                                            <span class="location-tag" title="Block: @item.BlockName"><i class="fas fa-layer-group me-1 text-secondary"></i>@item.BlockName</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.ShelfCode))
+                                        {
+                                            <span class="location-tag" title="Shelf: @item.ShelfCode"><i class="fas fa-th me-1 text-secondary"></i>@item.ShelfCode</span>
+                                        }
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </div>
+
+                            <div class="asset-card-footer">
+                                <div>
+                                    <span class="badge @(item.AvailableCopies > 0 ? "bg-success" : "bg-danger")" style="font-size:0.72rem; border-radius: 6px;">
+                                        @(item.AvailableCopies > 0 ? $"{item.AvailableCopies} Available" : "Out of Stock")
+                                    </span>
+                                    <div class="text-muted mt-1" style="font-size:0.65rem;">Total Stock: @item.TotalCopies</div>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button type="button"
+                                            onclick="openEditModal(@item.Id, '@itemTypeLower')"
+                                            class="btn btn-sm btn-light border rounded-circle text-primary"
+                                            style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;"
+                                            title="Edit Information">
+                                        <i class="fas fa-edit" style="font-size:0.8rem;"></i>
+                                    </button>
+                                    <button type="button"
+                                            onclick="confirmDelete(@item.Id, '@itemTypeLower', this)"
+                                            class="btn btn-sm btn-light border rounded-circle text-danger"
+                                            style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;"
+                                            title="Remove Item">
+                                        <i class="fas fa-trash" style="font-size:0.8rem;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     }
 </div>
 
-<!-- MODALS (will be moved to <body> by script) -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
@@ -279,7 +400,6 @@
     </div>
 </div>
 
-<!-- Type Selection Modal -->
 <div class="modal fade" id="typeSelectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
@@ -304,7 +424,6 @@
     </div>
 </div>
 
-<!-- Dynamic Create Modal (reused for all types) -->
 <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
@@ -323,13 +442,12 @@
 </div>
 
 <script>
-           document.addEventListener('DOMContentLoaded', function () {
-        // 1. Move all modals to <body> to avoid stacking issues
+    document.addEventListener('DOMContentLoaded', function () {
+        // Move modals to body to prevent backdrop/stacking glitches
         document.querySelectorAll('.modal').forEach(modal => {
             document.body.appendChild(modal);
         });
 
-        // 2. Initialize all modals
         let deleteModal, editModal, typeSelectModal, createModal;
 
         function initModals() {
@@ -357,57 +475,44 @@
         }
         initModals();
 
-        // Helper to show type selection modal (called from button)
         window.showTypeSelectModal = function() {
-            if (typeSelectModal) {
-                typeSelectModal.show();
-            } else {
-                console.error("Type select modal not initialized");
-                // Fallback: try to reinitialize
-                const typeSelectEl = document.getElementById('typeSelectModal');
-                if (typeSelectEl && typeof bootstrap !== 'undefined') {
-                    typeSelectModal = new bootstrap.Modal(typeSelectEl);
-                    typeSelectModal.show();
-                } else {
-                    alert("Modal system not ready. Please refresh the page.");
-                }
-            }
+            if (typeSelectModal) typeSelectModal.show();
         };
 
-        // 3. Filter logic (unchanged – keep your existing applyFilters etc.)
         const typePills = document.querySelectorAll('#typeFilters .filter-pill');
         const deptOptions = document.querySelectorAll('#deptFilterMenu .dropdown-item');
         const yearOptions = document.querySelectorAll('#yearFilterMenu .dropdown-item');
         const searchInput = document.getElementById('mainSearch');
         let selectedDept = 'all';
         let selectedYear = 'all';
-        let assetIdToDelete = null, assetTypeToDelete = null, rowToRemove = null;
+        let assetIdToDelete = null, assetTypeToDelete = null, cardWrapperToRemove = null;
 
         function applyFilters() {
             const activeType = document.querySelector('#typeFilters .active').dataset.filter;
             const search = searchInput.value.toLowerCase();
+
             document.querySelectorAll('.department-section').forEach(section => {
-                let visible = 0;
+                let visibleCards = 0;
                 const dept = section.dataset.dept;
+
                 section.querySelectorAll('.inventory-item').forEach(item => {
                     const type = (item.dataset.type || '').toLowerCase();
                     const text = item.innerText.toLowerCase();
-                    const year = item.children[1] ? item.children[1].innerText.trim() : '';
+                    const year = item.querySelector('.asset-year-val')?.innerText.trim() || '';
+
                     const match = (activeType === 'all' || type === activeType) &&
                                   (selectedDept === 'all' || dept === selectedDept) &&
                                   (selectedYear === 'all' || year === selectedYear) &&
                                   text.includes(search);
+
                     if (match) {
                         item.style.display = '';
-                        visible++;
+                        visibleCards++;
                     } else {
                         item.style.display = 'none';
-                        if (item.nextElementSibling && item.nextElementSibling.classList.contains('detail-drawer')) {
-                            item.nextElementSibling.style.display = 'none';
-                        }
                     }
                 });
-                section.style.display = visible ? '' : 'none';
+                section.style.display = visibleCards > 0 ? '' : 'none';
             });
         }
 
@@ -416,6 +521,7 @@
             p.classList.add('active');
             applyFilters();
         });
+
         deptOptions.forEach(o => o.onclick = (e) => {
             e.preventDefault();
             deptOptions.forEach(x => x.classList.remove('active'));
@@ -424,6 +530,7 @@
             document.getElementById('deptDropdown').innerText = o.innerText;
             applyFilters();
         });
+
         yearOptions.forEach(o => o.onclick = (e) => {
             e.preventDefault();
             yearOptions.forEach(x => x.classList.remove('active'));
@@ -432,30 +539,16 @@
             document.getElementById('yearDropdown').innerText = o.innerText;
             applyFilters();
         });
+
         searchInput.addEventListener('input', applyFilters);
 
-        // Drawer toggle
-        document.querySelectorAll('.master-row').forEach(row => {
-            row.addEventListener('click', function (e) {
-                if (e.target.closest('button') || e.target.closest('a')) return;
-                const drawer = this.nextElementSibling;
-                if (drawer && drawer.classList.contains('detail-drawer')) {
-                    const isOpen = drawer.style.display === 'table-row';
-                    drawer.style.display = isOpen ? 'none' : 'table-row';
-                    const icon = this.querySelector('.transition-icon');
-                    if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-                }
-            });
-        });
-
-        // 4. DELETE logic
         window.confirmDelete = function (id, type, btnElement) {
-            const drawerRow = btnElement.closest('.detail-drawer');
-            const masterRow = drawerRow.previousElementSibling;
-            const title = masterRow.querySelector('b').innerText;
+            const cardContainer = btnElement.closest('.inventory-item');
+            const title = cardContainer.querySelector('.asset-title-text').innerText;
             assetIdToDelete = id;
             assetTypeToDelete = type;
-            rowToRemove = masterRow;
+            cardWrapperToRemove = cardContainer;
+
             document.getElementById('modalAssetTitle').innerText = title;
             document.getElementById('modalAssetType').innerText = type.toUpperCase();
             document.getElementById('modalAssetId').innerText = `ID: #${type.charAt(0).toUpperCase()}-${id}`;
@@ -467,13 +560,8 @@
             const spinner = document.getElementById('deleteBtnSpinner');
             btn.disabled = true;
             spinner.classList.remove('d-none');
+
             const token = document.getElementById('__RequestVerificationToken')?.value;
-            if (!token) {
-                alert("Security token missing. Please refresh the page.");
-                btn.disabled = false;
-                spinner.classList.add('d-none');
-                return;
-            }
             try {
                 const response = await fetch(`/Inventory/Delete?id=${assetIdToDelete}&type=${assetTypeToDelete}`, {
                     method: 'POST',
@@ -482,15 +570,14 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
-                        const drawerRow = rowToRemove.nextElementSibling;
-                        if (drawerRow) drawerRow.remove();
-                        rowToRemove.remove();
+                        cardWrapperToRemove.remove();
                         deleteModal.hide();
+                        applyFilters();
                     } else {
-                        alert(data.message || "Delete failed.");
+                        alert(data.message || "Delete operations failed.");
                     }
                 } else {
-                    alert(`Server error (${response.status})`);
+                    alert(`Error parsing response (${response.status})`);
                 }
             } catch (err) {
                 alert("Network error: " + err.message);
@@ -500,38 +587,33 @@
             }
         });
 
-        // 5. EDIT logic
         window.openEditModal = async function (id, type) {
             const modalBody = document.getElementById('editModalBody');
-            modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Loading...</p></div>`;
+            modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Syncing data parameters...</p></div>`;
             if (editModal) editModal.show();
             try {
                 const fixedType = type.charAt(0).toUpperCase() + type.slice(1);
                 const response = await fetch(`/Inventory/GetEditPartial?id=${id}&type=${fixedType}`);
                 if (response.ok) modalBody.innerHTML = await response.text();
-                else modalBody.innerHTML = `<div class="alert alert-warning">Failed to load form</div>`;
-            } catch { modalBody.innerHTML = `<div class="alert alert-danger">Server error</div>`; }
+                else modalBody.innerHTML = `<div class="alert alert-warning">Failed loading the asset entity.</div>`;
+            } catch { modalBody.innerHTML = `<div class="alert alert-danger">Internal server lookup fault.</div>`; }
         };
 
-        // 6. CREATE (ADD NEW ASSET) logic
-        // Listen for type selection buttons (inside the typeSelectModal)
         document.querySelectorAll('#typeSelectModal [data-type]').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const assetType = this.getAttribute('data-type');
                 if (typeSelectModal) typeSelectModal.hide();
 
-                // Load create partial
                 const modalBody = document.getElementById('createModalBody');
                 const modalTitle = document.getElementById('createModalTitle');
                 modalTitle.innerText = `Create New ${assetType.charAt(0).toUpperCase() + assetType.slice(1)}`;
-                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p>Loading form...</p></div>`;
+                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p>Generating form bindings...</p></div>`;
                 if (createModal) createModal.show();
 
                 try {
                     const response = await fetch(`/Inventory/GetCreatePartial?type=${assetType}`);
                     if (response.ok) {
                         modalBody.innerHTML = await response.text();
-                        // Ensure anti-forgery token is present in the form
                         const form = modalBody.querySelector('form');
                         if (form && !form.querySelector('input[name="__RequestVerificationToken"]')) {
                             const tokenInput = document.createElement('input');
@@ -541,15 +623,14 @@
                             form.appendChild(tokenInput);
                         }
                     } else {
-                        modalBody.innerHTML = `<div class="alert alert-danger">Failed to load form. Please try again.</div>`;
+                        modalBody.innerHTML = `<div class="alert alert-danger">Failed to structuralize modal injection form data.</div>`;
                     }
                 } catch (err) {
-                    modalBody.innerHTML = `<div class="alert alert-danger">Network error: ${err.message}</div>`;
+                    modalBody.innerHTML = `<div class="alert alert-danger">Network fault detected: ${err.message}</div>`;
                 }
             });
         });
 
-        // Handle create form submission
         document.addEventListener('submit', async function (e) {
             const form = e.target.closest('#createModalBody form');
             if (!form) return;
@@ -563,29 +644,26 @@
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
-                    headers: {
-                        'RequestVerificationToken': document.getElementById('__RequestVerificationToken')?.value || ''
-                    }
+                    headers: { 'RequestVerificationToken': document.getElementById('__RequestVerificationToken')?.value || '' }
                 });
                 if (response.ok) {
                     if (createModal) createModal.hide();
-                    location.reload(); // refresh to show new item
+                    location.reload();
                 } else {
                     const text = await response.text();
                     if (response.status === 400 || text.includes('validation-summary')) {
                         document.getElementById('createModalBody').innerHTML = text;
                     } else {
-                        alert('Creation failed. Please check your inputs.');
+                        alert('Operation validation failure flags returned.');
                     }
                 }
             } catch (err) {
-                alert('Network error: ' + err.message);
+                alert('Network transaction fault: ' + err.message);
             } finally {
                 if (submitBtn) submitBtn.disabled = false;
             }
         });
 
-        // Edit form submission
         document.addEventListener('submit', async function (e) {
             if (e.target.closest('#editModalBody form')) {
                 e.preventDefault();
@@ -598,8 +676,8 @@
                     if (response.ok) {
                         if (editModal) editModal.hide();
                         location.reload();
-                    } else alert("Update failed.");
-                } catch { alert("Server error."); }
+                    } else alert("Transactional save mismatch error occurred.");
+                } catch { alert("Fatal synchronization architecture failure."); }
                 finally { if (btn) btn.disabled = false; }
             }
         });

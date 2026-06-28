@@ -73,7 +73,6 @@ public class StudentRepository : IStudentRepository
     {
         return await _context.Theses.ToListAsync();
     }
-
     public async Task<IEnumerable<Borrowingrecord>> GetBorrowedItemsByStudentIdAsync(int studentId)
     {
         var records = await _context.BorrowingRecords
@@ -86,21 +85,23 @@ public class StudentRepository : IStudentRepository
             {
                 var book = await _context.Books.FindAsync(record.ItemId);
                 record.Title = book?.Title ?? "Unknown Book";
+                record.ImageUrl = book?.ImageUrl; // Add this
             }
             else if (record.ItemType == "Journal")
             {
                 var journal = await _context.Journals.FindAsync(record.ItemId);
                 record.Title = journal?.JournalName ?? "Unknown Journal";
+                record.ImageUrl = journal?.ImageUrl; // Add this
             }
             else if (record.ItemType == "Thesis")
             {
                 var thesis = await _context.Theses.FindAsync(record.ItemId);
                 record.Title = thesis?.Title ?? "Unknown Thesis";
+                record.ImageUrl = thesis?.ImageUrl; // Add this
             }
         }
-
         return records;
-    }  
+    }
     public async Task<bool> BorrowItemAsync(int studentId, int itemId, string itemType)
     {
         // 1. Check if the specific item exists and is available based on type
@@ -166,16 +167,19 @@ public class StudentRepository : IStudentRepository
             {
                 var item = await _context.Books.FindAsync(res.ItemId);
                 res.Title = item?.Title ?? "Unknown Book";
+                res.ImageUrl = item?.ImageUrl; // Add this
             }
             else if (res.ItemType == "Journal")
             {
                 var item = await _context.Journals.FindAsync(res.ItemId);
                 res.Title = item?.JournalName ?? "Unknown Journal";
+                res.ImageUrl = item?.ImageUrl; // Add this
             }
             else if (res.ItemType == "Thesis")
             {
                 var item = await _context.Theses.FindAsync(res.ItemId);
                 res.Title = item?.Title ?? "Unknown Thesis";
+                res.ImageUrl = item?.ImageUrl; // Add this
             }
         }
         return reservations;
@@ -188,13 +192,22 @@ public class StudentRepository : IStudentRepository
     }
     public async Task<bool> UpdateStudentAsync(Student student)
     {
-        _context.Students.Update(student);
-        int rowsAffected = await _context.SaveChangesAsync();
+        // Find if the entity is already tracked in the context to prevent identity conflicts
+        var trackedEntity = await _context.Students.FindAsync(student.StudentId);
 
+        if (trackedEntity != null)
+        {
+            // Detach the existing instance from change tracking engine pipeline maps
+            _context.Entry(trackedEntity).State = EntityState.Detached;
+        }
+
+        // Attach current updated model and mark explicit entity modified state updates
+        _context.Entry(student).State = EntityState.Modified;
+
+        int rowsAffected = await _context.SaveChangesAsync();
         return rowsAffected > 0;
     }
-    // ... existing methods ...
-
+ 
     public async Task<SeatAvailability?> GetSeatAvailabilityAsync()
     {
         // Fetches the live record updated by your Python AI

@@ -1,0 +1,690 @@
+﻿
+@model IEnumerable<Library.Domain.Entities.Book>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to USKT Library</title>
+
+    <style>
+        /* Base Reset & Typography */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 🌟 Enable smooth scrolling natively across the entire page */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #2d3748;
+        }
+
+        /* Top Notification Bar */
+        .top-notice-bar {
+            background-color: #1a2e5a; /* USKT Theme Dark Blue */
+            color: #fff;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 8px 10px;
+            border-bottom: 2px solid #c5a059; /* USKT Gold Accent Line */
+        }
+
+        /* Navigation Header */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 5%;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar-logo {
+            height: 70px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin: -6px 0;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1a2e5a;
+            letter-spacing: 0.5px;
+        }
+
+        /* Action Buttons Container */
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+            .nav-actions a {
+                text-decoration: none;
+                font-size: 0.85rem;
+                font-weight: 700;
+                padding: 8px 16px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .nav-actions .btn-login {
+                color: #1a2e5a;
+                border: 2px solid #1a2e5a;
+                background-color: transparent;
+            }
+
+                .nav-actions .btn-login:hover {
+                    background-color: #1a2e5a;
+                    color: #ffffff;
+                    transform: translateY(-1px);
+                }
+
+            .nav-actions .btn-member {
+                background-color: #c5a059;
+                color: #1a2e5a;
+                border: 2px solid #c5a059;
+                box-shadow: 0 2px 5px rgba(197, 160, 89, 0.2);
+            }
+
+                .nav-actions .btn-member:hover {
+                    background-color: #b38f48;
+                    border-color: #b38f48;
+                    color: #ffffff;
+                    box-shadow: 0 4px 10px rgba(197, 160, 89, 0.4);
+                    transform: translateY(-1px);
+                }
+
+        /* Hero Container & Dynamic Carousel Slider */
+        .hero-container {
+            position: relative;
+            height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+
+        .hero-bg-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: imageSlider 180s infinite linear;
+        }
+
+            .slide:nth-child(1) {
+                background-image: linear-gradient(rgba(26, 46, 90, 0.65), rgba(26, 46, 90, 0.65)), url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1600&auto=format&fit=crop');
+                animation-delay: 0s;
+            }
+
+            .slide:nth-child(2) {
+                background-image: linear-gradient(rgba(26, 46, 90, 0.65), rgba(26, 46, 90, 0.65)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1600&auto=format&fit=crop');
+                animation-delay: 60s;
+            }
+
+            .slide:nth-child(3) {
+                background-image: linear-gradient(rgba(26, 46, 90, 0.65), rgba(26, 46, 90, 0.65)), url('https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=1600&auto=format&fit=crop');
+                animation-delay: 120s;
+            }
+
+        @@keyframes imageSlider {
+            0% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            0.5% {
+                opacity: 1;
+            }
+
+            33% {
+                opacity: 1;
+                transform: scale(1.04);
+            }
+
+            33.5% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-form {
+            display: flex;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            font-size: 1.05rem;
+            color: #333;
+            outline: none;
+        }
+
+        .search-button {
+            background-color: #c5a059; /* Theme Gold */
+            color: #1a2e5a;
+            border: none;
+            padding: 0 35px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+            .search-button:hover {
+                background-color: #b38f48;
+                color: #fff;
+            }
+
+        .quick-links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .quick-link-btn {
+            background-color: #1a2e5a;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+            .quick-link-btn:hover {
+                background-color: #c5a059;
+                color: #1a2e5a;
+                border-color: #c5a059;
+                cursor: pointer;
+            }
+
+        /* Content Sections Layout */
+        .section-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #1a2e5a;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-left: 4px solid #c5a059;
+            padding-left: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Book Grid Showcase */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .book-card-link:hover .book-card {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .book-status {
+            display: inline-block;
+            font-size: 0.7rem;
+            background: #e2f0d9;
+            color: #385723;
+            padding: 4px 10px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            border-radius: 20px;
+            align-self: center;
+        }
+
+            .book-status.unavailable {
+                background: #fce8e6;
+                color: #c53030;
+            }
+
+        /* Premium Generated Book Cover Wrapper */
+        .book-cover.generated-cover {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a2e5a 0%, #0d172e 100%);
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: inset -6px 0px 15px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid rgba(255, 255, 255, 0.25);
+            aspect-ratio: 3 / 4;
+            margin-bottom: 12px;
+        }
+
+            .book-cover.generated-cover::before {
+                content: '';
+                position: absolute;
+                width: 140%;
+                height: 140%;
+                top: -30%;
+                left: -20%;
+                background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+                pointer-events: none;
+            }
+
+        .cover-initials {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            margin-bottom: 12px;
+        }
+
+        .cover-decor {
+            font-size: 12px;
+            opacity: 0.6;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .book-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #1a2e5a;
+        }
+
+        .book-author {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        /* 🌟 NEW: Premium "OUR SERVICES" Cards Grid View */
+        .services-display-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .service-image-card {
+            position: relative;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+        }
+
+            .service-image-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+            }
+
+        .service-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .service-image-card:hover .service-card-img {
+            transform: scale(1.08);
+        }
+
+        /* Dark tint layer directly over images to mimic template design */
+        .service-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .service-card-icon {
+            font-size: 40px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .service-card-title {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Feature Row Layout */
+        .feature-split-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        @@media (max-width: 768px) {
+            .feature-split-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-image-side {
+            background-image: url('https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=1600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            min-height: 320px;
+        }
+
+        .feature-text-side {
+            background: #1a2e5a;
+            color: white;
+            padding: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .feature-text-side h3 {
+                font-size: 1.6rem;
+                margin-bottom: 15px;
+                color: #c5a059;
+                letter-spacing: 0.5px;
+            }
+
+            .feature-text-side p {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin-bottom: 24px;
+                color: #e2e8f0;
+            }
+
+        .feature-btn {
+            align-self: flex-start;
+            background: transparent;
+            border: 2px solid #c5a059;
+            color: #c5a059;
+            padding: 10px 22px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+            .feature-btn:hover {
+                background: #c5a059;
+                color: #1a2e5a;
+            }
+
+        /* Footer Style */
+        .custom-footer {
+            background-color: #111827;
+            color: #9ca3af;
+            text-align: center;
+            padding: 35px 20px;
+            font-size: 0.9rem;
+            border-top: 4px solid #c5a059;
+            margin-top: 60px;
+        }
+
+        .credits-highlight {
+            color: #e2e8f0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-notice-bar">
+        Welcome to the Smart Library with Book Recommendation System portal. Check announcements below.
+    </div>
+
+    <header class="main-header">
+        <div class="brand-container">
+            <img src="/images/usktlibrarylogo.png" alt="USKT Logo" class="navbar-logo" />
+            <div class="logo-text">USKT LIBRARY</div>
+        </div>
+        <nav class="nav-actions">
+            <a href="/Account/Login" class="btn-login">🔑 LOGIN</a>
+            <a href="/Account/Register" class="btn-member">👤 BECOME A MEMBER</a>
+        </nav>
+    </header>
+
+    <div class="hero-container">
+        <div class="hero-bg-slider">
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Discover Knowledge & Innovation</h1>
+
+            <form action="/Catalogue/Search" method="GET" class="search-form">
+                <input type="text" name="searchTerm" placeholder="Search book titles, theses, or journals..." class="search-input" required />
+                <button type="submit" class="search-button">SEARCH</button>
+            </form>
+
+            <div class="quick-links-container">
+                @* 🌟 FIXED: Changed href="/Services" to "#our-services-section" to instantly trigger smooth roll down *@
+                <a href="#our-services-section" class="quick-link-btn">SERVICES</a>
+                <a href="/EResources" class="quick-link-btn">E-RESOURCES</a>
+                <a href="/Catalogue" class="quick-link-btn">CATALOGUE</a>
+                <a href="/Spaces" class="quick-link-btn">SEAT AVAILABILITY</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="section-container">
+
+        <h2 class="section-title">In Focus / Recommended Books</h2>
+        <div class="books-grid">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var book in Model)
+                {
+                    <a asp-controller="Account" asp-action="Login" class="book-card-link" style="text-decoration: none; color: inherit; display: block;">
+                        <div class="book-card">
+                            <span class="book-status @(book.AvailableCopies > 0 ? "" : "unavailable")">
+                                @(book.AvailableCopies > 0 ? "AVAILABLE" : "BORROWED")
+                            </span>
+
+                            @if (!string.IsNullOrEmpty(book.ImageUrl))
+                            {
+                                <img class="book-cover" src="@book.ImageUrl" alt="@book.Title Cover" style="width:100%; height:auto; aspect-ratio:3/4; object-fit:cover; border-radius:6px; margin-bottom:12px;" />
+                            }
+                            else
+                            {
+                                <div class="book-cover generated-cover">
+                                    @{
+                                        var words = book.Title?.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                        var initials = words != null && words.Length > 0
+                                        ? string.Join("", words.Take(3).Select(w => char.ToUpper(w[0])))
+                                        : "B";
+                                    }
+                                    <span class="cover-initials">@initials</span>
+                                    <div class="cover-decor">📖 LIBRARY</div>
+                                </div>
+                            }
+
+                            <div>
+                                <div class="book-title">@book.Title</div>
+                                <div class="book-author">@book.Author</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <p style="grid-column: 1/-1; text-align: center; color: #718096; padding: 40px; background: white; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                    No featured library books available to showcase right now.
+                </p>
+            }
+        </div>
+
+        @* 🌟 NEW: Dynamic "OUR SERVICES" visual cards block layout matched from your uploaded layout scheme *@
+        <h2 id="our-services-section" class="section-title">Our Services</h2>
+        <div class="services-display-grid">
+
+            <a href="/Catalogue" class="service-image-card">
+                <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=600&auto=format&fit=crop" class="service-card-img" alt="Catalogue" />
+                <div class="service-card-overlay">
+                    <div class="service-card-icon">📚</div>
+                    <div class="service-card-title">Catalogue</div>
+                </div>
+            </a>
+
+            <a href="/Account/Login" class="service-image-card">
+                <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=600&auto=format&fit=crop" class="service-card-img" alt="Using Your Library" />
+                <div class="service-card-overlay">
+                    <div class="service-card-icon">🏢</div>
+                    <div class="service-card-title">Using Your Library</div>
+                </div>
+            </a>
+
+            <a href="/EResources" class="service-image-card">
+                <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=600&auto=format&fit=crop" class="service-card-img" alt="Home Library Service" />
+                <div class="service-card-overlay">
+                    <div class="service-card-icon">📖</div>
+                    <div class="service-card-title">Home Library Service</div>
+                </div>
+            </a>
+
+            <a href="/Spaces" class="service-image-card">
+                <img src="https://images.unsplash.com/photo-1568667256549-094345857637?q=80&w=600&auto=format&fit=crop" class="service-card-img" alt="Mobile Library" />
+                <div class="service-card-overlay">
+                    <div class="service-card-icon">🚐</div>
+                    <div class="service-card-title">Mobile Library</div>
+                </div>
+            </a>
+
+        </div>
+
+        <div class="feature-split-row">
+            <div class="feature-image-side"></div>
+            <div class="feature-text-side">
+                <h3>SEMESTER BREAK & PORTAL UPDATES</h3>
+                <p>Access AI-powered suggestions, live seat availability check-ins, and online thesis submissions directly through your student dashboard profile portal.</p>
+                <a href="/Services/Updates" class="feature-btn">VIEW ALL NOTICES</a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="custom-footer">
+        <div>&copy; @DateTime.Now.Year - University Smart Library & Recommendation System</div>
+        <div class="credits-highlight">Rights by Airaf and Ayesha</div>
+    </footer>
+
+</body>
+</html>
+

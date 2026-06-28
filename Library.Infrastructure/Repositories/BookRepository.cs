@@ -58,6 +58,12 @@ public class BookRepository : IBookRepository
 
         return await _context.SaveChangesAsync() > 0;
     }
+    public async Task<IEnumerable<Book>> GetFeaturedBooksAsync(int count)
+    {
+        return await _context.Books
+            .Take(count)
+            .ToListAsync();
+    }
     public async Task<bool> CreateRequestAsync(int studentId, int itemId, string itemType, string requestType)
     {
         var newRequest = new Borrowingrecord

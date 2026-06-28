@@ -34,7 +34,7 @@
             min-height: 650px;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px(60px) rgba(0, 0, 0, 0.12);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
             overflow: hidden;
             animation: slideIn 0.8s ease-out;
         }
@@ -44,7 +44,6 @@
                 opacity: 0;
                 transform: translateY(40px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -64,7 +63,6 @@
             overflow: hidden;
         }
 
-            /* Ambient animated glowing circles behind the library icon */
             .left-section::before, .left-section::after {
                 content: '';
                 position: absolute;
@@ -93,26 +91,35 @@
             0%, 100% {
                 transform: translateY(0) scale(1);
             }
-
             50% {
                 transform: translateY(-10px) scale(1.05);
             }
         }
 
-        .library-icon {
-            font-size: 60px;
+        .logo-container {
+            width: 110px;
+            height: 110px;
             margin-bottom: 20px;
-            animation: bounce 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatLogo 3s ease-in-out infinite;
             z-index: 1;
         }
 
-        @@keyframes bounce {
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
+        }
+
+        @@keyframes floatLogo {
             0%, 100% {
                 transform: translateY(0);
             }
-
             50% {
-                transform: translateY(-10px);
+                transform: translateY(-12px);
             }
         }
 
@@ -146,18 +153,50 @@
                 margin-bottom: 5px;
             }
 
-        /* 2-Column Grid layout for inputs */
+        .avatar-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #ffffff;
+            border: 2px dashed #e2e8f0;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .avatar-preview-box {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #a0aec0;
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+            .avatar-preview-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease; /* Matches the smooth JS slide effect */
+            transition: transform 0.3s ease;
         }
 
             .form-group.full-width {
@@ -174,6 +213,7 @@
 
         input[type="text"],
         input[type="password"],
+        input[type="file"],
         select {
             width: 100%;
             padding: 11px 15px;
@@ -186,12 +226,47 @@
 
             input[type="text"]:focus,
             input[type="password"]:focus,
+            input[type="file"]:focus,
             select:focus {
                 outline: none;
                 border-color: #667eea;
                 box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
                 background: #ffffff;
             }
+
+        .password-rules {
+            grid-column: span 2;
+            background: #edf2f7;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4a5568;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: -5px;
+            border-left: 4px solid #cbd5e0;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e53e3e;
+            transition: color 0.3s ease;
+        }
+
+        .rule-item.valid {
+            color: #38a169;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 500;
+            display: none;
+        }
 
         .register-btn {
             width: 100%;
@@ -246,12 +321,18 @@
                 grid-template-columns: 1fr;
             }
 
-            .form-group.full-width {
+            .form-group.full-width, .password-rules {
                 grid-column: span 1;
             }
 
             .right-section {
                 padding: 30px;
+            }
+
+            .avatar-upload-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
         }
     </style>
@@ -259,7 +340,9 @@
 <body>
     <div class="container">
         <div class="left-section">
-            <div class="library-icon">📖</div>
+            <div class="logo-container">
+                <img src="~/images/usktlibrarylogo.png" alt="USKT Logo" class="logo-img" />
+            </div>
             <h2>Join Our Library</h2>
             <p>Create a student account today and get instant access to borrow thousands of educational resources.</p>
         </div>
@@ -268,9 +351,19 @@
             <h1>Create Account</h1>
             <p style="color: #718096;">Please fill in your details to register</p>
 
-            <form asp-controller="Account" asp-action="Register" method="post">
-                <div class="form-grid">
+            <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" id="registrationForm">
 
+                <div class="avatar-upload-wrapper">
+                    <div class="avatar-preview-box" id="avatarPreviewContainer">
+                        <span id="avatarPlaceholder">👤</span>
+                    </div>
+                    <div style="flex-grow: 1; width: 100%;">
+                        <label style="font-weight: bold;">Profile Picture</label>
+                        <input type="file" id="registerImageFile" name="profileImageFile" accept=".jpg,.jpeg,.png" onchange="previewRegisterImage(this)" />
+                    </div>
+                </div>
+
+                <div class="form-grid">
                     <div class="form-group">
                         <label>Full Name</label>
                         <input type="text" asp-for="StudentName" placeholder="Enter your full name" required>
@@ -291,7 +384,20 @@
 
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" asp-for="PasswordHash" placeholder="Create a password" required>
+                        <input type="password" id="passwordInput" asp-for="PasswordHash" placeholder="Create a password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="confirmPasswordInput" placeholder="Repeat your password" required>
+                        <span class="error-message" id="confirmPasswordError">Passwords do not match.</span>
+                    </div>
+
+                    <div class="password-rules" id="passwordRulesBox">
+                        <div class="rule-item" id="ruleLength">❌ At least 8 characters long</div>
+                        <div class="rule-item" id="ruleUpper">❌ At least one uppercase letter (A-Z)</div>
+                        <div class="rule-item" id="ruleNumber">❌ At least one digit (0-9)</div>
+                        <div class="rule-item" id="ruleSpecial">❌ At least one special character (@@, #, $, etc.)</div>
                     </div>
 
                     <div class="form-group">
@@ -314,7 +420,6 @@
                         <label>Batch / Academic Year</label>
                         <input type="text" asp-for="Batch" placeholder="e.g. 2022-2026" required>
                     </div>
-
                 </div>
 
                 <button type="submit" class="register-btn">Create Account</button>
@@ -328,26 +433,102 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Find all inputs and selects in the form
-            const inputs = document.querySelectorAll('input, select');
-            const registerBtn = document.querySelector('.register-btn');
-            const form = document.querySelector('form');
+        function previewRegisterImage(input) {
+            const container = document.getElementById('avatarPreviewContainer');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    container.innerHTML = '<img src="' + e.target.result + '" alt="Preview" />';
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                container.innerHTML = '<span id="avatarPlaceholder">👤</span>';
+            }
+        }
 
-            // 1. Interactive focus effect (just like your login page)
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('input[type="text"], input[type="password"], select, input[type="file"]');
+            const registerBtn = document.querySelector('.register-btn');
+            const form = document.getElementById('registrationForm');
+            
+            const passwordInput = document.getElementById('passwordInput');
+            const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+            const passwordRulesBox = document.getElementById('passwordRulesBox');
+            const confirmError = document.getElementById('confirmPasswordError');
+
+            const ruleLength = document.getElementById('ruleLength');
+            const ruleUpper = document.getElementById('ruleUpper');
+            const ruleNumber = document.getElementById('ruleNumber');
+            const ruleSpecial = document.getElementById('ruleSpecial');
+
             inputs.forEach(input => {
                 input.addEventListener('focus', () => {
-                    // Slides the entire input container slightly to the right
                     input.parentElement.style.transform = 'translateX(5px)';
                 });
-
                 input.addEventListener('blur', () => {
                     input.parentElement.style.transform = 'translateX(0)';
                 });
             });
 
-            // 2. Button authentication state animation on submit
-            form.addEventListener('submit', function() {
+            passwordInput.addEventListener('focus', () => { passwordRulesBox.style.display = 'flex'; });
+
+            passwordInput.addEventListener('input', validatePasswordRules);
+            confirmPasswordInput.addEventListener('input', validateMatch);
+
+            function validatePasswordRules() {
+                const val = passwordInput.value;
+                
+                const hasLength = val.length >= 8;
+                const hasUpper = /[A-Z]/.test(val);
+                const hasNumber = /[0-9]/.test(val);
+                const hasSpecial = /[^A-Za-z0-9]/.test(val);
+
+               
+                updateRuleUI(ruleLength, hasLength, "At least 8 characters long");
+                updateRuleUI(ruleUpper, hasUpper, "At least one uppercase letter (A-Z)");
+                updateRuleUI(ruleNumber, hasNumber, "At least one digit (0-9)");
+                updateRuleUI(ruleSpecial, hasSpecial, "At least one special character ( #, $, etc.)");
+
+                validateMatch();
+                return hasLength && hasUpper && hasNumber && hasSpecial;
+            }
+
+            function updateRuleUI(element, isValid, message) {
+                if(isValid) {
+                    element.classList.add('valid');
+                    element.innerHTML = `✓ ${message}`;
+                } else {
+                    element.classList.remove('valid');
+                    element.innerHTML = `❌ ${message}`;
+                }
+            }
+
+            function validateMatch() {
+                if (confirmPasswordInput.value === "") {
+                    confirmError.style.display = 'none';
+                    return false;
+                }
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmError.style.display = 'block';
+                    return false;
+                } else {
+                    confirmError.style.display = 'none';
+                    return true;
+                }
+            }
+
+            form.addEventListener('submit', function(e) {
+                const isPasswordSecure = validatePasswordRules();
+                const doPasswordsMatch = validateMatch();
+
+                if (!isPasswordSecure || !doPasswordsMatch) {
+                    e.preventDefault();
+                    passwordRulesBox.style.display = 'flex';
+                    if(!doPasswordsMatch) confirmPasswordInput.focus();
+                    else passwordInput.focus();
+                    return false;
+                }
+
                 registerBtn.innerHTML = 'Creating Account...';
                 registerBtn.style.opacity = '0.7';
                 registerBtn.style.pointerEvents = 'none';

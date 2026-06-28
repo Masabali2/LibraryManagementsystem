@@ -7,23 +7,52 @@
 
 @section Styles {
     <style>
-        /* [KEEPING ALL YOUR ORIGINAL CSS] */
+        /* WELCOME & LAYOUT ANIMATIONS */
         .welcome-section {
             margin-bottom: 30px;
             animation: fadeInDown 0.6s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
-            .welcome-section h1 {
-                font-size: 28px;
-                color: #1a202c;
-                font-weight: 700;
-                margin-bottom: 5px;
-            }
+        /* 👤 PROFILE AVATAR ENGINE CONTAINER */
+        .profile-avatar-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 3px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-            .welcome-section p {
-                color: #718096;
-                font-size: 15px;
-            }
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .welcome-text h1 {
+            font-size: 28px;
+            color: #1a202c;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+        }
+
+        .welcome-text p {
+            color: #718096;
+            font-size: 15px;
+            margin: 0;
+        }
 
         .stats-grid {
             display: grid;
@@ -116,6 +145,7 @@
             color: #e53e3e;
         }
 
+        /* DATA TABLES STYLING */
         .table-section {
             background: #ffffff;
             border-radius: 16px;
@@ -138,10 +168,40 @@
             }
 
             .styled-table th, .styled-table td {
-                padding: 15px 20px;
+                padding: 12px 20px;
                 border-bottom: 1px solid #edf2f7;
+                vertical-align: middle;
             }
 
+        /* 📷 COMPACT TABLE IMAGE THUMBNAILS ENGINE */
+        .table-cover-container {
+            width: 45px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border: 1px solid #cbd5e1;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .table-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .table-cover-fallback {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BADGES */
         .type-badge {
             font-size: 11px;
             padding: 5px 10px;
@@ -149,6 +209,7 @@
             background: #f7fafc;
             border: 1px solid #e2e8f0;
             color: #4a5568;
+            white-space: nowrap;
         }
 
         .status-badge {
@@ -158,6 +219,7 @@
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .status-borrowed {
@@ -196,12 +258,49 @@
                 color: white;
                 border-color: #667eea;
             }
+
+        @@keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 }
 
+<!-- WELCOME SECTION WITH PROFILE IMAGE FALLBACK SYSTEM -->
 <div class="welcome-section">
-    <h1>Welcome Back, @Model.StudentName! 👋</h1>
-    <p>Here's a quick look at your library activity today.</p>
+    <div class="profile-avatar-container">
+        @if (Model != null && !string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="Profile" class="profile-avatar-img" />
+        }
+        else
+        {
+            <span>@(string.IsNullOrEmpty(Model?.StudentName) ? "S" : Model.StudentName.Trim().Substring(0, 1))</span>
+        }
+    </div>
+    <div class="welcome-text">
+        <h1>Welcome Back, @Model.StudentName! 👋</h1>
+        <p>Here's a quick look at your library activity today.</p>
+    </div>
 </div>
 
 <div class="stats-grid">
@@ -244,10 +343,11 @@
     </div>
 </div>
 
+<!-- CURRENT BORROWED ACTIVITY TABLE -->
 <div class="table-section">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h2>Current Activity (Borrowed)</h2>
-        <div class="filter-group">
+        <div class="filter-group" style="margin-bottom: 0;">
             <button class="filter-btn active" onclick="filterData('All', this)">All</button>
             <button class="filter-btn" onclick="filterData('Book', this)">Books</button>
             <button class="filter-btn" onclick="filterData('Thesis', this)">Theses</button>
@@ -258,6 +358,7 @@
     <table class="styled-table" id="activityTable">
         <thead>
             <tr>
+                <th style="width: 65px;">Cover</th>
                 <th>Type</th>
                 <th>Item Name</th>
                 <th>Borrowed Date</th>
@@ -271,6 +372,32 @@
                 foreach (var item in Model.BorrowedItems)
                 {
                     <tr class="activity-row" data-type="@item.Type">
+                        <td>
+                            <div class="table-cover-container">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Title"
+                                         style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                }
+                                else
+                                {
+                                    <div class="table-cover-fallback" style="width: 40px; height: 50px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 4px;">
+                                        @if (item.Type == "Book")
+                                        {
+                                            <i class="fas fa-book text-secondary"></i>
+                                        }
+                                        else if (item.Type == "Journal")
+                                        {
+                                            <i class="fas fa-newspaper text-info"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-graduation-cap" style="color: #805ad5;"></i>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </td>
                         <td>
                             <span class="type-badge">
                                 @(item.Type == "Thesis" ? "🎓 Thesis" : item.Type == "Journal" ? "📑 Journal" : "📚 Book")
@@ -298,12 +425,13 @@
             }
             else
             {
-                <tr><td colspan="5" class="text-center text-muted">No borrowed items.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted" style="padding: 30px;">No borrowed items.</td></tr>
             }
         </tbody>
     </table>
 </div>
 
+<!-- ACTIVE RESERVATIONS TABLE -->
 <div class="table-section">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2>Active Reservations</h2>
@@ -312,6 +440,7 @@
     <table class="styled-table" id="reservationTable">
         <thead>
             <tr>
+                <th style="width: 65px;">Cover</th>
                 <th>Type</th>
                 <th>Item Name</th>
                 <th>Reservation Date</th>
@@ -325,6 +454,32 @@
                 foreach (var item in Model.ReservedItems)
                 {
                     <tr class="activity-row" data-type="@item.ItemType">
+                        <td>
+                            <div class="table-cover-container">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Title"
+                                         style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                }
+                                else
+                                {
+                                    <div class="table-cover-fallback" style="width: 40px; height: 50px; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+                                        @if (item.ItemType == "Book")
+                                        {
+                                            <i class="fas fa-book text-secondary"></i>
+                                        }
+                                        else if (item.ItemType == "Journal")
+                                        {
+                                            <i class="fas fa-newspaper text-info"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-graduation-cap" style="color: #805ad5;"></i>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </td>
                         <td>
                             <span class="type-badge">
                                 @(item.ItemType == "Thesis" ? "🎓 Thesis" : item.ItemType == "Journal" ? "📑 Journal" : "📚 Book")
@@ -348,7 +503,7 @@
             }
             else
             {
-                <tr><td colspan="5" class="text-center text-muted">No active reservations.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted" style="padding: 30px;">No active reservations.</td></tr>
             }
         </tbody>
     </table>
@@ -357,11 +512,9 @@
 @section Scripts {
     <script>
         function filterData(type, btn) {
-            // Update active button state
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            // Apply filter to all tables containing '.activity-row'
             const rows = document.querySelectorAll('.activity-row');
             rows.forEach(row => {
                 const rowType = row.getAttribute('data-type');

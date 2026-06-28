@@ -25,6 +25,8 @@ namespace Library.Domain.DTOs
         // Mapped from AvailableCopies (Book) or Quantity (Journal)
         public int AvailableCopies { get; set; }
 
+        public string? ImageUrl { get; set; }
+
         public string Department { get; set; } = null!;
 
         // "book", "journal", or "thesis" for UI logic

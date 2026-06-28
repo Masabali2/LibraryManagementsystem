@@ -1,57 +1,174 @@
 ﻿@model Library.Domain.Entities.Thesis
 
-<form asp-action="UpdateThesis" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="ThesisId" />
+<style>
+    .edit-form-container {
+        animation: fadeSlideIn 0.4s ease;
+    }
 
-    <input type="hidden" asp-for="ShelfId" />
+    @@keyframes fadeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
 
-    <div class="row g-3">
-        <div class="col-md-12">
-            <label class="form-label small fw-bold text-muted">RESEARCH TITLE</label>
-            <textarea asp-for="Title" class="form-control shadow-sm" rows="2"
-                      style="border-radius: 15px;" required></textarea>
-        </div>
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">STUDENT NAME</label>
-            <input asp-for="StudentName" class="form-control rounded-pill px-3 shadow-sm" required />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">ROLL NUMBER</label>
-            <input asp-for="RollNo" class="form-control rounded-pill px-3 shadow-sm" required />
-        </div>
+    .form-card {
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    }
 
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">DEPARTMENT</label>
-            <input asp-for="Department" class="form-control rounded-pill px-3 shadow-sm" required />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">BATCH</label>
-            <input asp-for="Batch" class="form-control rounded-pill px-3 shadow-sm" required />
-        </div>
+    .top-cover-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 14px;
+    }
 
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">LOCATION BLOCK</label>
-            <input name="LocationBlockName" class="form-control rounded-pill px-3 shadow-sm"
-                   value="@Model.Shelf?.LocationBlock?.Name" placeholder="e.g. FYP Lab" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted">SHELF CODE</label>
-            <input name="ShelfCode" class="form-control rounded-pill px-3 shadow-sm"
-                   value="@Model.Shelf?.ShelfCode" placeholder="e.g. Cabinet-04" />
-        </div>
+    .current-cover-preview {
+        width: 90px;
+        height: 115px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        flex-shrink: 0;
+    }
 
-        <div class="col-md-12">
-            <label class="form-label small fw-bold text-muted">SUBMISSION YEAR</label>
-            <input asp-for="Year" type="number" class="form-control rounded-pill px-3 shadow-sm" required />
-        </div>
+    .no-cover-preview {
+        width: 90px;
+        height: 115px;
+        border-radius: 12px;
+        background: #64748b;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .form-control {
+        border-radius: 50px !important;
+        border: 1px solid #e2e8f0;
+        padding: 9px 14px;
+        font-size: 0.9rem;
+    }
+
+    textarea.form-control {
+        border-radius: 15px !important;
+    }
+
+    .form-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="edit-form-container">
+    <div class="form-card">
+
+        <form asp-action="UpdateThesis" asp-controller="Inventory" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="ThesisId" />
+            <input type="hidden" asp-for="ShelfId" />
+            <input type="hidden" asp-for="ImageUrl" />
+
+            <div class="top-cover-box">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="Current Thesis Cover" class="current-cover-preview" />
+                }
+                else
+                {
+                    <div class="no-cover-preview">No Image</div>
+                }
+
+                <div class="flex-grow-1">
+                    <label class="form-label fw-bold text-muted">THESIS DOCUMENT IMAGE / COVER</label>
+                    <input type="file"
+                           name="ThesisImage"
+                           id="EditThesisImageFile"
+                           class="form-control shadow-sm"
+                           accept="image/*" />
+                    <small class="text-muted d-block mt-1 ms-2" style="font-size: 0.68rem;">
+                        Leave empty to keep current picture
+                    </small>
+                </div>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold text-muted">RESEARCH TITLE</label>
+                    <textarea asp-for="Title" class="form-control shadow-sm" rows="2" required></textarea>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted">SUBMISSION YEAR</label>
+                    <input asp-for="Year" type="number" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">STUDENT NAME</label>
+                    <input asp-for="StudentName" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">ROLL NUMBER</label>
+                    <input asp-for="RollNo" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">DEPARTMENT</label>
+                    <input asp-for="Department" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">BATCH</label>
+                    <input asp-for="Batch" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">LOCATION BLOCK</label>
+                    <input name="LocationBlockName"
+                           class="form-control shadow-sm"
+                           value="@Model.Shelf?.LocationBlock?.Name"
+                           placeholder="e.g. FYP Lab" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted">SHELF CODE</label>
+                    <input name="ShelfCode"
+                           class="form-control shadow-sm"
+                           value="@Model.Shelf?.ShelfCode"
+                           placeholder="e.g. Cabinet-04" />
+                </div>
+            </div>
+
+            <div class="text-end mt-3 pt-3 border-top">
+                <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="fas fa-check-circle me-1"></i> Update Thesis
+                </button>
+            </div>
+        </form>
+
     </div>
-
-    <div class="text-end mt-4 pt-3 border-top">
-        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
-            <i class="fas fa-check-circle me-1"></i> Update Thesis
-        </button>
-    </div>
-</form>
+</div>

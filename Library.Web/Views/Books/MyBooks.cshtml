@@ -68,7 +68,7 @@
         /* BOOK GRID & CARDS */
         .books-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
             animation: fadeInUp 0.8s ease-out;
         }
@@ -76,13 +76,12 @@
         .book-card {
             background: #ffffff;
             border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
             border: 1px solid #edf2f7;
             transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
             .book-card:hover {
@@ -91,35 +90,75 @@
                 border-color: #e2e8f0;
             }
 
+        /* 📷 COVER CONTAINER (Matching Library Catalog Design) */
+        .card-img-container {
+            height: 180px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .card-cover-img {
+            height: 100%;
+            width: auto;
+            max-width: 75%;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        .card-body-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
         .book-title {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             color: #2d3748;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 36px;
+            line-height: 1.3;
         }
 
         .book-author {
-            font-size: 14px;
+            font-size: 13px;
             color: #718096;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            text-truncate: true;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* PROGRESS BAR */
         .progress-container {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .progress-labels {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            color: #a0aec0;
+            font-size: 11px;
+            color: #718096;
             margin-bottom: 5px;
         }
 
         .progress-bar-bg {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background-color: #edf2f7;
             border-radius: 4px;
             overflow: hidden;
@@ -148,11 +187,9 @@
             display: inline-block;
             padding: 4px 10px;
             border-radius: 9999px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            align-self: flex-start;
-            margin-bottom: 10px;
         }
 
         .badge-safe {
@@ -180,11 +217,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 5px;
         }
 
         .btn-action {
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 600;
@@ -219,27 +256,33 @@
         }
 
         @@keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
         }
 
         @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         }
     </style>
 }
@@ -282,28 +325,65 @@
             else if (percentElapsed > 50) { progressColorClass = "bg-yellow"; badgeClass = "badge-warning"; }
 
             <div class="book-card" data-type="@item.Type">
-                <span class="badge @badgeClass">@badgeText</span>
-                <div class="book-title">@item.Title</div>
-                <div class="book-author">by @item.Author</div>
 
-                <div class="progress-container">
-                    <div class="progress-labels">
-                        <span>Borrowed: @item.BorrowDate.ToString("MMM dd")</span>
-                        <span>Due: @dueDate.ToString("MMM dd")</span>
+                <div class="card-img-container">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" class="card-cover-img" alt="@item.Title" />
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column align-items-center justify-content-center w-75 h-100 rounded shadow-sm text-center p-2"
+                             style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 1px solid #cbd5e1;">
+                            @if (item.Type == "Book")
+                            {
+                                <i class="fas fa-book text-secondary mb-2" style="font-size: 1.8rem;"></i>
+                            }
+                            else if (item.Type == "Journal")
+                            {
+
+                                <i class="fas fa-newspaper text-info mb-2" style="font-size: 1.8rem;"></i>
+                            }
+                            else
+                            {
+
+                                <i class="fas fa-graduation-cap mb-2" style="font-size: 1.8rem; color: #805ad5;"></i>
+                            }
+                            <span class="fw-semibold text-muted px-1" style="font-size: 10px; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @item.Title
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-body-content">
+                    <div>
+                        <div class="book-title" title="@item.Title">@item.Title</div>
+                        <div class="book-author">by @item.Author</div>
                     </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill @progressColorClass" style="width: @percentElapsed%"></div>
+
+                    <div>
+                        <div class="progress-container">
+                            <div class="progress-labels">
+                                <span>Borrowed: @item.BorrowDate.ToString("MMM dd")</span>
+                                <span>Due: @dueDate.ToString("MMM dd")</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill @progressColorClass" style="width: @percentElapsed%"></div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <form asp-controller="Books" asp-action="Return" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
+                                <button type="submit" class="btn-action btn-return">Return</button>
+                            </form>
+                            <form asp-controller="Books" asp-action="Renew" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
+                                <button type="submit" class="btn-action btn-renew">Renew</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card-actions">
-                    <form asp-controller="Books" asp-action="Return" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
-                        <button type="submit" class="btn-action btn-return">Return</button>
-                    </form>
-                    <form asp-controller="Books" asp-action="Renew" asp-route-id="@item.BorrowingRecordId" method="post" style="display:contents;">
-                        <button type="submit" class="btn-action btn-renew">Renew</button>
-                    </form>
-                </div>
             </div>
         }
     }
@@ -321,18 +401,56 @@
         foreach (var item in Model.PastReads)
         {
             <div class="book-card" data-type="@item.Type">
-                <span class="badge badge-history">Returned</span>
-                <div class="book-title">@item.Title</div>
-                <div class="book-author">by @item.Author</div>
 
-                <div class="progress-labels" style="margin-top:10px;">
-                    <span>Borrowed: @item.BorrowDate.ToString("yyyy-MM-dd")</span>
-                    <span>Returned: @item.ActualReturnDate?.ToString("yyyy-MM-dd")</span>
+                <div class="card-img-container">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" class="card-cover-img" alt="@item.Title" />
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column align-items-center justify-content-center w-75 h-100 rounded shadow-sm text-center p-2"
+                             style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 1px solid #cbd5e1; opacity: 0.8;">
+                            @if (item.Type == "Book")
+                            {
+                                <i class="fas fa-book text-secondary mb-2" style="font-size: 1.8rem;"></i>
+                            }
+                            else if (item.Type == "Journal")
+                            {
+
+                                <i class="fas fa-newspaper text-info mb-2" style="font-size: 1.8rem;"></i>
+                            }
+                            else
+                            {
+
+                                <i class="fas fa-graduation-cap mb-2" style="font-size: 1.8rem; color: #805ad5;"></i>
+                            }
+                            <span class="fw-semibold text-muted px-1" style="font-size: 10px; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @item.Title
+                            </span>
+                        </div>
+                    }
+                </div>
+                <div class="card-body-content">
+                    <div>
+                        <div class="book-title" title="@item.Title">@item.Title</div>
+                        <div class="book-author">by @item.Author</div>
+                    </div>
+
+                    <div>
+                        <div class="progress-labels" style="margin-top:10px; padding: 5px 0;">
+                            <div class="d-flex flex-column small text-muted">
+                                <span>Borrowed: <strong>@item.BorrowDate.ToString("yyyy-MM-dd")</strong></span>
+                                <span>Returned: <strong>@item.ActualReturnDate?.ToString("yyyy-MM-dd")</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn-action btn-disabled" style="grid-column: 1 / span 2;">Archived</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-actions">
-                    <button class="btn-action btn-disabled" style="grid-column: 1 / span 2;">Archived</button>
-                </div>
             </div>
         }
     }

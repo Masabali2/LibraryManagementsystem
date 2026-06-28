@@ -38,15 +38,18 @@
         }
 
         @@keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         }
 
         .left-section {
@@ -62,21 +65,36 @@
             overflow: hidden;
         }
 
-        .library-icon {
-            font-size: 60px;
+        /* 🚀 NEW LOGO IMAGE CONTAINER & ANIMATION LOGIC */
+        .logo-container {
+            width: 110px;
+            height: 110px;
             margin-bottom: 20px;
-            animation: bounce 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatLogo 3s ease-in-out infinite;
             z-index: 1;
         }
 
-        @@keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
+        }
 
-            50% {
-                transform: translateY(-10px);
-            }
+        @@keyframes floatLogo {
+            0%, 100%
+
+        {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-12px); /* Smooth floating displacement */
+        }
+
         }
 
         .left-section h2 {
@@ -169,17 +187,20 @@
         }
 
         @@keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
+            0%, 100%
 
-            25% {
-                transform: translateX(-5px);
-            }
+        {
+            transform: translateX(0);
+        }
 
-            75% {
-                transform: translateX(5px);
-            }
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
+
         }
 
         /* Styles for the registration link */
@@ -203,22 +224,27 @@
                 }
 
         @@media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                height: auto;
-            }
+            .container
 
-            .left-section {
-                min-height: 250px;
-            }
+        {
+            flex-direction: column;
+            height: auto;
+        }
+
+        .left-section {
+            min-height: 250px;
+        }
+
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="left-section">
-            <div class="library-icon">📚</div>
-            <h2>Library System</h2>
+            <div class="logo-container">
+                <img src="~/images/usktlibrarylogo.png" alt="USKT Logo" class="logo-img" />
+            </div>
+            <h2>USKT Library</h2>
             <p>Access your library account and explore thousands of books, journals, and digital resources at your fingertips.</p>
         </div>
 

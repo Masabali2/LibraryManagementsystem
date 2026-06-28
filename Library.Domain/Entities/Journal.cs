@@ -16,4 +16,7 @@ public class Journal
     public int? Quantity { get; set; }
     public int? ShelfId { get; set; } // Nullable so old data doesn't crash
     public virtual Shelf? Shelf { get; set; }
+    // 🚀 NEW PROPERTY: Stores the file path or URL of the cover image
+    [StringLength(1000)]
+    public string? ImageUrl { get; set; }
 }

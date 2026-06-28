@@ -23,6 +23,7 @@
         padding-bottom: 20px;
     }
 
+    /* 👤 CORE PROFILE AVATAR ENGINE styles */
     .large-avatar {
         width: 80px;
         height: 80px;
@@ -34,7 +35,16 @@
         font-size: 32px;
         font-weight: 700;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        overflow: hidden;
+        border: 2px solid #edf2f7;
+        flex-shrink: 0;
     }
+
+        .large-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
     .info-label {
         font-weight: 600;
@@ -79,8 +89,16 @@
         }
 
         <div class="profile-header">
+            <!-- 📷 Profile Picture / Text Fallback Engine -->
             <div class="large-avatar">
-                @Model.StudentName.Substring(0, 1).ToUpper()
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="@Model.StudentName" />
+                }
+                else
+                {
+                    @Model.StudentName.Substring(0, 1).ToUpper()
+                }
             </div>
             <div>
                 <h2 style="color: #2d3748; margin-bottom: 5px;">@Model.StudentName</h2>
@@ -136,7 +154,9 @@
                 <h5 class="modal-title" id="modalTitle">Edit Your Information</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-action="UpdateProfile" method="post">
+
+            @* Added enctype attribute here to enable binary file processing *@
+            <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -144,8 +164,28 @@
                     <input type="hidden" asp-for="StudentId" />
                     <input type="hidden" asp-for="PasswordHash" />
                     <input type="hidden" asp-for="Role" />
+                    <input type="hidden" asp-for="ImageUrl" />
 
                     <div class="row g-3">
+                        <!-- 📷 PROFILE IMAGE UPLOAD PANEL -->
+                        <div class="col-12 d-flex align-items-center gap-3 mb-3 border-bottom pb-3">
+                            <div class="large-avatar">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img src="@Model.ImageUrl" alt="Preview" id="profilePreview" />
+                                }
+                                else
+                                {
+                                    <span id="textPreview">@Model.StudentName.Substring(0, 1).ToUpper()</span>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <label for="profileImageFile" class="form-label fw-bold">Update Profile Picture</label>
+                                <input type="file" id="profileImageFile" name="profileImageFile" class="form-control" accept=".jpg,.jpeg,.png" onchange="previewImage(this)" />
+                                <small class="text-muted">Accepted formats: JPG, JPEG, PNG.</small>
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
                             <label asp-for="StudentName" class="form-label fw-bold">Full Name</label>
                             <input asp-for="StudentName" class="form-control" required />
@@ -193,3 +233,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Live UI Image rendering update loop code
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var avatarDiv = document.querySelector('#updateProfileModal .large-avatar');
+                avatarDiv.innerHTML = '<img src="' + e.target.result + '" alt="Preview" id="profilePreview" />';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

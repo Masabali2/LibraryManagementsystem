@@ -10,6 +10,7 @@
         public DateTime DueDate { get; set; }
         public bool IsDueSoon { get; set; }
         public string Status { get; set; } = null!; // 🚀 New: "Pending", "Approved"
+        public string ImageUrl { get; set; }
         public string RequestType { get; set; } = null!;
 
 

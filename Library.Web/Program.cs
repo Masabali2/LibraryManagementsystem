@@ -50,7 +50,7 @@ app.UseAuthorization();
 // 3. Define Routes (Must be BEFORE app.Run)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // 4. Start the Application (This must be the LAST line)
 app.Run();

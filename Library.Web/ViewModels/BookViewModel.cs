@@ -11,6 +11,8 @@ namespace Library.Web.ViewModels
         // This will store Author (Book), Publisher (Journal), or Student Name (Thesis)
         public string Author { get; set; } = string.Empty;
         public string Department { get; set; } = string.Empty;
+        // 🆕 Add this property to store the image filename or URL
+        public string? ImageUrl { get; set; }
 
         public string ItemType { get; set; } = "Book";
 

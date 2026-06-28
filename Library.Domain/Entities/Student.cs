@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Library.Domain.Entities;
 
@@ -27,4 +28,7 @@ public class Student
 
     // Navigation Property
     public virtual ICollection<Borrowingrecord> BorrowingRecords { get; set; } = new List<Borrowingrecord>();
+    // 🚀 NEW PROPERTY: Stores the file path or URL of the cover image
+    [StringLength(1000)]
+    public string? ImageUrl { get; set; }
 }

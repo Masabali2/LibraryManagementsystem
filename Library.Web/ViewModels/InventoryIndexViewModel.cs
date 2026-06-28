@@ -10,6 +10,7 @@ namespace Library.Web.ViewModels
         public List<Thesis> Theses { get; set; } = new List<Thesis>();
         public List<Journal> Journals { get; set; } = new List<Journal>();
 
+        public string? ImageUrl { get; set; }
         // Optional: Summary properties for the top stats
         public int TotalAssets => Books.Count + Theses.Count + Journals.Count;
     }

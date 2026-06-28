@@ -1,7 +1,6 @@
 ﻿@model Library.Domain.Entities.Book
 
 <style>
-    /* 🌟 Form Container Animation */
     .edit-form-container {
         animation: fadeSlideIn 0.4s ease;
     }
@@ -18,34 +17,73 @@
         }
     }
 
-    /* ✨ Input Styling */
+    .edit-book-wide-form {
+        max-width: 100%;
+    }
+
+    .form-card {
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    }
+
+    .top-cover-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 14px;
+    }
+
+    .current-cover-preview {
+        width: 90px;
+        height: 115px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        flex-shrink: 0;
+    }
+
+    .no-cover-preview {
+        width: 90px;
+        height: 115px;
+        border-radius: 12px;
+        background: #64748b;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
     .form-control {
         border-radius: 50px !important;
         border: 1px solid #e2e8f0;
         transition: all 0.25s ease;
-        padding: 10px 15px;
+        padding: 9px 14px;
+        font-size: 0.9rem;
     }
 
         .form-control:focus {
             border-color: #3182ce;
             box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
-            transform: scale(1.02);
+            transform: scale(1.01);
         }
 
-    /* 🏷 Labels */
     .form-label {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         letter-spacing: 0.5px;
+        margin-bottom: 4px;
     }
 
-    /* 🎯 Section Divider */
-    .form-section {
-        border-bottom: 1px dashed #e2e8f0;
-        padding-bottom: 10px;
-        margin-bottom: 10px;
-    }
-
-    /* 🔘 Buttons */
     .btn-primary {
         background: linear-gradient(135deg, #3182ce, #00c6ff);
         border: none;
@@ -60,34 +98,55 @@
     .btn-light {
         background: #f1f5f9;
     }
-
-    /* 📦 Card Feel */
-    .form-card {
-        background: rgba(255,255,255,0.7);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-    }
 </style>
 
-<div class="edit-form-container">
+<div class="edit-form-container edit-book-wide-form">
     <div class="form-card">
 
-        <form asp-action="UpdateBook" asp-controller="Inventory" method="post">
+        <form asp-action="UpdateBook" asp-controller="Inventory" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
 
             <input type="hidden" asp-for="BookId" />
             <input type="hidden" asp-for="ShelfId" />
+            <input type="hidden" asp-for="ImageUrl" />
 
-            <div class="row g-3">
+            <!-- IMAGE AT TOP -->
+            <div class="top-cover-box">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="Current Book Cover" class="current-cover-preview" />
+                }
+                else
+                {
+                    <div class="no-cover-preview">No Image</div>
+                }
 
-                <!-- 📘 BASIC INFO -->
-                <div class="col-md-12 form-section">
+                <div class="flex-grow-1">
+                    <label class="form-label fw-bold text-muted">BOOK COVER IMAGE</label>
+                    <input type="file"
+                           name="BookImage"
+                           id="EditBookImageFile"
+                           class="form-control shadow-sm"
+                           accept="image/*" />
+                    <small class="text-muted d-block mt-1 ms-2" style="font-size: 0.68rem;">
+                        Leave empty to keep current picture
+                    </small>
+                </div>
+            </div>
+
+            <!-- WIDE GRID FORM -->
+            <div class="row g-2">
+
+                <div class="col-md-8">
                     <label class="form-label fw-bold text-muted">BOOK TITLE</label>
                     <input asp-for="Title" class="form-control shadow-sm" required />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted">PUBLICATION YEAR</label>
+                    <input asp-for="PublicationYear" type="number" class="form-control shadow-sm" />
                 </div>
 
                 <div class="col-md-6">
@@ -100,7 +159,6 @@
                     <input asp-for="Department" class="form-control shadow-sm" required />
                 </div>
 
-                <!-- 📍 LOCATION -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted">LOCATION BLOCK</label>
                     <input name="LocationBlockName"
@@ -117,30 +175,19 @@
                            placeholder="e.g. Row-01" />
                 </div>
 
-                <!-- 📅 YEAR -->
-                <div class="col-md-12">
-                    <label class="form-label fw-bold text-muted">PUBLICATION YEAR</label>
-                    <input asp-for="PublicationYear" type="number"
-                           class="form-control shadow-sm" />
-                </div>
-
-                <!-- 📊 STOCK -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted">TOTAL COPIES</label>
-                    <input asp-for="TotalCopies" type="number" min="0"
-                           class="form-control shadow-sm" />
+                    <input asp-for="TotalCopies" type="number" min="0" class="form-control shadow-sm" />
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted">AVAILABLE COPIES</label>
-                    <input asp-for="AvailableCopies" type="number" min="0"
-                           class="form-control shadow-sm" />
+                    <input asp-for="AvailableCopies" type="number" min="0" class="form-control shadow-sm" />
                 </div>
 
             </div>
 
-            <!-- ACTIONS -->
-            <div class="text-end mt-4 pt-3 border-top">
+            <div class="text-end mt-3 pt-3 border-top">
                 <button type="button"
                         class="btn btn-light rounded-pill px-4 me-2"
                         data-bs-dismiss="modal">
@@ -159,9 +206,8 @@
 </div>
 
 <script>
-    // 🔥 Smart validation: Available <= Total
     document.addEventListener('input', function (e) {
-        if (e.target.name.includes('AvailableCopies')) {
+        if (e.target.name && e.target.name.includes('AvailableCopies')) {
             const total = document.querySelector('[name="TotalCopies"]')?.value;
             if (total && parseInt(e.target.value) > parseInt(total)) {
                 e.target.value = total;

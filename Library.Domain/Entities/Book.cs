@@ -10,7 +10,7 @@
         [StringLength(500)]
         public string Title { get; set; } = null!;
         [StringLength(500)]
-        public string Author { get; set; } = null!;
+    public string Author { get; set; } = null!;
         [StringLength(100)]
         public string? PublicationYear { get; set; }
         [StringLength(50)]
@@ -19,4 +19,7 @@
         public int? AvailableCopies { get; set; }
     public int? ShelfId { get; set; } // Nullable so old data doesn't crash
     public virtual Shelf? Shelf { get; set; }
+    // 🚀 NEW PROPERTY: Stores the file path or URL of the cover image
+    [StringLength(1000)]
+    public string? ImageUrl { get; set; }
 }

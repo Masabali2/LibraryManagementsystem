@@ -40,6 +40,7 @@ public class AccountController : Controller
                 HttpContext.Session.SetString("UserRole", "Student");
                 HttpContext.Session.SetInt32("CurrentStudentId", student.StudentId);
                 HttpContext.Session.SetString("StudentName", student.StudentName);
+                HttpContext.Session.SetString("StudentImageUrl", student.ImageUrl ?? "");
             }
 
             return RedirectToAction("Dashboard", "Student");
@@ -51,17 +52,51 @@ public class AccountController : Controller
 
     [HttpGet]
     public IActionResult Register() => View();
-
     [HttpPost]
-    public async Task<IActionResult> Register(Student student)
+    public async Task<IActionResult> Register(Student student, IFormFile? profileImageFile)
     {
         if (ModelState.IsValid)
         {
-            bool isRegistered = await _authService.RegisterStudentAsync(student);
-            if (isRegistered) return RedirectToAction("Login");
+            // 🔒 FIX: Route this through your AuthService so it gets properly hashed and validated!
+            bool isAdded = await _authService.RegisterStudentAsync(student);
 
-            ViewBag.ErrorMessage = "Username or Roll Number already registered!";
+            if (isAdded)
+            {
+                // Now that it's successfully added, handle the profile image if there is one
+                if (profileImageFile != null && profileImageFile.Length > 0)
+                {
+                    // student.StudentId is now populated by EF Core after the database save
+                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", student.StudentId.ToString());
+
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    string extension = Path.GetExtension(profileImageFile.FileName);
+                    string fileName = $"profile_image{extension}";
+                    string fullPhysicalPath = Path.Combine(folderPath, fileName);
+
+                    using (var stream = new FileStream(fullPhysicalPath, FileMode.Create))
+                    {
+                        await profileImageFile.CopyToAsync(stream);
+                    }
+
+                    // Update path reference field (Make sure your property matches your entity, e.g., ImageUrl or ProfileImageUrl)
+                    student.ImageUrl = $"/images/{student.StudentId}/{fileName}";
+
+                    // Update the student row with the image path link
+                    await _studentRepo.UpdateStudentAsync(student);
+                }
+
+                TempData["SuccessMessage"] = "Registration successful! Please login.";
+                return RedirectToAction("Login");
+            }
+
+            // If isAdded is false, it means the username or Roll Number already existed
+            ModelState.AddModelError("", "Username or Roll Number is already registered.");
         }
+
         return View(student);
     }
 

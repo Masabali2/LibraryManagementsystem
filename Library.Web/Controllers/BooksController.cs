@@ -39,7 +39,8 @@ public class BooksController : Controller
             AvailableCopies = b.AvailableCopies ?? 0,
             TotalCopies = b.TotalCopies ?? 0,
             IsAvailable = (b.AvailableCopies ?? 0) > 0,
-            ItemType = "Book"
+            ItemType = "Book",
+            ImageUrl= b.ImageUrl // Map the image URL if available
         });
 
         // Map Journals
@@ -54,7 +55,8 @@ public class BooksController : Controller
             AvailableCopies = j.Quantity ?? 0,
             TotalCopies = j.Quantity ?? 0,
             IsAvailable = (j.Quantity ?? 0) > 0,
-            ItemType = "Journal"
+            ItemType = "Journal",
+            ImageUrl = j.ImageUrl // Map the image URL if available
         });
 
         // Map Theses
@@ -69,7 +71,8 @@ public class BooksController : Controller
             AvailableCopies = 1,
             TotalCopies = 1,
             IsAvailable = true,
-            ItemType = "Thesis"
+            ItemType = "Thesis",
+            ImageUrl = t.ImageUrl // Map the image URL if available
         });
 
         var finalModel = bookVMs.Concat(journalVMs).Concat(thesisVMs)
@@ -155,12 +158,17 @@ public class BooksController : Controller
 
         var viewModel = new MyBooksViewModel
         {
+            // ... inside your MyBooks method, update the mapping:
             ActiveBorrowedBooks = mappedItems.Where(x => !x.Record.IsReturned).Select(x => new ActiveBorrowedBookViewModel
             {
                 BorrowingRecordId = x.Record.RecordId,
                 Title = x.Title,
                 Author = x.Author,
-                Type = x.Record.ItemType, 
+                Type = x.Record.ItemType,
+                // Add this line to grab the image based on type
+                ImageUrl = x.Record.ItemType == "Book" ? books.FirstOrDefault(b => b.BookId == x.Record.ItemId)?.ImageUrl :
+                           x.Record.ItemType == "Journal" ? journals.FirstOrDefault(j => j.JournalId == x.Record.ItemId)?.ImageUrl :
+                           theses.FirstOrDefault(t => t.ThesisId == x.Record.ItemId)?.ImageUrl,
                 BorrowDate = x.Record.BorrowDate,
                 ExpectedReturnDate = x.Record.ExpectedReturnDate
             }).ToList(),
@@ -171,7 +179,11 @@ public class BooksController : Controller
                 Author = x.Author,
                 Type = x.Record.ItemType,
                 BorrowDate = x.Record.BorrowDate,
-                ActualReturnDate = x.Record.ActualReturnDate
+                ActualReturnDate = x.Record.ActualReturnDate,
+                // Add the mapping logic here
+                ImageUrl = x.Record.ItemType == "Book" ? books.FirstOrDefault(b => b.BookId == x.Record.ItemId)?.ImageUrl :
+                x.Record.ItemType == "Journal" ? journals.FirstOrDefault(j => j.JournalId == x.Record.ItemId)?.ImageUrl :
+                theses.FirstOrDefault(t => t.ThesisId == x.Record.ItemId)?.ImageUrl
             }).ToList()
         };
 

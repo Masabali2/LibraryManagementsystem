@@ -130,6 +130,7 @@ public class InventoryRepository : IInventoryRepository
             AvailableCopies = b.AvailableCopies ?? 0,
             Department = b.Department,
             Type = "book",
+            ImageUrl=b.ImageUrl,
             ShelfCode = b.Shelf != null ? b.Shelf.ShelfCode : "N/A",
             BlockName = b.Shelf != null && b.Shelf.LocationBlock != null ? b.Shelf.LocationBlock.Name : "Unassigned"
         });
@@ -144,6 +145,7 @@ public class InventoryRepository : IInventoryRepository
             AvailableCopies = 1,
             Department = j.Department ?? "General",
             Type = "journal",
+            ImageUrl=j.ImageUrl,
             ShelfCode = j.Shelf != null ? j.Shelf.ShelfCode : "N/A",
             BlockName = j.Shelf != null && j.Shelf.LocationBlock != null ? j.Shelf.LocationBlock.Name : "Unassigned"
         });
@@ -158,6 +160,7 @@ public class InventoryRepository : IInventoryRepository
             AvailableCopies = 1,
             Department = t.Department,
             Type = "thesis",
+            ImageUrl=t.ImageUrl,
             ShelfCode = t.Shelf != null ? t.Shelf.ShelfCode : "N/A",
             BlockName = t.Shelf != null && t.Shelf.LocationBlock != null ? t.Shelf.LocationBlock.Name : "Unassigned"
         });
