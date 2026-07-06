@@ -31,4 +31,6 @@ public class Student
     // 🚀 NEW PROPERTY: Stores the file path or URL of the cover image
     [StringLength(1000)]
     public string? ImageUrl { get; set; }
+    public bool IsBanned { get; set; } = false;
+    public string? BanReason { get; set; }
 }

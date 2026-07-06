@@ -1,0 +1,454 @@
+﻿@model List<Library.Domain.Entities.Challan>
+
+@{
+    ViewData["Title"] = "Revenue Tracking";
+    Layout = "_AdminLayout";
+    ViewData["ActivePage"] = "Revenue Tracking";
+
+    var totalChallans = Model?.Count ?? 0;
+    var unpaidCount = Model?.Count(c => c.Status == "Unpaid") ?? 0;
+    var paidCount = Model?.Count(c => c.Status == "Paid") ?? 0;
+    var partialCount = Model?.Count(c => c.Status == "Partially Paid") ?? 0;
+
+    var totalGeneratedAmount = Model?.Sum(c => c.TotalAmount) ?? 0m;
+    var paidRevenue = Model?
+        .Where(c => c.Status == "Paid")
+        .Sum(c => c.TotalAmount) ?? 0m;
+
+    var unpaidAmount = Model?
+        .Where(c => c.Status == "Unpaid")
+        .Sum(c => c.TotalAmount) ?? 0m;
+}
+
+<style>
+    .revenue-page {
+        padding: 24px;
+    }
+
+    .revenue-header-card {
+        background: linear-gradient(135deg, #0f766e, #2563eb);
+        color: white;
+        border-radius: 22px;
+        padding: 24px;
+        margin-bottom: 22px;
+        box-shadow: 0 14px 32px rgba(37, 99, 235, .18);
+    }
+
+        .revenue-header-card h2 {
+            font-weight: 850;
+            margin-bottom: 5px;
+        }
+
+        .revenue-header-card p {
+            margin: 0;
+            opacity: .9;
+        }
+
+    .revenue-stat {
+        background: rgba(255,255,255,.15);
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 16px;
+        padding: 14px;
+        height: 100%;
+        backdrop-filter: blur(6px);
+    }
+
+    .revenue-stat-label {
+        font-size: .72rem;
+        font-weight: 750;
+        opacity: .85;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .revenue-stat-value {
+        font-size: 1.35rem;
+        font-weight: 900;
+        margin-top: 3px;
+    }
+
+    .revenue-table-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 28px rgba(15,23,42,.05);
+    }
+
+    .filter-label {
+        color: #475569;
+        font-size: .78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .revenue-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: .73rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        white-space: nowrap;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        vertical-align: middle;
+        padding: 13px 11px;
+    }
+
+    .challan-no {
+        color: #1d4ed8;
+        font-weight: 850;
+        text-decoration: none;
+    }
+
+    .student-name {
+        color: #0f172a;
+        font-weight: 800;
+    }
+
+    .student-roll {
+        color: #64748b;
+        font-size: .78rem;
+        margin-top: 2px;
+    }
+
+    .status-paid {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-unpaid {
+        color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .status-partial {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .status-cancelled {
+        color: #475569;
+        background: #e2e8f0;
+    }
+
+    .status-pill {
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: .72rem;
+        font-weight: 850;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 52px 20px;
+        color: #64748b;
+    }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+</style>
+
+<div class="revenue-page">
+    <div class="revenue-header-card">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-4">
+                <h2>
+                    <i class="fas fa-chart-line me-2"></i>
+                    Revenue Tracking
+                </h2>
+                <p>Track generated challans, payment status, paid revenue, and pending dues.</p>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Total Challans</div>
+                            <div class="revenue-stat-value">@totalChallans</div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Generated Amount</div>
+                            <div class="revenue-stat-value">Rs. @totalGeneratedAmount.ToString("N0")</div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Paid Revenue</div>
+                            <div class="revenue-stat-value">Rs. @paidRevenue.ToString("N0")</div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Unpaid Amount</div>
+                            <div class="revenue-stat-value">Rs. @unpaidAmount.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-4">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Unpaid</div>
+                            <div class="revenue-stat-value">@unpaidCount</div>
+                        </div>
+                    </div>
+
+                    <div class="col-4">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Partial</div>
+                            <div class="revenue-stat-value">@partialCount</div>
+                        </div>
+                    </div>
+
+                    <div class="col-4">
+                        <div class="revenue-stat">
+                            <div class="revenue-stat-label">Paid</div>
+                            <div class="revenue-stat-value">@paidCount</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="revenue-table-card">
+        <div class="row g-3 align-items-end mb-3">
+            <div class="col-md-6">
+                <label class="filter-label" for="challanSearch">Search</label>
+                <input id="challanSearch"
+                       type="search"
+                       class="form-control"
+                       placeholder="Search by challan number, student name, roll number..." />
+            </div>
+
+            <div class="col-md-3">
+                <label class="filter-label" for="statusFilter">Payment Status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="all">All Statuses</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Partially Paid">Partially Paid</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex justify-content-md-end">
+                <a href="/UserManagement"
+                   class="btn btn-light border rounded-pill px-4 fw-bold">
+                    <i class="fas fa-users me-1"></i> Students
+                </a>
+            </div>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover revenue-table mb-0" id="challansTable">
+                    <thead>
+                        <tr>
+                            <th>Challan No.</th>
+                            <th>Student</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th class="text-end">Amount</th>
+                            <th>Status</th>
+                            <th style="width: 180px;">Update Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var challan in Model)
+                        {
+                            var statusClass = challan.Status switch
+                            {
+                                "Paid" => "status-paid",
+                                "Partially Paid" => "status-partial",
+                                "Cancelled" => "status-cancelled",
+                                _ => "status-unpaid"
+                            };
+
+                            <tr data-status="@challan.Status">
+                                <td>
+                                    <a class="challan-no"
+                                       href="/Challan/Details?id=@challan.ChallanId">
+                                        @challan.ChallanNo
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <div class="student-name">@challan.Student?.StudentName</div>
+                                    <div class="student-roll">@challan.Student?.RollNo</div>
+                                </td>
+
+                                <td>@challan.IssueDate.ToString("dd MMM yyyy")</td>
+                                <td>@challan.DueDate.ToString("dd MMM yyyy")</td>
+
+                                <td class="text-end fw-bold">
+                                    Rs. @challan.TotalAmount.ToString("N2")
+                                </td>
+
+                                <td>
+                                    <span class="status-pill @statusClass">
+                                        @challan.Status
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <select class="form-select form-select-sm"
+                                            onchange="updateStatus(@challan.ChallanId, this.value)">
+                                        <option value="Unpaid" selected="@(challan.Status == "Unpaid")">Unpaid</option>
+                                        <option value="Partially Paid" selected="@(challan.Status == "Partially Paid")">Partially Paid</option>
+                                        <option value="Paid" selected="@(challan.Status == "Paid")">Paid</option>
+                                        <option value="Cancelled" selected="@(challan.Status == "Cancelled")">Cancelled</option>
+                                    </select>
+                                </td>
+
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="/Challan/Details?id=@challan.ChallanId"
+                                           class="btn btn-outline-primary action-btn"
+                                           title="View challan">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <a href="/Challan/Print?id=@challan.ChallanId"
+                                           target="_blank"
+                                           class="btn btn-outline-secondary action-btn"
+                                           title="Print challan">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-outline-danger action-btn"
+                                                title="Delete challan"
+                                                onclick="deleteChallan(@challan.ChallanId)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-file-circle-xmark d-block"></i>
+                <h5 class="fw-bold text-dark">No challans generated yet</h5>
+                <p class="mb-0">Open a student's details and select <strong>Generate Challan</strong> to create the first one.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("challanSearch");
+            const statusFilter = document.getElementById("statusFilter");
+            const rows = document.querySelectorAll("#challansTable tbody tr");
+
+            function filterChallans() {
+                const searchValue = (searchInput?.value || "").toLowerCase().trim();
+                const statusValue = statusFilter?.value || "all";
+
+                rows.forEach(function (row) {
+                    const rowText = row.innerText.toLowerCase();
+                    const rowStatus = row.dataset.status || "";
+
+                    const matchesSearch = !searchValue || rowText.includes(searchValue);
+                    const matchesStatus = statusValue === "all" || rowStatus === statusValue;
+
+                    row.style.display = matchesSearch && matchesStatus ? "" : "none";
+                });
+            }
+
+            searchInput?.addEventListener("input", filterChallans);
+            statusFilter?.addEventListener("change", filterChallans);
+        });
+
+        async function updateStatus(challanId, status) {
+            try {
+                const response = await fetch("/Challan/UpdateStatus", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        challanId: challanId,
+                        status: status
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || "Unable to update challan status.");
+                    return;
+                }
+
+                window.location.reload();
+
+            } catch (error) {
+                alert("Network error: " + error.message);
+            }
+        }
+
+        async function deleteChallan(challanId) {
+            if (!confirm("Delete this challan permanently?")) {
+                return;
+            }
+
+            try {
+                const response = await fetch("/Challan/Delete", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        challanId: challanId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || "Unable to delete challan.");
+                    return;
+                }
+
+                window.location.reload();
+
+            } catch (error) {
+                alert("Network error: " + error.message);
+            }
+        }
+    </script>
+}

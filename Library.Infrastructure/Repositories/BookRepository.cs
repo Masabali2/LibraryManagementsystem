@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Domain.DTOs;
 using Library.Domain.Entities;
 using Library.Domain.Interfaces;
 using Library.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Infrastructure.Repositories;
 
@@ -79,5 +80,18 @@ public class BookRepository : IBookRepository
         };
         await _context.BorrowingRecords.AddAsync(newRequest);
         return await _context.SaveChangesAsync() > 0;
+    }
+    public async Task<List<LibraryItemOptionDto>> GetAvailableLibraryItemsAsync()
+    {
+        return await _context.Books
+            .Where(book => book.AvailableCopies > 0)
+            .OrderBy(book => book.Title)
+            .Select(book => new LibraryItemOptionDto
+            {
+                ItemId = book.BookId,
+                Title = book.Title,
+                ItemType = "Book"
+            })
+            .ToListAsync();
     }
 }

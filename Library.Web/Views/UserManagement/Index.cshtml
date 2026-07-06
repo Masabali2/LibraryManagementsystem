@@ -1,0 +1,1484 @@
+﻿@model IEnumerable<Library.Domain.Entities.Student>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["ActivePage"] = "User Management";
+
+    var totalStudents = Model.Count();
+    var departments = Model.Select(x => x.Department).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderBy(x => x).ToList();
+    var batches = Model.Select(x => x.Batch).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().OrderByDescending(x => x).ToList();
+}
+
+<style>
+    /* ─────────────────────────────────────────────
+       USER MANAGEMENT PAGE
+    ───────────────────────────────────────────── */
+
+    .um-header-card {
+        background: linear-gradient(135deg, #ffffff, #f8fbff);
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.05);
+        animation: fadeSlide .45s ease;
+    }
+
+    .um-stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        transition: all .25s ease;
+    }
+
+        .um-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+        }
+
+    .um-stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #9333ea);
+        color: #ffffff;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    }
+
+    .um-utility-bar {
+        background: #ffffff;
+        padding: 16px 20px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+        animation: fadeSlide .55s ease;
+    }
+
+    .filter-pill {
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: #475569;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: .84rem;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+        .filter-pill:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .filter-pill.active {
+            background: #3182ce;
+            color: #ffffff;
+            border-color: #3182ce;
+            box-shadow: 0 8px 20px rgba(49, 130, 206, .25);
+        }
+
+    .um-search {
+        border-radius: 50px;
+        padding: 11px 18px 11px 44px;
+        border: 1px solid #dbe3ef;
+        box-shadow: none;
+    }
+
+        .um-search:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 .2rem rgba(49, 130, 206, .12);
+        }
+
+    .search-icon {
+        position: absolute;
+        left: 17px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+    }
+
+    .table-shell {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        padding: 18px;
+        box-shadow: 0 8px 26px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+        animation: fadeSlide .65s ease;
+    }
+
+    #studentsTable {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+        #studentsTable thead th {
+            color: #64748b;
+            font-size: .74rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-weight: 800;
+            border: none !important;
+            padding: 12px 14px;
+        }
+
+        #studentsTable tbody tr {
+            background: #ffffff;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+            transition: all .22s ease;
+        }
+
+            #studentsTable tbody tr:hover {
+                transform: scale(1.006);
+                box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            }
+
+        #studentsTable tbody td {
+            padding: 14px;
+            color: #334155;
+            vertical-align: middle;
+            border-top: 1px solid #edf2f7;
+            border-bottom: 1px solid #edf2f7;
+            font-size: .9rem;
+        }
+
+            #studentsTable tbody td:first-child {
+                border-left: 4px solid #6366f1;
+                border-radius: 14px 0 0 14px;
+            }
+
+            #studentsTable tbody td:last-child {
+                border-right: 1px solid #edf2f7;
+                border-radius: 0 14px 14px 0;
+            }
+
+    .student-avatar,
+    .avatar-placeholder {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+    }
+
+    .student-avatar {
+        object-fit: cover;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .avatar-placeholder {
+        background: linear-gradient(135deg, #4f46e5, #9333ea);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(79, 70, 229, .22);
+    }
+
+    .role-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 5px 11px;
+        border-radius: 8px;
+        font-size: .72rem;
+        font-weight: 800;
+    }
+
+    .batch-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 5px 11px;
+        border-radius: 8px;
+        font-size: .72rem;
+        font-weight: 700;
+        border: 1px solid #e2e8f0;
+    }
+
+    .dept-badge {
+        background: #ecfeff;
+        color: #0e7490;
+        padding: 5px 11px;
+        border-radius: 8px;
+        font-size: .72rem;
+        font-weight: 700;
+    }
+
+    .ban-reason-text {
+        max-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all .2s ease;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+    /* ─────────────────────────────────────────────
+       DATATABLES
+    ───────────────────────────────────────────── */
+
+    .dataTables_wrapper .dt-length select,
+    .dataTables_wrapper .dt-input {
+        border-radius: 999px !important;
+        border: 1px solid #dbe3ef !important;
+        padding: 6px 12px !important;
+    }
+
+    .dataTables_wrapper .dt-paging .dt-paging-button {
+        border-radius: 50px !important;
+        border: 1px solid #e2e8f0 !important;
+        margin: 0 2px;
+    }
+
+        .dataTables_wrapper .dt-paging .dt-paging-button.current {
+            background: #3182ce !important;
+            color: #ffffff !important;
+            border-color: #3182ce !important;
+        }
+
+    /* ─────────────────────────────────────────────
+       ALL MODAL Z-INDEX
+    ───────────────────────────────────────────── */
+
+    .modal-backdrop {
+        z-index: 99990 !important;
+    }
+
+    .modal {
+        z-index: 99991 !important;
+    }
+
+    #studentDetailsModal {
+        z-index: 99992 !important;
+    }
+
+    #banStudentModal {
+        z-index: 99993 !important;
+    }
+
+    #successModal {
+        z-index: 99994 !important;
+    }
+
+    #editStudentModal {
+        z-index: 99995 !important;
+    }
+
+    /* ─────────────────────────────────────────────
+       STUDENT DETAILS MODAL
+    ───────────────────────────────────────────── */
+
+    #studentDetailsModal .modal-dialog {
+        z-index: 99992 !important;
+    }
+
+    #studentDetailsModal .modal-content {
+        border-radius: 24px;
+        max-height: 88vh;
+        overflow: hidden;
+    }
+
+    #studentDetailsBody {
+        max-height: 76vh;
+        overflow-y: auto;
+    }
+
+    /* ─────────────────────────────────────────────
+       BAN MODAL
+    ───────────────────────────────────────────── */
+
+    #banStudentModal .modal-dialog {
+        z-index: 99993 !important;
+    }
+
+    #banStudentModal .modal-content {
+        border-radius: 20px;
+    }
+
+    /* ─────────────────────────────────────────────
+       SUCCESS MODAL
+    ───────────────────────────────────────────── */
+
+    #successModal .modal-dialog {
+        z-index: 99994 !important;
+    }
+
+    .success-modal .modal-content {
+        border-radius: 28px;
+        border: none;
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+        animation: modalPop .5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .checkmark-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 12px auto 8px;
+    }
+
+    .checkmark-circle {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e6f7e6;
+        animation: pulseCircle .6s ease;
+    }
+
+    .checkmark-svg {
+        width: 56px;
+        height: 56px;
+        display: block;
+    }
+
+        .checkmark-svg .checkmark-path {
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: drawCheck .5s ease forwards .2s;
+        }
+
+    .success-modal .modal-title {
+        font-weight: 800;
+        font-size: 1.3rem;
+    }
+
+    .success-modal .success-message {
+        font-size: 1.05rem;
+        color: #1e293b;
+        font-weight: 500;
+        margin-top: 4px;
+    }
+
+    .success-modal .success-sub {
+        font-size: .92rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .success-modal .btn-success {
+        border-radius: 50px;
+        padding: 10px 34px;
+        font-weight: 700;
+        background: #10b981;
+        border: none;
+        transition: all .2s;
+    }
+
+        .success-modal .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, .35);
+        }
+
+    /* ─────────────────────────────────────────────
+       EDIT STUDENT MODAL — FIXED VERSION
+    ───────────────────────────────────────────── */
+
+    #editStudentModal .modal-dialog {
+        max-width: 900px;
+        height: calc(100vh - 40px);
+        margin: 20px auto;
+        display: flex;
+        align-items: stretch;
+    }
+
+    #editStudentModal .modal-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 22px;
+    }
+
+    #editStudentModal .modal-header {
+        flex-shrink: 0;
+        background: #ffffff;
+        z-index: 2;
+    }
+
+    #editStudentModal .modal-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: none !important;
+        padding: 24px !important;
+    }
+
+    #editStudentModal .modal-footer,
+    #editStudentForm .modal-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        flex-shrink: 0;
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        padding: 15px 24px;
+        display: flex;
+        justify-content: center !important;
+        gap: 10px;
+    }
+
+    #editStudentModal .btn-update {
+        min-width: 140px;
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-weight: 700;
+    }
+
+    /* Edit partial image preview */
+    #editStudentModal .edit-avatar {
+        width: 92px;
+        height: 92px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        #editStudentModal .edit-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE EDIT MODAL
+    ───────────────────────────────────────────── */
+
+    @@media (max-width: 768px) {
+        #editStudentModal .modal-dialog
+
+    {
+        height: calc(100vh - 20px);
+        margin: 10px;
+        max-width: none;
+    }
+
+    #editStudentModal .modal-body {
+        padding: 16px !important;
+    }
+
+    #editStudentModal .modal-footer,
+    #editStudentForm .modal-footer {
+        padding: 12px 16px;
+    }
+
+    }
+
+    /* ─────────────────────────────────────────────
+       ANIMATIONS
+    ───────────────────────────────────────────── */
+
+    @@keyframes fadeSlide {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    @@keyframes modalPop {
+        0%
+
+    {
+        opacity: 0;
+        transform: scale(0.92) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    }
+
+    @@keyframes pulseCircle {
+        0%
+
+    {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+    }
+
+    @@keyframes drawCheck {
+        to
+
+    {
+        stroke-dashoffset: 0;
+    }
+
+    }
+</style>
+
+<!-- ─── MAIN CONTENT ─── -->
+<div class="container-fluid px-4 mt-4">
+
+    <!-- Header -->
+    <div class="um-header-card mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h4 class="fw-bold m-0 text-dark">User Management</h4>
+                <p class="text-muted small mb-0">Manage registered students, departments, batches, and account details.</p>
+            </div>
+            <button type="button"
+                    class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold"
+                    onclick="openCreateStudent()">
+                <i class="fas fa-user-plus me-2"></i> Add Student
+            </button>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-md-4">
+                <div class="um-stat-card d-flex align-items-center gap-3">
+                    <div class="um-stat-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="text-muted small">Total Students</div>
+                        <h4 class="fw-bold m-0">@totalStudents</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="um-stat-card d-flex align-items-center gap-3">
+                    <div class="um-stat-icon"><i class="fas fa-building-columns"></i></div>
+                    <div>
+                        <div class="text-muted small">Departments</div>
+                        <h4 class="fw-bold m-0">@departments.Count</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="um-stat-card d-flex align-items-center gap-3">
+                    <div class="um-stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div>
+                        <div class="text-muted small">Batches</div>
+                        <h4 class="fw-bold m-0">@batches.Count</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utility Bar -->
+    <div class="um-utility-bar mb-4">
+        <button class="filter-pill active role-filter" data-role="all">All Users</button>
+        <button class="filter-pill role-filter" data-role="Student">Students</button>
+
+        <div class="dropdown">
+            <button id="departmentDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
+                Department
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item department-option active" href="#" data-department="all">All Departments</a></li>
+                @foreach (var dept in departments)
+                {
+                    <li><a class="dropdown-item department-option" href="#" data-department="@dept">@dept</a></li>
+                }
+            </ul>
+        </div>
+
+        <div class="dropdown">
+            <button id="batchDropdown" class="filter-pill dropdown-toggle" data-bs-toggle="dropdown">
+                Batch / Year
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item batch-option active" href="#" data-batch="all">All Batches</a></li>
+                @foreach (var batch in batches)
+                {
+                    <li><a class="dropdown-item batch-option" href="#" data-batch="@batch">@batch</a></li>
+                }
+            </ul>
+        </div>
+
+        <button class="filter-pill active ban-filter" data-ban="all">All Status</button>
+        <button class="filter-pill ban-filter" data-ban="false">Active</button>
+        <button class="filter-pill ban-filter" data-ban="true">Banned</button>
+
+        <button id="resetFilters" class="filter-pill text-danger">
+            <i class="fas fa-rotate-left me-1"></i> Reset
+        </button>
+
+        <div class="position-relative flex-grow-1">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="studentSearch" class="form-control um-search"
+                   placeholder="Search by roll no, name, email, phone, department, batch..." />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-shell">
+        <table id="studentsTable" class="table align-middle w-100">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Roll No</th>
+                    <th>Department</th>
+                    <th>Batch</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    var firstLetter = !string.IsNullOrWhiteSpace(student.StudentName)
+                    ? student.StudentName.Substring(0, 1).ToUpper()
+                    : "S";
+
+                    <tr data-role="@student.Role"
+                        data-department="@student.Department"
+                        data-batch="@student.Batch"
+                        data-ban="@student.IsBanned.ToString().ToLower()">
+
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                @if (!string.IsNullOrEmpty(student.ImageUrl))
+                                {
+                                    <img src="@student.ImageUrl"
+                                         class="student-avatar"
+                                         alt="@student.StudentName"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    <div class="avatar-placeholder d-none">@firstLetter</div>
+                                }
+                                else
+                                {
+                                    <div class="avatar-placeholder">@firstLetter</div>
+                                }
+                                <div>
+                                    <div class="fw-bold text-dark">@student.StudentName</div>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-user me-1"></i>@student.Username
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="fw-bold">@student.RollNo</td>
+                        <td><span class="dept-badge">@student.Department</span></td>
+                        <td><span class="batch-badge">@student.Batch</span></td>
+                        <td>@student.Email</td>
+                        <td>@(string.IsNullOrWhiteSpace(student.PhoneNumber) ? "N/A" : student.PhoneNumber)</td>
+                        <td><span class="role-badge">@student.Role</span></td>
+
+                        <td>
+                            @if (student.IsBanned)
+                            {
+                                <span class="badge bg-danger rounded-pill px-3">
+                                    <i class="fas fa-ban me-1"></i>Banned
+                                </span>
+                                @if (!string.IsNullOrWhiteSpace(student.BanReason))
+                                {
+                                    <div class="text-muted small mt-1 ban-reason-text" title="@student.BanReason">
+                                        @student.BanReason
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-success rounded-pill px-3">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <button type="button"
+                                        onclick="openStudentDetails(@student.StudentId)"
+                                        class="btn btn-sm btn-light border text-primary action-btn"
+                                        title="View Full Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-light border @(student.IsBanned ? "text-success" : "text-danger") action-btn"
+                                        data-student-id="@student.StudentId"
+                                        data-student-name="@student.StudentName"
+                                        data-is-banned="@student.IsBanned.ToString().ToLower()"
+                                        onclick="toggleBan(
+                                                    this.dataset.studentId,
+                                                    this.dataset.studentName,
+                                                    this.dataset.isBanned === 'true'
+                                                )"
+                                        title="@(student.IsBanned ? "Unban Student" : "Ban Student")">
+                                    <i class="fas @(student.IsBanned ? "fa-unlock" : "fa-ban")"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ─── MODAL: Student Details ─── -->
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold ms-3 mt-3">
+                    <i class="fas fa-id-card text-primary me-2"></i>Student Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="studentDetailsBody" class="modal-body p-4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── MODAL: Ban Reason ─── -->
+<div class="modal fade" id="banStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold text-danger">
+                    <i class="fas fa-ban me-2"></i>Ban Student
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <p class="text-muted mb-3">
+                    You are about to ban <strong id="banStudentName"></strong>.
+                    The student will not be able to borrow or reserve library items.
+                </p>
+                <label class="form-label fw-bold">Ban Reason <span class="text-danger">*</span></label>
+                <textarea id="banReason"
+                          class="form-control"
+                          rows="4"
+                          maxlength="500"
+                          placeholder="Example: Repeated late return of books, unpaid fine, misconduct..."></textarea>
+                <div id="banReasonError" class="text-danger small mt-2 d-none">
+                    Please enter a ban reason.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button"
+                        class="btn btn-light border rounded-pill px-4"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button"
+                        id="confirmBanButton"
+                        class="btn btn-danger rounded-pill px-4">
+                    <i class="fas fa-ban me-1"></i> Confirm Ban
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── MODAL: Success (tick animation) ─── -->
+<div class="modal fade success-modal" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body p-3">
+
+                <!-- tick circle -->
+                <div class="checkmark-wrapper">
+                    <div class="checkmark-circle">
+                        <svg class="checkmark-svg" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="26" cy="26" r="25" stroke="#10b981" stroke-width="4" fill="none" opacity="0.2" />
+                            <path class="checkmark-path"
+                                  d="M14 27 L22 35 L38 17"
+                                  stroke="#10b981"
+                                  stroke-width="5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  fill="none" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- title -->
+                <h5 class="modal-title fw-bold text-dark mt-2" id="successModalTitle">
+                    Success!
+                </h5>
+
+                <!-- dynamic message -->
+                <p class="success-message" id="successModalMessage">
+                    Student has been banned.
+                </p>
+                <p class="success-sub" id="successModalSub">
+                    The action was completed successfully.
+                </p>
+
+                <!-- close button -->
+                <button type="button"
+                        class="btn btn-success mt-3"
+                        id="successModalCloseBtn">
+                    <i class="fas fa-check me-2"></i> Got it
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 22px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold ms-3 mt-3">
+                    <i class="fas fa-edit text-primary me-2"></i>Edit Student
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div id="editStudentBody" class="modal-body p-4">
+                <!-- The partial view content will be injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css" />
+
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // =========================================================
+            // DATATABLE
+            // =========================================================
+            const table = new DataTable("#studentsTable", {
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50, 100],
+                ordering: true,
+                responsive: true,
+                autoWidth: false,
+                dom: 'rt<"d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3"lip>',
+                language: {
+                    emptyTable: "No student records found",
+                    zeroRecords: "No matching students found",
+                    lengthMenu: "Show _MENU_ records",
+                    info: "Showing _START_ to _END_ of _TOTAL_ students"
+                }
+            });
+
+            let selectedRole = "all";
+            let selectedDepartment = "all";
+            let selectedBatch = "all";
+            let selectedBan = "all";
+
+            DataTable.ext.search.push(function (settings, data, dataIndex) {
+                if (settings.nTable.id !== "studentsTable") {
+                    return true;
+                }
+
+                const row = table.row(dataIndex).node();
+
+                if (!row) {
+                    return true;
+                }
+
+                const role = row.getAttribute("data-role") || "";
+                const department = row.getAttribute("data-department") || "";
+                const batch = row.getAttribute("data-batch") || "";
+                const ban = row.getAttribute("data-ban") || "false";
+
+                return (selectedRole === "all" || role === selectedRole) &&
+                    (selectedDepartment === "all" || department === selectedDepartment) &&
+                    (selectedBatch === "all" || batch === selectedBatch) &&
+                    (selectedBan === "all" || ban === selectedBan);
+            });
+
+            function redrawTable() {
+                table.draw();
+            }
+
+            // =========================================================
+            // SEARCH AND FILTERS
+            // =========================================================
+            const studentSearch = document.getElementById("studentSearch");
+
+            if (studentSearch) {
+                studentSearch.addEventListener("input", function () {
+                    table.search(this.value).draw();
+                });
+            }
+
+            document.querySelectorAll(".role-filter").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    document.querySelectorAll(".role-filter").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    this.classList.add("active");
+                    selectedRole = this.dataset.role;
+                    redrawTable();
+                });
+            });
+
+            document.querySelectorAll(".department-option").forEach(function (option) {
+                option.addEventListener("click", function (event) {
+                    event.preventDefault();
+
+                    document.querySelectorAll(".department-option").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    this.classList.add("active");
+                    selectedDepartment = this.dataset.department;
+
+                    const departmentDropdown = document.getElementById("departmentDropdown");
+                    if (departmentDropdown) {
+                        departmentDropdown.innerText = this.innerText;
+                    }
+
+                    redrawTable();
+                });
+            });
+
+            document.querySelectorAll(".batch-option").forEach(function (option) {
+                option.addEventListener("click", function (event) {
+                    event.preventDefault();
+
+                    document.querySelectorAll(".batch-option").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    this.classList.add("active");
+                    selectedBatch = this.dataset.batch;
+
+                    const batchDropdown = document.getElementById("batchDropdown");
+                    if (batchDropdown) {
+                        batchDropdown.innerText = this.innerText;
+                    }
+
+                    redrawTable();
+                });
+            });
+
+            document.querySelectorAll(".ban-filter").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    document.querySelectorAll(".ban-filter").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    this.classList.add("active");
+                    selectedBan = this.dataset.ban;
+                    redrawTable();
+                });
+            });
+
+            const resetFilters = document.getElementById("resetFilters");
+
+            if (resetFilters) {
+                resetFilters.addEventListener("click", function () {
+                    selectedRole = "all";
+                    selectedDepartment = "all";
+                    selectedBatch = "all";
+                    selectedBan = "all";
+
+                    document.querySelectorAll(".role-filter").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    document.querySelector('.role-filter[data-role="all"]')?.classList.add("active");
+
+                    document.querySelectorAll(".department-option").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    document.querySelector('.department-option[data-department="all"]')?.classList.add("active");
+
+                    document.querySelectorAll(".batch-option").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    document.querySelector('.batch-option[data-batch="all"]')?.classList.add("active");
+
+                    document.querySelectorAll(".ban-filter").forEach(function (item) {
+                        item.classList.remove("active");
+                    });
+
+                    document.querySelector('.ban-filter[data-ban="all"]')?.classList.add("active");
+
+                    const departmentDropdown = document.getElementById("departmentDropdown");
+                    const batchDropdown = document.getElementById("batchDropdown");
+
+                    if (departmentDropdown) {
+                        departmentDropdown.innerText = "Department";
+                    }
+
+                    if (batchDropdown) {
+                        batchDropdown.innerText = "Batch / Year";
+                    }
+
+                    if (studentSearch) {
+                        studentSearch.value = "";
+                    }
+
+                    table.search("").draw();
+                });
+            }
+
+            // =========================================================
+            // STUDENT DETAILS MODAL
+            // =========================================================
+            window.openStudentDetails = async function (id) {
+                const modalEl = document.getElementById("studentDetailsModal");
+                const body = document.getElementById("studentDetailsBody");
+
+                if (!modalEl || !body) {
+                    return;
+                }
+
+                document.body.appendChild(modalEl);
+
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl, {
+                    backdrop: "static",
+                    keyboard: true
+                });
+
+                body.innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Fetching student details...</p>
+                    </div>`;
+
+                modal.show();
+
+                try {
+                    const response = await fetch(`/UserManagement/Details?id=${id}`);
+                    const html = await response.text();
+
+                    if (!response.ok) {
+                        throw new Error(html || "Failed to load student details.");
+                    }
+
+                    body.innerHTML = html;
+                } catch (error) {
+                    body.innerHTML = `
+                        <div class="alert alert-danger rounded-4">
+                            Network error: ${error.message}
+                        </div>`;
+                }
+            };
+
+            // =========================================================
+            // BAN / UNBAN STUDENT
+            // =========================================================
+            let selectedStudentIdForBan = null;
+            let selectedStudentNameForBan = "";
+
+            window.toggleBan = function (studentId, studentName, isBanned) {
+                selectedStudentIdForBan = studentId;
+                selectedStudentNameForBan = studentName;
+
+                if (isBanned) {
+                    if (confirm(`Unban "${studentName}"? They will be able to borrow and reserve books again.`)) {
+                        submitBanStatus("");
+                    }
+
+                    return;
+                }
+
+                const banStudentName = document.getElementById("banStudentName");
+                const banReason = document.getElementById("banReason");
+                const banReasonError = document.getElementById("banReasonError");
+                const banModalEl = document.getElementById("banStudentModal");
+
+                if (!banModalEl) {
+                    return;
+                }
+
+                if (banStudentName) {
+                    banStudentName.textContent = studentName;
+                }
+
+                if (banReason) {
+                    banReason.value = "";
+                }
+
+                if (banReasonError) {
+                    banReasonError.classList.add("d-none");
+                }
+
+                document.body.appendChild(banModalEl);
+
+                const banModal = bootstrap.Modal.getOrCreateInstance(banModalEl, {
+                    backdrop: "static",
+                    keyboard: true
+                });
+
+                banModal.show();
+            };
+
+            async function submitBanStatus(reason) {
+                try {
+                    const response = await fetch("/UserManagement/ToggleBan", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({
+                            studentId: selectedStudentIdForBan,
+                            reason: reason
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        alert(result.message || "Failed to update student status.");
+                        return;
+                    }
+
+                    const banModalEl = document.getElementById("banStudentModal");
+                    bootstrap.Modal.getInstance(banModalEl)?.hide();
+
+                    const action = result.isBanned ? "banned" : "unbanned";
+                    const title = result.isBanned ? "Student Banned!" : "Student Unbanned!";
+
+                    window.showSuccessToast(
+                        `<strong>${selectedStudentNameForBan}</strong> has been ${action} successfully.`,
+                        title,
+                        result.isBanned
+                            ? "The student can no longer borrow or reserve books."
+                            : "The student can borrow and reserve books again."
+                    );
+                } catch (error) {
+                    alert("Network error: " + error.message);
+                }
+            }
+
+            const confirmBanButton = document.getElementById("confirmBanButton");
+
+            if (confirmBanButton) {
+                confirmBanButton.addEventListener("click", function () {
+                    const reasonInput = document.getElementById("banReason");
+                    const reason = reasonInput ? reasonInput.value.trim() : "";
+
+                    if (!reason) {
+                        document.getElementById("banReasonError")?.classList.remove("d-none");
+                        reasonInput?.focus();
+                        return;
+                    }
+
+                    submitBanStatus(reason);
+                });
+            }
+
+            document.getElementById("banReason")?.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && event.ctrlKey) {
+                    confirmBanButton?.click();
+                }
+            });
+
+            // =========================================================
+            // OPEN EDIT STUDENT MODAL
+            // =========================================================
+            window.openEditStudent = async function (id) {
+                const modalEl = document.getElementById("editStudentModal");
+                const body = document.getElementById("editStudentBody");
+
+                if (!modalEl || !body) {
+                    return;
+                }
+
+                const detailsModalEl = document.getElementById("studentDetailsModal");
+                bootstrap.Modal.getInstance(detailsModalEl)?.hide();
+
+                body.innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Loading student information...</p>
+                    </div>`;
+
+                document.body.appendChild(modalEl);
+
+                const editModal = bootstrap.Modal.getOrCreateInstance(modalEl, {
+                    backdrop: "static",
+                    keyboard: true
+                });
+
+                editModal.show();
+
+                try {
+                    const response = await fetch(`/UserManagement/GetEditPartial?id=${id}`);
+                    const html = await response.text();
+
+                    if (!response.ok) {
+                        throw new Error(html || "Failed to load edit form.");
+                    }
+
+                    body.innerHTML = html;
+                } catch (error) {
+                    body.innerHTML = `
+                        <div class="alert alert-danger rounded-4">
+                            <h6 class="fw-bold">Failed to load edit form</h6>
+                            <p class="mb-0">${error.message}</p>
+                        </div>`;
+                }
+            };
+
+            // =========================================================
+            // EDIT STUDENT FORM SUBMIT
+            // =========================================================
+            document.addEventListener("submit", async function (event) {
+                const form = event.target.closest("#editStudentForm");
+
+                if (!form) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const submitBtn = form.querySelector("button[type='submit']");
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                }
+
+                try {
+                    const response = await fetch("/UserManagement/EditStudent", {
+                        method: "POST",
+                        body: new FormData(form)
+                    });
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        alert(result.message || "Student update failed.");
+                        return;
+                    }
+
+                    const modalEl = document.getElementById("editStudentModal");
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+
+                    window.showSuccessToast(
+                        `<strong>${result.studentName}</strong> has been updated successfully.`,
+                        "Student Updated!",
+                        "Student information was updated successfully."
+                    );
+                } catch (error) {
+                    alert("Network error: " + error.message);
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+
+            // =========================================================
+            // OPEN CREATE STUDENT MODAL
+            // =========================================================
+            window.openCreateStudent = async function () {
+                const modalEl = document.getElementById("editStudentModal");
+                const body = document.getElementById("editStudentBody");
+
+                if (!modalEl || !body) {
+                    return;
+                }
+
+                body.innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Loading create student form...</p>
+                    </div>`;
+
+                document.body.appendChild(modalEl);
+
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl, {
+                    backdrop: "static",
+                    keyboard: true
+                });
+
+                modal.show();
+
+                try {
+                    const response = await fetch("/UserManagement/GetCreateStudentPartial");
+                    const html = await response.text();
+
+                    if (!response.ok) {
+                        throw new Error(html || "Could not load create student form.");
+                    }
+
+                    body.innerHTML = html;
+                } catch (error) {
+                    body.innerHTML = `
+                        <div class="alert alert-danger rounded-4">
+                            ${error.message}
+                        </div>`;
+                }
+            };
+
+            // =========================================================
+            // CREATE STUDENT FORM SUBMIT
+            // =========================================================
+            document.addEventListener("submit", async function (event) {
+                const form = event.target.closest("#createStudentForm");
+
+                if (!form) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const submitBtn = form.querySelector("button[type='submit']");
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                }
+
+                try {
+                    const response = await fetch("/UserManagement/CreateStudent", {
+                        method: "POST",
+                        body: new FormData(form)
+                    });
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        alert(result.message || "Student creation failed.");
+                        return;
+                    }
+
+                    const modalEl = document.getElementById("editStudentModal");
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+
+                    window.showSuccessToast(
+                        `<strong>${result.studentName}</strong> has been created successfully.`,
+                        "Student Created!",
+                        "New student account was created successfully."
+                    );
+                } catch (error) {
+                    alert("Network error: " + error.message);
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+
+            // =========================================================
+            // IMAGE PREVIEW: EDIT FORM
+            // =========================================================
+            window.previewAdminStudentImage = function (input) {
+                if (!input.files || !input.files[0]) {
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    const avatar = document.querySelector("#editStudentModal .edit-avatar");
+
+                    if (avatar) {
+                        avatar.innerHTML = `<img src="${event.target.result}" alt="Preview" />`;
+                    }
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            };
+
+            // =========================================================
+            // IMAGE PREVIEW: CREATE FORM
+            // =========================================================
+            window.previewCreateStudentImage = function (input) {
+                if (!input.files || !input.files[0]) {
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    const avatar = document.querySelector("#editStudentModal .create-avatar");
+
+                    if (avatar) {
+                        avatar.innerHTML = `<img src="${event.target.result}" alt="Preview" />`;
+                    }
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            };
+
+            // =========================================================
+            // SUCCESS MODAL
+            // =========================================================
+            window.showSuccessToast = function (
+                message,
+                title = "Success!",
+                subText = "The action was completed successfully."
+            ) {
+                const successModalEl = document.getElementById("successModal");
+
+                if (!successModalEl) {
+                    alert(title + "\n" + subText);
+                    window.location.href = "/UserManagement";
+                    return;
+                }
+
+                document.getElementById("successModalTitle").textContent = title;
+                document.getElementById("successModalMessage").innerHTML = message;
+                document.getElementById("successModalSub").textContent = subText;
+
+                document.body.appendChild(successModalEl);
+
+                const successModal = bootstrap.Modal.getOrCreateInstance(successModalEl, {
+                    backdrop: "static",
+                    keyboard: false
+                });
+
+                successModal.show();
+
+                document.getElementById("successModalCloseBtn").onclick = function () {
+                    window.location.href = "/UserManagement";
+                };
+
+                setTimeout(function () {
+                    window.location.href = "/UserManagement";
+                }, 2000);
+            };
+        });
+    </script>
+}

@@ -8,11 +8,15 @@ namespace Library.Web.Controllers;
 public class StudentController : Controller
 {
     private readonly IStudentRepository _studentRepo;
+    private readonly IChallanRepository _challanRepository;
 
     // The repository is injected right here!
-    public StudentController(IStudentRepository studentRepo)
+    public StudentController(
+     IStudentRepository studentRepo,
+     IChallanRepository challanRepository)
     {
         _studentRepo = studentRepo;
+        _challanRepository = challanRepository;
     }
     [HttpGet]
     public async Task<IActionResult> Dashboard()
@@ -24,6 +28,11 @@ public class StudentController : Controller
         // 1. Fetch from BOTH tables
         var borrowedRecords = await _studentRepo.GetBorrowedItemsByStudentIdAsync(currentStudentId.Value);
         var reservationRecords = await _studentRepo.GetActiveReservationsByStudentIdAsync(currentStudentId.Value);
+        var studentChallans = await _challanRepository.GetChallansByStudentIdAsync(currentStudentId.Value);
+
+        var pendingFines = studentChallans
+            .Where(c => c.Status == "Unpaid" || c.Status == "Partially Paid")
+            .Sum(c => c.TotalAmount);
 
         var viewModel = new StudentDashboardViewModel
         {
@@ -39,7 +48,7 @@ public class StudentController : Controller
             ActiveReservationsCount = reservationRecords.Count(),
             PendingApprovalsCount = borrowedRecords.Count(i => i.Status == "Pending") + reservationRecords.Count(i => i.Status == "Pending"),
 
-            PendingFines = await _studentRepo.GetPendingFinesAsync(currentStudentId.Value),
+            PendingFines = pendingFines,
 
             // 4. Map the lists correctly
             BorrowedItems = borrowedRecords.Select(item => new BorrowedItemViewModel
@@ -54,6 +63,10 @@ public class StudentController : Controller
 
             ReservedItems = reservationRecords
         };
+        ViewData["ActivePage"] = "Dashboard";
+
+        ViewBag.UnpaidChallanCount =
+            await _challanRepository.GetUnpaidChallanCountByStudentIdAsync(currentStudentId.Value);
 
         return View(viewModel);
     }

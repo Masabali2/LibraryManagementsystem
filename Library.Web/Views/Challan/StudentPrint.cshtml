@@ -1,0 +1,488 @@
+﻿@model Library.Domain.Entities.Challan
+
+@{
+    ViewData["Title"] = "My Challan";
+    Layout = "_StudentLayout";
+
+    var universityName = "University of Sialkot";
+    var systemName = "USKT Library Management System";
+}
+
+<style>
+    .student-print-page {
+        max-width: 1000px;
+        margin: auto;
+        padding: 24px;
+    }
+
+    .student-print-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .student-challan {
+        position: relative;
+        background: #ffffff;
+        border: 2px solid #111827;
+        padding: 22px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111827;
+    }
+
+    .student-copy-name {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        border: 1px solid #111827;
+        padding: 5px 10px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .06em;
+    }
+
+    .student-challan-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 2px solid #111827;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .student-logo-box {
+        width: 78px;
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .student-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .student-header-text {
+        flex: 1;
+        text-align: center;
+        padding-right: 55px;
+    }
+
+        .student-header-text h1 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .student-header-text h2 {
+            margin: 4px 0 0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .student-header-text p {
+            margin: 4px 0 0;
+            font-size: 10px;
+        }
+
+    .student-challan-title {
+        text-align: center;
+        font-size: 15px;
+        font-weight: 900;
+        text-decoration: underline;
+        margin: 10px 0 14px;
+    }
+
+    .student-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+        margin-bottom: 13px;
+        font-size: 11px;
+    }
+
+    .student-detail-line {
+        display: flex;
+        gap: 6px;
+        min-height: 23px;
+        border-bottom: 1px dotted #64748b;
+        align-items: flex-end;
+    }
+
+    .student-detail-label {
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .student-detail-value {
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .student-status-box {
+        display: inline-block;
+        border: 1px solid #111827;
+        padding: 2px 7px;
+        font-size: 9px;
+        font-weight: 900;
+    }
+
+    .student-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+
+        .student-items-table th,
+        .student-items-table td {
+            border: 1px solid #111827;
+            padding: 7px;
+        }
+
+        .student-items-table th {
+            background: #f1f5f9;
+            text-align: center;
+            font-weight: 900;
+        }
+
+        .student-items-table td:nth-child(1),
+        .student-items-table td:nth-child(3),
+        .student-items-table td:nth-child(4) {
+            text-align: center;
+        }
+
+        .student-items-table td:nth-child(5) {
+            text-align: right;
+            font-weight: 700;
+        }
+
+    .student-bottom-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+        margin-top: 13px;
+    }
+
+    .student-info-box {
+        border: 1px solid #111827;
+        padding: 9px;
+        font-size: 10px;
+    }
+
+    .student-info-box-title {
+        font-size: 11px;
+        font-weight: 900;
+        text-decoration: underline;
+        margin-bottom: 6px;
+    }
+
+    .student-info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .student-total-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        align-items: center;
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .student-total-value {
+        border: 2px solid #111827;
+        padding: 6px 14px;
+        min-width: 185px;
+        text-align: right;
+    }
+
+    .student-notes {
+        margin-top: 11px;
+        border-top: 1px solid #111827;
+        padding-top: 8px;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    .student-footer {
+        display: grid;
+        grid-template-columns: 1fr 90px 1fr;
+        align-items: end;
+        gap: 16px;
+        margin-top: 20px;
+        font-size: 10px;
+    }
+
+    .student-signature {
+        border-top: 1px solid #111827;
+        padding-top: 5px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .student-qr-box {
+        width: 72px;
+        height: 72px;
+        border: 1px solid #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: auto;
+        font-size: 8px;
+        font-weight: 700;
+    }
+
+    @@media print {
+        @@page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        .no-print,
+        nav,
+        aside,
+        .sidebar,
+        .navbar,
+        header,
+        footer {
+            display: none !important;
+        }
+
+        body {
+            background: #ffffff !important;
+        }
+
+        .student-print-page {
+            max-width: none;
+            padding: 0;
+        }
+
+        .student-challan {
+            border: 1.5px solid #111827;
+            padding: 14px;
+        }
+
+        .student-logo-box {
+            width: 58px;
+            height: 58px;
+        }
+
+        .student-header-text {
+            padding-right: 45px;
+        }
+
+            .student-header-text h1 {
+                font-size: 17px;
+            }
+
+            .student-header-text h2 {
+                font-size: 12px;
+            }
+    }
+</style>
+
+<div class="student-print-page">
+    <div class="student-print-toolbar no-print">
+        <div>
+            <h4 class="fw-bold mb-0">My Challan</h4>
+            <small class="text-muted">Challan No: @Model.ChallanNo</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Challan"
+               asp-action="MyChallans"
+               class="btn btn-light border rounded-pill px-4">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary rounded-pill px-4"
+                    onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Print / Save PDF
+            </button>
+        </div>
+    </div>
+
+    <section class="student-challan">
+        <div class="student-copy-name">STUDENT COPY</div>
+
+        <div class="student-challan-header">
+            <div class="student-logo-box">
+                <img src="~/images/usktlibrarylogo.png"
+                     alt="USKT Library Logo"
+                     class="student-logo-img" />
+            </div>
+
+            <div class="student-header-text">
+                <h1>@universityName</h1>
+                <h2>@systemName</h2>
+                <p>Library Fine / Book Purchase / Payment Challan</p>
+            </div>
+        </div>
+
+        <div class="student-challan-title">PAYMENT CHALLAN</div>
+
+        <div class="student-details-grid">
+            <div class="student-detail-line">
+                <span class="student-detail-label">Challan No:</span>
+                <span class="student-detail-value">@Model.ChallanNo</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Issue Date:</span>
+                <span class="student-detail-value">@Model.IssueDate.ToString("dd MMM yyyy")</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Student Name:</span>
+                <span class="student-detail-value">@Model.Student?.StudentName</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Due Date:</span>
+                <span class="student-detail-value">@Model.DueDate.ToString("dd MMM yyyy")</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Roll No:</span>
+                <span class="student-detail-value">@Model.Student?.RollNo</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Status:</span>
+                <span class="student-status-box">@Model.Status</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Department:</span>
+                <span class="student-detail-value">@Model.Student?.Department</span>
+            </div>
+
+            <div class="student-detail-line">
+                <span class="student-detail-label">Batch:</span>
+                <span class="student-detail-value">@Model.Student?.Batch</span>
+            </div>
+        </div>
+
+        <table class="student-items-table">
+            <thead>
+                <tr>
+                    <th style="width:8%;">#</th>
+                    <th>Particulars</th>
+                    <th style="width:12%;">Qty</th>
+                    <th style="width:18%;">Unit Price</th>
+                    <th style="width:20%;">Amount (Rs.)</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    var serial = 1;
+                }
+
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@serial</td>
+                            <td>@item.Particulars</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.UnitPrice.ToString("N2")</td>
+                            <td>@item.Amount.ToString("N2")</td>
+                        </tr>
+
+                        serial++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No charge items found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="student-bottom-grid">
+            <div class="student-info-box">
+                <div class="student-info-box-title">Bank Account Details</div>
+
+                <div class="student-info-row">
+                    <strong>Bank Name:</strong>
+                    <span>@Model.BankName</span>
+                </div>
+
+                <div class="student-info-row">
+                    <strong>Account Title:</strong>
+                    <span>@Model.AccountTitle</span>
+                </div>
+
+                <div class="student-info-row">
+                    <strong>Account No:</strong>
+                    <span>@Model.AccountNo</span>
+                </div>
+            </div>
+
+            <div class="student-info-box">
+                <div class="student-info-box-title">Library Book Summary</div>
+
+                <div class="student-info-row">
+                    <strong>Borrowed:</strong>
+                    <span>@Model.BorrowedBooksCount</span>
+                </div>
+
+                <div class="student-info-row">
+                    <strong>Issued:</strong>
+                    <span>@Model.IssuedBooksCount</span>
+                </div>
+
+                <div class="student-info-row">
+                    <strong>Purchased:</strong>
+                    <span>@Model.PurchasedBooksCount</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="student-total-row">
+            <span>Total Amount Payable:</span>
+            <span class="student-total-value">Rs. @Model.TotalAmount.ToString("N2")</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <div class="student-notes">
+                <strong>Additional Information:</strong> @Model.Notes
+            </div>
+        }
+
+        <div class="student-notes">
+            <strong>Instructions:</strong>
+            Pay this challan before the due date. Keep the printed or saved PDF copy as your payment record.
+        </div>
+
+        <div class="student-footer">
+            <div class="student-signature">Student Signature</div>
+
+            <div class="student-qr-box">
+                QR<br />
+                @Model.ChallanNo
+            </div>
+
+            <div class="student-signature">Authorized Library Officer</div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,625 @@
+﻿@model Library.Domain.Entities.Challan
+
+@{
+    ViewData["Title"] = "Print Challan";
+    Layout = "_AdminLayout";
+
+    var copies = new[] { "BANK COPY", "LIBRARY COPY", "STUDENT COPY" };
+    var universityName = "University of Sialkot";
+    var systemName = "USKT Library Management System";
+}
+<style>
+    .print-page {
+        max-width: 1000px;
+        margin: auto;
+        padding: 24px;
+    }
+
+    .print-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 12px;
+    }
+
+    .challan-copy {
+        position: relative;
+        background: #fff;
+        border: 2px solid #111827;
+        padding: 20px;
+        margin-bottom: 24px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111827;
+        page-break-inside: avoid;
+    }
+
+        .challan-copy:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -14px;
+            border-bottom: 2px dashed #64748b;
+        }
+
+    .copy-name {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        border: 1px solid #111827;
+        padding: 4px 9px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .06em;
+    }
+
+    .challan-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 2px solid #111827;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    /* USKT logo container */
+    .logo-box {
+        width: 78px;
+        height: 78px;
+        border: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    /* USKT logo image */
+    .logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .header-text {
+        flex: 1;
+        text-align: center;
+        padding-right: 55px;
+    }
+
+        .header-text h1 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .header-text h2 {
+            margin: 4px 0 0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .header-text p {
+            margin: 4px 0 0;
+            font-size: 10px;
+        }
+
+    .challan-title {
+        text-align: center;
+        font-size: 15px;
+        font-weight: 900;
+        text-decoration: underline;
+        margin: 10px 0 14px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+        margin-bottom: 13px;
+        font-size: 11px;
+    }
+
+    .detail-line {
+        display: flex;
+        gap: 6px;
+        min-height: 23px;
+        border-bottom: 1px dotted #64748b;
+        align-items: flex-end;
+    }
+
+    .detail-label {
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .status-box {
+        display: inline-block;
+        border: 1px solid #111827;
+        padding: 2px 7px;
+        font-size: 9px;
+        font-weight: 900;
+    }
+
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #111827;
+            padding: 6px;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            text-align: center;
+            font-weight: 900;
+        }
+
+        .items-table td:nth-child(1),
+        .items-table td:nth-child(3),
+        .items-table td:nth-child(4) {
+            text-align: center;
+        }
+
+        .items-table td:nth-child(5) {
+            text-align: right;
+            font-weight: 700;
+        }
+
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+        margin-top: 13px;
+    }
+
+    .info-box {
+        border: 1px solid #111827;
+        padding: 9px;
+        font-size: 10px;
+    }
+
+    .info-box-title {
+        font-size: 11px;
+        font-weight: 900;
+        text-decoration: underline;
+        margin-bottom: 6px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        align-items: center;
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .total-value {
+        border: 2px solid #111827;
+        padding: 6px 14px;
+        min-width: 185px;
+        text-align: right;
+    }
+
+    .notes {
+        margin-top: 11px;
+        border-top: 1px solid #111827;
+        padding-top: 8px;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    .footer {
+        display: grid;
+        grid-template-columns: 1fr 90px 1fr;
+        align-items: end;
+        gap: 16px;
+        margin-top: 20px;
+        font-size: 10px;
+    }
+
+    .signature {
+        border-top: 1px solid #111827;
+        padding-top: 5px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .qr-placeholder {
+        width: 72px;
+        height: 72px;
+        border: 1px solid #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: auto;
+        font-size: 8px;
+        font-weight: 700;
+    }
+
+    @@media print {
+        @@page {
+            size: A4;
+            margin: 8mm;
+        }
+
+        .no-print,
+        nav,
+        aside,
+        .sidebar,
+        .navbar {
+            display: none !important;
+        }
+
+        .print-page {
+            max-width: none;
+            padding: 0;
+        }
+
+        .challan-copy {
+            padding: 11px;
+            margin-bottom: 11px;
+        }
+
+            .challan-copy:not(:last-child)::after {
+                bottom: -7px;
+            }
+        /* Smaller logo for three copies on one A4 page */
+        .logo-box {
+            width: 52px;
+            height: 52px;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-text {
+            padding-right: 38px;
+        }
+
+            .header-text h1 {
+                font-size: 15px;
+            }
+
+            .header-text h2 {
+                font-size: 11px;
+            }
+
+            .header-text p,
+            .details-grid,
+            .items-table,
+            .info-box,
+            .notes,
+            .footer,
+            .copy-name {
+                font-size: 8px;
+            }
+
+        .challan-title {
+            font-size: 11px;
+            margin: 6px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 3px;
+        }
+
+        .bottom-grid {
+            margin-top: 7px;
+        }
+
+        .total-row {
+            margin-top: 7px;
+            font-size: 11px;
+        }
+
+        .total-value {
+            min-width: 125px;
+            padding: 4px 8px;
+        }
+
+        .footer {
+            margin-top: 12px;
+        }
+
+        .qr-placeholder {
+            width: 52px;
+            height: 52px;
+            font-size: 6px;
+        }
+    }
+</style>
+
+<div class="print-page">
+    <div class="print-toolbar no-print">
+        <div>
+            <h4 class="fw-bold mb-0">Challan Generated</h4>
+            <small class="text-muted">Challan No: @Model.ChallanNo</small>
+        </div>
+       
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-success rounded-pill px-4"
+                    onclick="notifyStudent(@Model.ChallanId)">
+                <i class="fas fa-bell me-1"></i> Notify Student
+            </button>
+            <a href="/Challan/Details?id=@Model.ChallanId"
+               class="btn btn-light border rounded-pill px-4">
+                <i class="fas fa-eye me-1"></i> View Details
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary rounded-pill px-4"
+                    onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Print / Save PDF
+            </button>
+        </div>
+    </div>
+
+    @foreach (var copy in copies)
+    {
+        <section class="challan-copy">
+            <div class="copy-name">@copy</div>
+
+            <div class="challan-header">
+                <div class="logo-box">
+                    <img src="~/images/usktlibrarylogo.png" alt="USKT Logo" class="logo-img" />
+                </div>
+
+                <div class="header-text">
+                    <h1>@universityName</h1>
+                    <h2>@systemName</h2>
+                    <p>Library Fine / Book Purchase / Payment Challan</p>
+                </div>
+            </div>
+
+            <div class="challan-title">PAYMENT CHALLAN</div>
+
+            <div class="details-grid">
+                <div class="detail-line">
+                    <span class="detail-label">Challan No:</span>
+                    <span class="detail-value">@Model.ChallanNo</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Issue Date:</span>
+                    <span class="detail-value">@Model.IssueDate.ToString("dd MMM yyyy")</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Student Name:</span>
+                    <span class="detail-value">@Model.Student?.StudentName</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Due Date:</span>
+                    <span class="detail-value">@Model.DueDate.ToString("dd MMM yyyy")</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Roll No:</span>
+                    <span class="detail-value">@Model.Student?.RollNo</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Status:</span>
+                    <span class="status-box">@Model.Status</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Department:</span>
+                    <span class="detail-value">@Model.Student?.Department</span>
+                </div>
+
+                <div class="detail-line">
+                    <span class="detail-label">Batch:</span>
+                    <span class="detail-value">@Model.Student?.Batch</span>
+                </div>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">#</th>
+                        <th>Particulars</th>
+                        <th style="width: 12%;">Qty</th>
+                        <th style="width: 18%;">Unit Price</th>
+                        <th style="width: 20%;">Amount (Rs.)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{
+                        var serial = 1;
+                    }
+
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>@serial</td>
+                                <td>@item.Particulars</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.Amount.ToString("N2")</td>
+                            </tr>
+
+                            serial++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No charge items found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="bottom-grid">
+                <div class="info-box">
+                    <div class="info-box-title">Bank Account Details</div>
+
+                    <div class="info-row">
+                        <strong>Bank Name:</strong>
+                        <span>@Model.BankName</span>
+                    </div>
+
+                    <div class="info-row">
+                        <strong>Account Title:</strong>
+                        <span>@Model.AccountTitle</span>
+                    </div>
+
+                    <div class="info-row">
+                        <strong>Account No:</strong>
+                        <span>@Model.AccountNo</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">Library Book Summary</div>
+
+                    <div class="info-row">
+                        <strong>Borrowed:</strong>
+                        <span>@Model.BorrowedBooksCount</span>
+                    </div>
+
+                    <div class="info-row">
+                        <strong>Issued:</strong>
+                        <span>@Model.IssuedBooksCount</span>
+                    </div>
+
+                    <div class="info-row">
+                        <strong>Purchased:</strong>
+                        <span>@Model.PurchasedBooksCount</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-row">
+                <span>Total Amount Payable:</span>
+                <span class="total-value">Rs. @Model.TotalAmount.ToString("N2")</span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <div class="notes">
+                    <strong>Additional Information:</strong> @Model.Notes
+                </div>
+            }
+
+            <div class="notes">
+                <strong>Instructions:</strong>
+                Pay before the due date and retain this copy as payment proof.
+                Unpaid challans may restrict library borrowing services.
+            </div>
+
+            <div class="footer">
+                <div class="signature">Student Signature</div>
+
+                <div class="qr-placeholder">
+                    QR<br />
+                    @Model.ChallanNo
+                </div>
+
+                <div class="signature">Authorized Library Officer</div>
+            </div>
+        </section>
+    }
+</div>
+@section Scripts {
+    <script>
+        function showNotifySuccessModal(studentId) {
+            const modalHtml = `
+                <div class="modal fade" id="notifySuccessModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 rounded-4 shadow-lg text-center p-4">
+                            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                 style="width:85px;height:85px;border-radius:50%;background:#dcfce7;">
+                                <i class="fas fa-check text-success" style="font-size:42px;"></i>
+                            </div>
+
+                            <h4 class="fw-bold mb-2">Student Notified!</h4>
+                            <p class="text-muted mb-4">
+                                Challan notification has been sent successfully.
+                            </p>
+
+                            <button type="button" class="btn btn-success rounded-pill px-4"
+                                    onclick="window.location.href='/Challan/Index?studentId=${studentId}'">
+                                Back to Generate Challan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+            const modalEl = document.getElementById("notifySuccessModal");
+            const modal = new bootstrap.Modal(modalEl, {
+                backdrop: "static",
+                keyboard: false
+            });
+
+            modal.show();
+
+            setTimeout(() => {
+                window.location.href = "/Challan/Index?studentId=" + studentId;
+            }, 2000);
+        }
+
+        async function notifyStudent(challanId) {
+            try {
+                const response = await fetch("/Challan/NotifyStudent", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        challanId: challanId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || "Notification failed.");
+                    return;
+                }
+
+                showNotifySuccessModal(result.studentId);
+
+            } catch (error) {
+                alert("Network error: " + error.message);
+            }
+        }
+    </script>
+}
+}

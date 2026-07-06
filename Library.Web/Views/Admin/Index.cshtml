@@ -9,7 +9,6 @@
         --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     }
 
-    /* Welcome Banner */
     .welcome-banner {
         background: var(--primary-grad);
         padding: 45px;
@@ -32,8 +31,9 @@
             border-radius: 50%;
         }
 
-    /* Inventory Summary Card */
-    .inventory-card {
+    .inventory-card,
+    .stat-card,
+    .activity-panel {
         background: white;
         border-radius: 24px;
         padding: 30px;
@@ -86,12 +86,8 @@
         background: #e2e8f0;
     }
 
-    /* Operational Cards */
     .stat-card {
-        background: white;
         border-radius: 22px;
-        padding: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         height: 100%;
         transition: 0.3s;
         border: 1px solid transparent;
@@ -112,7 +108,6 @@
         font-size: 20px;
     }
 
-    /* Filter Bar Single Row */
     .filter-bar-single {
         display: flex;
         gap: 12px;
@@ -149,7 +144,6 @@
         font-size: 0.9rem;
     }
 
-    /* Tags & Status */
     .item-type-tag {
         font-size: 10px;
         text-transform: uppercase;
@@ -184,6 +178,86 @@
         background-color: #fef9c3 !important;
         color: #a16207 !important;
     }
+
+    #studentDetailsModal {
+        z-index: 99999 !important;
+    }
+
+        #studentDetailsModal .modal-content {
+            background: #fff !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+
+        #studentDetailsModal .modal-body,
+        #studentDetailsModal .modal-header {
+            background-color: #ffffff !important;
+        }
+
+    .modal-backdrop.show {
+        opacity: 0.35 !important;
+    }
+
+    .approval-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .approval-box {
+        width: 420px;
+        max-width: 92%;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 25px 70px rgba(15, 23, 42, 0.25);
+        animation: popIn .35s ease;
+    }
+
+    .approval-icon {
+        width: 82px;
+        height: 82px;
+        border-radius: 50%;
+        background: #dcfce7;
+        color: #15803d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 42px;
+    }
+
+        .approval-icon.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    .approval-box h4 {
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .approval-box p {
+        color: #64748b;
+        margin-bottom: 22px;
+    }
+
+    @@keyframes popIn {
+        0% {
+            transform: scale(.85);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
 </style>
 
 <div class="animate-page">
@@ -193,13 +267,30 @@
     </div>
 
     <div class="inventory-card">
-        <div class="inventory-label"><i class="fas fa-chart-pie"></i><span>Asset Distribution</span></div>
+        <div class="inventory-label">
+            <i class="fas fa-chart-pie"></i>
+            <span>Asset Distribution</span>
+        </div>
+
         <div class="stats-container">
-            <div class="stat-item"><b>@Model.BooksCount.ToString("00")</b><span>Books</span></div>
+            <div class="stat-item">
+                <b>@Model.BooksCount.ToString("00")</b>
+                <span>Books</span>
+            </div>
+
             <div class="vertical-divider"></div>
-            <div class="stat-item"><b>@Model.ThesesCount.ToString("00")</b><span>Theses</span></div>
+
+            <div class="stat-item">
+                <b>@Model.ThesesCount.ToString("00")</b>
+                <span>Theses</span>
+            </div>
+
             <div class="vertical-divider"></div>
-            <div class="stat-item"><b>@Model.JournalsCount.ToString("00")</b><span>Journals</span></div>
+
+            <div class="stat-item">
+                <b>@Model.JournalsCount.ToString("00")</b>
+                <span>Journals</span>
+            </div>
         </div>
     </div>
 
@@ -207,7 +298,10 @@
         <div class="col-md-4">
             <div class="stat-card" style="border-bottom: 4px solid #22c55e;">
                 <div class="d-flex align-items-center">
-                    <div class="icon-circle" style="background: #f0fdf4; color: #22c55e;"><i class="fas fa-users"></i></div>
+                    <div class="icon-circle" style="background: #f0fdf4; color: #22c55e;">
+                        <i class="fas fa-users"></i>
+                    </div>
+
                     <div class="ms-3">
                         <h3 class="fw-bold mb-0">@Model.ActiveStudents</h3>
                         <p class="text-muted small mb-0">Active Users</p>
@@ -215,10 +309,14 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="stat-card" style="border-bottom: 4px solid #f59e0b;">
                 <div class="d-flex align-items-center">
-                    <div class="icon-circle" style="background: #fffbeb; color: #f59e0b;"><i class="fas fa-file-invoice"></i></div>
+                    <div class="icon-circle" style="background: #fffbeb; color: #f59e0b;">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+
                     <div class="ms-3">
                         <h3 class="fw-bold mb-0">@Model.BooksIssuedToday</h3>
                         <p class="text-muted small mb-0">Issued Today</p>
@@ -226,37 +324,60 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="stat-card" style="border-bottom: 4px solid #ec4899;">
                 <div class="d-flex align-items-center">
-                    <div class="icon-circle" style="background: #fdf2f8; color: #ec4899;"><i class="fas fa-wallet"></i></div>
-                    <div class="ms-3">
-                        <h3 class="fw-bold mb-0">PKR @(Model.OverdueReturns * 50)</h3>
-                        <p class="text-muted small mb-0">Total Fines</p>
+                    <div class="icon-circle" style="background: #fdf2f8; color: #ec4899;">
+                        <i class="fas fa-wallet"></i>
                     </div>
+
+                    <h3 class="fw-bold mb-0">PKR @Model.TotalRevenue.ToString("N0")</h3>
+                    <p class="text-muted small mb-0">Total Revenue</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="activity-panel">
-        <h5 class="fw-bold mb-4">Live Activity Feed</h5>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-bold mb-1">Borrow Approval Feed</h5>
+                <p class="text-muted small mb-0">
+                    Review student borrow requests for books, journals, and theses.
+                </p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <span class="badge bg-warning-subtle rounded-pill px-3 py-2">
+                    Pending: @Model.RecentTransactions.Count(x => x.Status == "Pending")
+                </span>
+
+                <span class="badge bg-success-subtle rounded-pill px-3 py-2">
+                    Issued: @Model.RecentTransactions.Count(x => x.Status == "Issued")
+                </span>
+            </div>
+        </div>
 
         <div class="filter-bar-single">
             <div class="search-wrapper">
                 <i class="fas fa-search"></i>
-                <input type="text" id="tableSearch" class="form-control" placeholder="Search student or item name...">
+                <input type="text"
+                       id="tableSearch"
+                       class="form-control"
+                       placeholder="Search student name, roll no, or item name..." />
             </div>
 
             <select id="typeFilter" class="form-select filter-select">
-    <option value="">All Categories</option>
-    <option value="BOOK">Books</option>
-    <option value="THESIS">Theses</option>
-    <option value="JOURNAL">Journals</option>
-</select>
+                <option value="">All Categories</option>
+                <option value="Book">Books</option>
+                <option value="Thesis">Theses</option>
+                <option value="Journal">Journals</option>
+            </select>
 
             <select id="statusFilter" class="form-select filter-select">
                 <option value="">All Status</option>
+                <option value="Pending">Pending Approval</option>
                 <option value="Issued">Issued</option>
                 <option value="Returned">Returned</option>
             </select>
@@ -267,53 +388,82 @@
                 <thead>
                     <tr class="text-muted small fw-bold text-uppercase">
                         <th class="border-0">Student</th>
-                        <th class="border-0">Item Details</th>
-                        <th class="border-0">Date</th>
+                        <th class="border-0">Requested Item</th>
+                        <th class="border-0">Request Date</th>
                         <th class="border-0">Status</th>
-                        <th class="border-0 text-end">Action</th>
+                        <th class="border-0 text-end">Actions</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var item in Model.RecentTransactions)
                     {
-                        <tr class="transaction-row" data-type="@item.ItemType" data-status="@item.Status">
+                        var typeClass = item.ItemType == "Thesis"
+                        ? "tag-thesis"
+                        : item.ItemType == "Journal"
+                        ? "tag-journal"
+                        : "tag-book";
+
+                        var statusClass = item.Status == "Issued" || item.Status == "Returned"
+                        ? "bg-success-subtle"
+                        : "bg-warning-subtle";
+
+                        <tr class="transaction-row"
+                            data-type="@item.ItemType"
+                            data-status="@item.Status">
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar-sm me-3 rounded-circle d-flex align-items-center justify-content-center"
-                                         style="width:36px; height:36px; font-size:12px; font-weight:800; background:#f1f5f9; color:#6366f1;">
-                                        @item.StudentName.Substring(0, 1)
+                                         style="width:38px;height:38px;font-size:13px;font-weight:800;background:#f1f5f9;color:#6366f1;">
+                                        @(string.IsNullOrWhiteSpace(item.StudentName) ? "S" : item.StudentName.Substring(0, 1).ToUpper())
                                     </div>
-                                    <span class="fw-bold text-dark search-target">@item.StudentName</span>
+
+                                    <div>
+                                        <div class="fw-bold text-dark search-target">@item.StudentName</div>
+                                    </div>
                                 </div>
                             </td>
+
                             <td>
-                                @if (item.ItemType == "Thesis")
-                                {
-                                    <span class="item-type-tag tag-thesis">Thesis</span>
-                                }
-                                else if (item.ItemType == "Journal")
-                                {
-
-                                    <span class="item-type-tag tag-journal">Journal</span>
-                                }
-                                else
-                                {
-
-                                    <span class="item-type-tag tag-book">Book</span>
-                                }
+                                <span class="item-type-tag @typeClass">@item.ItemType</span>
                                 <div class="fw-semibold small text-dark search-target">@item.ItemName</div>
-                                <small class="text-muted">#@item.ItemId</small>
                             </td>
-                            <td class="small fw-medium">@item.Date.ToString("MMM dd, yyyy")</td>
+
+                            <td class="small fw-medium">
+                                @item.Date.ToString("MMM dd, yyyy")
+                            </td>
+
                             <td>
-                                <span class="badge @(item.Status == "Returned" ? "bg-success-subtle" : "bg-warning-subtle") rounded-pill px-3">
-                                    @item.Status
+                                <span class="badge @statusClass rounded-pill px-3">
+                                    @(item.Status == "Pending" ? "Pending Approval" : item.Status)
                                 </span>
                             </td>
+
                             <td class="text-end">
-                                <button class="btn btn-light btn-sm rounded-circle border shadow-sm">
-                                    <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
-                                </button>
+                                <div class="d-inline-flex gap-2">
+                                    <button type="button"
+                                            class="btn btn-light btn-sm rounded-pill border shadow-sm"
+                                            onclick="openStudentDetails(@item.StudentId)">
+                                        <i class="fas fa-user me-1"></i> Student Detail
+                                    </button>
+
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <button type="button"
+                                                class="btn btn-success btn-sm rounded-pill shadow-sm"
+                                                onclick="approveBorrow(@item.RecordId)">
+                                            <i class="fas fa-check me-1"></i> Approve
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm rounded-pill"
+                                                disabled>
+                                            <i class="fas fa-check-circle me-1"></i> Approved
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -323,39 +473,186 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-         const searchInput = document.getElementById('tableSearch');
-         const typeFilter = document.getElementById('typeFilter');
-         const statusFilter = document.getElementById('statusFilter');
-         const rows = document.querySelectorAll('.transaction-row');
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-id-card text-primary me-2"></i>
+                    Student Details
+                </h5>
 
-         function filterTable() {
-             // Convert everything to lowercase for a "fuzzy" match
-             const searchTerm = searchInput.value.toLowerCase();
-             const selectedType = typeFilter.value.toLowerCase();
-             const selectedStatus = statusFilter.value.toLowerCase();
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
 
-             rows.forEach(row => {
-                 const text = row.innerText.toLowerCase();
-                 // Get attributes and convert to lowercase safely
-                 const type = (row.getAttribute('data-type') || "").toLowerCase();
-                 const status = (row.getAttribute('data-status') || "").toLowerCase();
+            <div class="modal-body p-0" id="studentDetailsModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-3 mb-0">Loading student details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                 const matchesSearch = text.includes(searchTerm);
-                 const matchesType = selectedType === "" || type === selectedType;
-                 const matchesStatus = selectedStatus === "" || status === selectedStatus;
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("tableSearch");
+            const typeFilter = document.getElementById("typeFilter");
+            const statusFilter = document.getElementById("statusFilter");
+            const rows = document.querySelectorAll(".transaction-row");
 
-                 if (matchesSearch && matchesType && matchesStatus) {
-                     row.style.display = "";
-                 } else {
-                     row.style.display = "none";
-                 }
-             });
-         }
+            function filterTable() {
+                const searchTerm = (searchInput.value || "").toLowerCase();
+                const selectedType = (typeFilter.value || "").toLowerCase();
+                const selectedStatus = (statusFilter.value || "").toLowerCase();
 
-         searchInput.addEventListener('input', filterTable);
-         typeFilter.addEventListener('change', filterTable);
-         statusFilter.addEventListener('change', filterTable);
-     });
-</script>
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    const type = (row.getAttribute("data-type") || "").toLowerCase();
+                    const status = (row.getAttribute("data-status") || "").toLowerCase();
+
+                    const matchesSearch = text.includes(searchTerm);
+                    const matchesType = selectedType === "" || type === selectedType;
+                    const matchesStatus = selectedStatus === "" || status === selectedStatus;
+
+                    row.style.display = matchesSearch && matchesType && matchesStatus ? "" : "none";
+                });
+            }
+
+            searchInput.addEventListener("input", filterTable);
+            typeFilter.addEventListener("change", filterTable);
+            statusFilter.addEventListener("change", filterTable);
+        });
+
+        function approveBorrow(recordId) {
+            document.getElementById("approvalOverlay")?.remove();
+
+            const html = `
+                <div id="approvalOverlay" class="approval-overlay">
+                    <div class="approval-box">
+                        <div class="approval-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+
+                        <h4>Approve Borrow Request?</h4>
+                        <p>This will issue the requested item to the student.</p>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button"
+                                    class="btn btn-light border rounded-pill px-4"
+                                    onclick="closeApprovalPopup()">
+                                Cancel
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-success rounded-pill px-4"
+                                    onclick="confirmApproveBorrow(${recordId})">
+                                Yes, Approve
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+
+            document.body.insertAdjacentHTML("beforeend", html);
+        }
+
+        function closeApprovalPopup() {
+            document.getElementById("approvalOverlay")?.remove();
+        }
+
+        async function confirmApproveBorrow(recordId) {
+            const approveBtn = document.querySelector("#approvalOverlay .btn-success");
+
+            if (approveBtn) {
+                approveBtn.disabled = true;
+                approveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Approving...`;
+            }
+
+            try {
+                const response = await fetch("/UserManagement/AcceptBorrow", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        recordId: recordId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showApprovalResult(false, result.message || "Approval failed.");
+                    return;
+                }
+
+                showApprovalResult(true, "Borrow request approved successfully.");
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1400);
+
+            } catch (error) {
+                showApprovalResult(false, "Network error: " + error.message);
+            }
+        }
+
+        function showApprovalResult(success, message) {
+            const box = document.querySelector("#approvalOverlay .approval-box");
+
+            if (!box) return;
+
+            box.innerHTML = `
+                <div class="approval-icon ${success ? "" : "error"}">
+                    <i class="fas ${success ? "fa-check" : "fa-times"}"></i>
+                </div>
+
+                <h4>${success ? "Approved!" : "Failed"}</h4>
+                <p>${message}</p>
+            `;
+        }
+
+        async function openStudentDetails(studentId) {
+            const modalElement = document.getElementById("studentDetailsModal");
+            const modalBody = document.getElementById("studentDetailsModalBody");
+
+            document.body.appendChild(modalElement);
+
+            modalBody.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-3 mb-0">Loading student details...</p>
+                </div>`;
+
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+
+            modal.show();
+
+            try {
+                const response = await fetch(`/UserManagement/UserManagementDetail?id=${studentId}`);
+
+                if (!response.ok) {
+                    throw new Error("Student details could not be loaded.");
+                }
+
+                modalBody.innerHTML = await response.text();
+
+            } catch (error) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger m-4">
+                        <i class="fas fa-circle-exclamation me-2"></i>
+                        ${error.message}
+                    </div>`;
+            }
+        }
+    </script>
+}

@@ -21,6 +21,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IChallanRepository, ChallanRepository>();
+builder.Services.AddScoped<ILibraryTransactionRepository, LibraryTransactionRepository>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

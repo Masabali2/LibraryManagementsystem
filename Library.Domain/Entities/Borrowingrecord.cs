@@ -27,9 +27,9 @@ public class Borrowingrecord
     [Required]
     public int ItemId { get; set; }
     [NotMapped]
-    public string Title { get; set; }
+    public string? Title { get; set; }
     [NotMapped]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
     public string Status { get; set; } = "Pending";
 
     public string RequestType { get; set; } = "Borrow";

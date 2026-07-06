@@ -104,7 +104,10 @@ public class StudentRepository : IStudentRepository
     }
     public async Task<bool> BorrowItemAsync(int studentId, int itemId, string itemType)
     {
-        // 1. Check if the specific item exists and is available based on type
+        var student = await _context.Students.FindAsync(studentId);
+
+        if (student == null || student.IsBanned)
+            return false;
         if (itemType == "Book")
         {
             var book = await _context.Books.FindAsync(itemId);
@@ -142,6 +145,10 @@ public class StudentRepository : IStudentRepository
     }
     public async Task<bool> ReserveItemAsync(int studentId, int itemId, string itemType)
     {
+        var student = await _context.Students.FindAsync(studentId);
+
+        if (student == null || student.IsBanned)
+            return false;
         var reservation = new Reservation
         {
             StudentId = studentId,
@@ -215,6 +222,50 @@ public class StudentRepository : IStudentRepository
         return await _context.SeatAvailabilities
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == 1);
+    }
+    public async Task<IEnumerable<Student>> GetAllStudentsAsync()
+    {
+        return await _context.Students
+            .AsNoTracking()
+            .OrderBy(s => s.Department)
+            .ThenBy(s => s.Batch)
+            .ThenBy(s => s.StudentName)
+            .ToListAsync();
+    }
+
+    public async Task<Student?> GetStudentDetailsByIdAsync(int studentId)
+    {
+        return await _context.Students
+            .AsNoTracking()
+            .Include(s => s.BorrowingRecords)
+            .FirstOrDefaultAsync(s => s.StudentId == studentId);
+    }
+    public async Task<bool> AcceptBorrowRequestAsync(int recordId)
+    {
+        var record = await _context.BorrowingRecords
+            .FirstOrDefaultAsync(x => x.RecordId == recordId);
+
+        if (record == null)
+            return false;
+
+        record.Status = "Accepted";
+        record.BorrowDate = DateTime.Now;
+        record.ExpectedReturnDate = DateTime.Now.AddDays(14);
+        record.IsReturned = false;
+
+        return await _context.SaveChangesAsync() > 0;
+    }
+    public async Task<bool> ToggleStudentBanAsync(int studentId, string? reason)
+    {
+        var student = await _context.Students.FindAsync(studentId);
+
+        if (student == null)
+            return false;
+
+        student.IsBanned = !student.IsBanned;
+        student.BanReason = student.IsBanned ? reason : null;
+
+        return await _context.SaveChangesAsync() > 0;
     }
 
 }

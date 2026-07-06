@@ -214,7 +214,19 @@
                         <span class="live-dot-mini"></span>
                     </a>
                 </li>
-                <li><a href="#">🔔 Notifications</a></li>
+                <li class="@(ViewData["ActivePage"]?.ToString() == "MyChallans" ? "active" : "")">
+                    <a asp-controller="Challan" asp-action="MyChallans">
+                        <span>🔔</span>
+                        <span>My Challans</span>
+
+                        @if ((ViewBag.UnpaidChallanCount ?? 0) > 0)
+                        {
+                            <span class="badge bg-danger rounded-pill ms-auto">
+                                @ViewBag.UnpaidChallanCount
+                            </span>
+                        }
+                    </a>
+                </li>
                 <li class="@(ViewData["ActivePage"]?.ToString() == "Profile" ? "active" : "")">
                     <a asp-controller="Student" asp-action="Profile"><span>⚙️</span> Profile</a>
                 </li>

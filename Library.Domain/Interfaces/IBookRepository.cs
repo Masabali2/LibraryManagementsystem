@@ -1,4 +1,5 @@
-﻿using Library.Domain.Entities;
+﻿using Library.Domain.DTOs;
+using Library.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace Library.Domain.Interfaces
         Task<bool> ReturnBookAsync(int recordId);
         Task<bool> RenewBookAsync(int recordId, int daysToExtend);
         Task<IEnumerable<Book>> GetFeaturedBooksAsync(int count);
+        Task<List<LibraryItemOptionDto>> GetAvailableLibraryItemsAsync();
     }
 }

@@ -1,0 +1,455 @@
+﻿@model Library.Domain.DTOs.AdminStudentDetailsDto
+
+@{
+    var s = Model.Student;
+    var firstLetter = !string.IsNullOrWhiteSpace(s.StudentName)
+        ? s.StudentName.Substring(0, 1).ToUpper()
+        : "S";
+
+    var borrowedRecords = Model.BorrowedRecords ?? new List<Library.Domain.Entities.Borrowingrecord>();
+    var reservations = Model.Reservations ?? new List<Library.Domain.Entities.Reservation>();
+}
+<style>
+    .student-detail-wrap {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+    .student-hero {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #2563eb, #9333ea);
+        min-height: 125px;
+        margin-bottom: 50px;
+    }
+
+    .student-hero-bg {
+        position: absolute;
+        inset: 0;
+        opacity: .22;
+        filter: blur(6px);
+        transform: scale(1.08);
+        background-size: cover;
+        background-position: center;
+    }
+
+    .student-profile-center {
+        position: absolute;
+        left: 50%;
+        bottom: -42px;
+        transform: translateX(-50%);
+        z-index: 2;
+        text-align: center;
+    }
+
+    .student-profile-img,
+    .student-profile-placeholder {
+        width: 86px;
+        height: 86px;
+        border-radius: 18px;
+        border: 4px solid #fff;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, .20);
+    }
+
+    .student-profile-img {
+        object-fit: cover;
+        background: #fff;
+    }
+
+    .student-profile-placeholder {
+        background: linear-gradient(135deg, #4f46e5, #9333ea);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+    }
+
+    .student-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .student-subtitle {
+        font-size: .85rem;
+        color: #64748b;
+    }
+
+    .compact-action-btn {
+        padding: 6px 18px;
+        font-size: .85rem;
+        font-weight: 700;
+        border-radius: 999px;
+    }
+
+    .mini-stat {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 10px 12px;
+        height: 100%;
+    }
+
+    .mini-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #9333ea);
+        color: white;
+        flex-shrink: 0;
+        font-size: .85rem;
+    }
+
+    .mini-stat-title {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+    }
+
+    .mini-stat-value {
+        color: #0f172a;
+        font-size: 1.05rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .info-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 13px;
+        padding: 9px 11px;
+        height: 100%;
+    }
+
+    .info-label {
+        font-size: .62rem;
+        color: #64748b;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: .82rem;
+        word-break: break-word;
+    }
+
+    .section-title {
+        font-size: .9rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .record-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 13px;
+        padding: 8px 10px;
+        background: white;
+    }
+
+    .record-img {
+        width: 40px;
+        height: 52px;
+        border-radius: 9px;
+        object-fit: cover;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .record-title {
+        font-size: .84rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .record-meta {
+        font-size: .7rem;
+        color: #64748b;
+    }
+
+    .status-pill {
+        font-size: .65rem;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 3px 8px;
+        display: inline-block;
+        margin-top: 3px;
+    }
+
+    .empty-box {
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+        color: #64748b;
+        border-radius: 13px;
+        padding: 14px;
+        text-align: center;
+        font-size: .82rem;
+    }
+
+    .accept-btn {
+        font-size: .72rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+</style>
+<div class="student-detail-wrap">
+
+    <div class="student-hero">
+        @if (!string.IsNullOrEmpty(s.ImageUrl))
+        {
+            <div class="student-hero-bg" style="background-image:url('@s.ImageUrl')"></div>
+        }
+
+        <div class="student-profile-center">
+            @if (!string.IsNullOrEmpty(s.ImageUrl))
+            {
+                <img src="@s.ImageUrl" class="student-profile-img" alt="@s.StudentName" />
+            }
+            else
+            {
+                <div class="student-profile-placeholder">@firstLetter</div>
+            }
+        </div>
+    </div>
+
+    <div class="text-center mb-3">
+        <div class="student-name">@s.StudentName</div>
+        <div class="student-subtitle">@s.RollNo | @s.Department Department</div>
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-2">
+            <button type="button"
+                    class="btn btn-primary compact-action-btn"
+                    onclick="openEditStudent(@s.StudentId)">
+                <i class="fas fa-edit me-1"></i>Edit Student
+            </button>
+
+            <a asp-controller="Borrowing"
+               asp-action="Direct"
+               asp-route-studentId="@s.StudentId"
+               class="btn btn-success compact-action-btn">
+                <i class="fas fa-book-medical me-1"></i>Borrow Directly
+            </a>
+
+            <a asp-controller="Challan"
+               asp-action="Index"
+               asp-route-studentId="@s.StudentId"
+               class="btn btn-warning compact-action-btn">
+                <i class="fas fa-file-invoice-dollar me-1"></i>
+                Generate Challan
+            </a>
+            <button type="button"
+                    class="btn @(s.IsBanned ? "btn-secondary" : "btn-danger") compact-action-btn"
+                    data-student-id="@s.StudentId"
+                    data-student-name="@s.StudentName"
+                    data-is-banned="@s.IsBanned.ToString().ToLower()"
+                    onclick="toggleBan(
+            this.dataset.studentId,
+            this.dataset.studentName,
+            this.dataset.isBanned === 'true'
+        )">
+                <i class="fas @(s.IsBanned ? "fa-unlock" : "fa-ban") me-1"></i>
+                @(s.IsBanned ? "Unban Student" : "Ban Student")
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <div class="mini-stat d-flex align-items-center gap-2">
+                <div class="mini-icon"><i class="fas fa-book-reader"></i></div>
+                <div>
+                    <div class="mini-stat-title">Borrowed Items</div>
+                    <div class="mini-stat-value">@Model.BorrowedBooksCount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mini-stat d-flex align-items-center gap-2">
+                <div class="mini-icon"><i class="fas fa-bookmark"></i></div>
+                <div>
+                    <div class="mini-stat-title">Reservations</div>
+                    <div class="mini-stat-value">@Model.ReservedBooksCount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="mini-stat d-flex align-items-center gap-2">
+                <div class="mini-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div>
+                    <div class="mini-stat-title">Pending Fine</div>
+                    <div class="mini-stat-value">Rs. @Model.PendingFines.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Student ID</div>
+                <div class="info-value">#@s.StudentId</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Username</div>
+                <div class="info-value">@s.Username</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Email</div>
+                <div class="info-value">@s.Email</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Phone</div>
+                <div class="info-value">@(string.IsNullOrWhiteSpace(s.PhoneNumber) ? "N/A" : s.PhoneNumber)</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Roll No</div>
+                <div class="info-value">@s.RollNo</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Batch</div>
+                <div class="info-value">@s.Batch</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Department</div>
+                <div class="info-value">@s.Department</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="info-card">
+                <div class="info-label">Role</div>
+                <div class="info-value">@s.Role</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="section-title">
+                <i class="fas fa-book-reader text-primary me-1"></i>Borrowed Records
+            </div>
+
+            @if (borrowedRecords.Any())
+            {
+                foreach (var item in borrowedRecords)
+                {
+                    <div class="record-box mb-2">
+                        <div class="d-flex gap-2 align-items-center">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="record-img" alt="@item.Title" />
+                            }
+                            else
+                            {
+                                <div class="record-img d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-book text-muted"></i>
+                                </div>
+                            }
+
+                            <div class="flex-grow-1">
+                                <div class="record-title">@(!string.IsNullOrEmpty(item.Title) ? item.Title : "Unknown Item")</div>
+                                <div class="record-meta">
+                                    @item.ItemType | @item.BorrowDate.ToString("dd MMM yyyy")
+                                </div>
+
+                                <span class="status-pill @(item.Status == "Accepted" ? "bg-success text-white" : "bg-warning text-dark")">
+                                    @item.Status
+                                </span>
+                            </div>
+
+                            @if (item.Status == "Pending")
+                            {
+                                <button type="button"
+                                        class="btn btn-success accept-btn"
+                                        onclick="acceptBorrow(@item.RecordId)">
+                                    Accept
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-box">
+                    <i class="fas fa-circle-info me-1"></i>No borrowed records found.
+                </div>
+            }
+        </div>
+
+        <div class="col-md-6">
+            <div class="section-title">
+                <i class="fas fa-bookmark text-primary me-1"></i>Reservation Records
+            </div>
+
+            @if (reservations.Any())
+            {
+                foreach (var item in reservations)
+                {
+                    <div class="record-box mb-2">
+                        <div class="d-flex gap-2 align-items-center">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="record-img" alt="@item.Title" />
+                            }
+                            else
+                            {
+                                <div class="record-img d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-bookmark text-muted"></i>
+                                </div>
+                            }
+
+                            <div class="flex-grow-1">
+                                <div class="record-title">@(!string.IsNullOrEmpty(item.Title) ? item.Title : "Unknown Item")</div>
+                                <div class="record-meta">
+                                    @item.ItemType | @item.ReservationDate.ToString("dd MMM yyyy")
+                                </div>
+
+                                <span class="status-pill bg-info text-white">@item.Status</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-box">
+                    <i class="fas fa-circle-info me-1"></i>No reservation records found.
+                </div>
+            }
+        </div>
+    </div>
+</div>

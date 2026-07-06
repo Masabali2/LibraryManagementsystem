@@ -1,4 +1,5 @@
 ﻿using Library.Domain.Interfaces;
+using Library.Infrastructure.Repositories;
 using Library.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,29 +8,31 @@ namespace Library.Web.Controllers;
 public class AdminController : Controller
 {
     private readonly IAdminRepository _adminRepo;
-
-    public AdminController(IAdminRepository adminRepo)
+    private readonly IChallanRepository _challanRepo;
+    public AdminController(IAdminRepository adminRepo, IChallanRepository challanRepo)
     {
         _adminRepo = adminRepo;
+        _challanRepo = challanRepo;
     }
 
     public async Task<IActionResult> Index()
     {
-        // 1. Fetch main stats
         var totalBooksCount = await _adminRepo.GetTotalBooksCountAsync();
         var activeStudents = await _adminRepo.GetActiveStudentsCountAsync();
         var issuedToday = await _adminRepo.GetBooksIssuedTodayCountAsync();
         var overdue = await _adminRepo.GetOverdueReturnsCountAsync();
 
-        // 2. Fetch inventory counts
         var specificBooksCount = await _adminRepo.GetSpecificBooksCountAsync();
         var thesesCount = await _adminRepo.GetThesisCountAsync();
         var journalsCount = await _adminRepo.GetJournalCountAsync();
 
-        // 3. Fetch recent activity (Repository fills the [NotMapped] Title property)
-        var recentBorrowing = await _adminRepo.GetRecentBorrowingRecordsAsync(10);
+        var recentBorrowing = await _adminRepo.GetRecentBorrowingRecordsAsync(50);
+        var challans = await _challanRepo.GetAllChallansAsync();
 
-        // 4. Map to ViewModel
+        var totalRevenue = challans
+            .Where(c => c.Status == "Paid")
+            .Sum(c => c.TotalAmount);
+
         var viewModel = new AdminDashboardViewModel
         {
             TotalBooks = totalBooksCount,
@@ -40,22 +43,31 @@ public class AdminController : Controller
             BooksCount = specificBooksCount,
             ThesesCount = thesesCount,
             JournalsCount = journalsCount,
+            TotalRevenue=totalRevenue,
 
-            RecentTransactions = recentBorrowing.Select(br => {
+            RecentTransactions = recentBorrowing.Select(br =>
+            {
+                var detectedType = br.ItemType ?? "Book";
 
-                // CORRECT LOGIC: Use the string property from your table
-                // This ensures the JS filters "BOOK", "THESIS", "JOURNAL" work
-                string detectedType = br.ItemType?.ToUpper() ?? "BOOK";
+                var status = br.IsReturned
+                    ? "Returned"
+                    : br.Status == "Pending"
+                        ? "Pending"
+                        : "Issued";
 
                 return new TransactionDto
                 {
+                    RecordId = br.RecordId,          // change to br.BorrowRecordId if your property name is different
+                    StudentId = br.StudentId,
+
                     StudentName = br.Student?.StudentName ?? "Unknown Reader",
+
                     ItemId = br.ItemId.ToString(),
-                    // Use the Title property we filled manually in the Repository
                     ItemName = br.Title ?? "System Asset",
                     ItemType = detectedType,
+
                     Date = br.BorrowDate,
-                    Status = br.IsReturned ? "Returned" : "Issued"
+                    Status = status
                 };
             }).ToList()
         };

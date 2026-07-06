@@ -24,6 +24,10 @@ public class LibraryDbContext : DbContext
     public DbSet<SeatAvailability> SeatAvailabilities { get; set; }
     public DbSet<LocationBlock> LocationBlocks { get; set; }
     public DbSet<Shelf> Shelves { get; set; }
+    public DbSet<Challan> Challans { get; set; }
+    public DbSet<ChallanItem> ChallanItems { get; set; }
+    public DbSet<LibraryTransaction> LibraryTransactions { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,6 +47,11 @@ public class LibraryDbContext : DbContext
                 PasswordHash = "admin123"
             }
         );
+        modelBuilder.Entity<Challan>()
+       .HasMany(c => c.Items)
+       .WithOne(i => i.Challan)
+       .HasForeignKey(i => i.ChallanId)
+       .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

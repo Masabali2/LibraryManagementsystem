@@ -1,0 +1,478 @@
+﻿@model Library.Domain.DTOs.DirectBorrowDto
+
+@{
+    ViewData["Title"] = "Borrow Directly";
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .direct-page {
+        padding: 24px;
+    }
+
+    .direct-header {
+        background: linear-gradient(135deg, #0f766e, #2563eb);
+        color: white;
+        padding: 25px;
+        border-radius: 22px;
+        margin-bottom: 22px;
+        box-shadow: 0 14px 30px rgba(15, 118, 110, .18);
+    }
+
+        .direct-header h2 {
+            font-weight: 850;
+            margin: 0 0 5px;
+        }
+
+        .direct-header p {
+            margin: 0;
+            opacity: .9;
+        }
+
+    .direct-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 850;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+    }
+
+    .student-info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 16px;
+    }
+
+    .student-label {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .student-value {
+        color: #0f172a;
+        font-weight: 750;
+        margin-top: 3px;
+    }
+
+    .form-label {
+        font-weight: 750;
+        font-size: .83rem;
+        color: #334155;
+    }
+
+    .required-star {
+        color: #dc2626;
+    }
+
+    .transaction-choice {
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 13px 15px;
+        cursor: pointer;
+        transition: .2s ease;
+        height: 100%;
+    }
+
+        .transaction-choice:hover {
+            border-color: #2563eb;
+            background: #f8fbff;
+        }
+
+        .transaction-choice.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+        }
+
+        .transaction-choice input {
+            margin-right: 8px;
+        }
+
+        .transaction-choice strong {
+            display: block;
+            color: #0f172a;
+            font-size: .92rem;
+        }
+
+        .transaction-choice small {
+            color: #64748b;
+        }
+
+    .total-box {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 16px;
+        padding: 18px;
+        text-align: right;
+    }
+
+    .total-label {
+        color: #166534;
+        font-size: .78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+    }
+
+    .total-amount {
+        color: #166534;
+        font-size: 1.75rem;
+        font-weight: 900;
+        margin-top: 3px;
+    }
+
+    .option-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 13px 15px;
+        background: #fff;
+    }
+
+        .option-box .form-check-label {
+            font-weight: 750;
+            color: #334155;
+        }
+
+        .option-box small {
+            display: block;
+            color: #64748b;
+            margin-left: 24px;
+            margin-top: 2px;
+        }
+
+    .btn-submit-direct {
+        min-width: 210px;
+        padding: 11px 28px;
+        border-radius: 999px;
+        font-weight: 800;
+    }
+
+    @@keyframes popIn {
+        0% {
+            transform: scale(.3);
+            opacity: 0;
+        }
+
+        70% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<div class="direct-page">
+    <div class="direct-header">
+        <h2>
+            <i class="fas fa-book-medical me-2"></i>
+            Borrow / Sell Book Directly
+        </h2>
+        <p>Issue a library item, sell a book, add charges, and optionally move to challan generation.</p>
+    </div>
+
+    <form asp-controller="Borrowing"
+          asp-action="Direct"
+          method="post"
+          id="directBorrowForm">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <input asp-for="StudentId" type="hidden" />
+        <input asp-for="StudentName" type="hidden" />
+        <input asp-for="RollNo" type="hidden" />
+        <input asp-for="Department" type="hidden" />
+        <input asp-for="Batch" type="hidden" />
+        <input asp-for="ItemTitle" type="hidden" id="itemTitleInput" />
+        <input asp-for="ItemType" type="hidden" id="itemTypeInput" value="Book" />
+        <input asp-for="TotalAmount" type="hidden" id="totalAmountInput" />
+
+        <div class="direct-card">
+            <div class="section-title">
+                <i class="fas fa-user-graduate me-2 text-primary"></i>
+                Student Information
+            </div>
+
+            <div class="student-info-box">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="student-label">Student Name</div>
+                        <div class="student-value">@Model.StudentName</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="student-label">Roll Number</div>
+                        <div class="student-value">@Model.RollNo</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="student-label">Department</div>
+                        <div class="student-value">@Model.Department</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="student-label">Batch</div>
+                        <div class="student-value">@Model.Batch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="direct-card">
+            <div class="section-title">
+                <i class="fas fa-exchange-alt me-2 text-success"></i>
+                Transaction Details
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Transaction Type <span class="required-star">*</span>
+                    </label>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="transaction-choice active" id="borrowChoice">
+                                <input type="radio"
+                                       asp-for="TransactionType"
+                                       value="Borrow"
+                                       checked />
+                                <strong><i class="fas fa-book-reader me-1"></i> Borrow</strong>
+                                <small>Issue item with due date.</small>
+                            </label>
+                        </div>
+
+                        <div class="col-6">
+                            <label class="transaction-choice" id="sellChoice">
+                                <input type="radio"
+                                       asp-for="TransactionType"
+                                       value="Sell" />
+                                <strong><i class="fas fa-shopping-cart me-1"></i> Sell</strong>
+                                <small>Sell item to student.</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="ItemId" class="form-label">
+                        Book / Library Item <span class="required-star">*</span>
+                    </label>
+
+                    <select asp-for="ItemId"
+                            class="form-select"
+                            id="itemSelect"
+                            required>
+                        <option value="">-- Select Book / Item --</option>
+
+                        @foreach (var item in Model.AvailableItems)
+                        {
+                            <option value="@item.ItemId"
+                                    data-title="@item.Title"
+                                    data-type="@item.ItemType">
+                                @item.Title (@item.ItemType)
+                            </option>
+                        }
+                    </select>
+
+                    <span asp-validation-for="ItemId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="IssueDate" class="form-label">
+                        Issue Date <span class="required-star">*</span>
+                    </label>
+                    <input asp-for="IssueDate" type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-4" id="dueDateSection">
+                    <label asp-for="DueDate" class="form-label">
+                        Due Date <span class="required-star">*</span>
+                    </label>
+                    <input asp-for="DueDate" type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Quantity" class="form-label">
+                        Quantity <span class="required-star">*</span>
+                    </label>
+                    <input asp-for="Quantity"
+                           type="number"
+                           min="1"
+                           class="form-control"
+                           id="quantityInput" />
+                </div>
+            </div>
+        </div>
+
+        <div class="direct-card">
+            <div class="section-title">
+                <i class="fas fa-money-bill-wave me-2 text-warning"></i>
+                Pricing and Fine Information
+            </div>
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="Price" class="form-label">
+                        Book Price / Charge (Rs.)
+                    </label>
+                    <input asp-for="Price"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           class="form-control"
+                           id="priceInput" />
+                    <small class="text-muted">
+                        For normal borrowing, keep price as 0.
+                    </small>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="FineAmount" class="form-label">
+                        Fine Amount (Rs.)
+                    </label>
+                    <input asp-for="FineAmount"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           class="form-control"
+                           id="fineInput" />
+                    <small class="text-muted">
+                        Add late fine, lost book fine, or service charges.
+                    </small>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="total-box">
+                        <div class="total-label">Total Amount</div>
+                        <div class="total-amount">
+                            Rs. <span id="totalDisplay">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" asp-for="GenerateChallan" value="true" />
+
+        <div class="direct-card">
+            <div class="section-title">
+                <i class="fas fa-sticky-note me-2 text-secondary"></i>
+                Additional Notes
+            </div>
+
+            <label asp-for="Notes" class="form-label">Notes</label>
+            <textarea asp-for="Notes"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Example: Book purchase, borrowing reason, fine reason, payment instructions, etc."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <a asp-controller="UserManagement"
+               asp-action="Index"
+               class="btn btn-light border rounded-pill px-4">
+                Cancel
+            </a>
+
+            <button type="submit" class="btn btn-warning btn-submit-direct">
+                <i class="fas fa-file-invoice-dollar me-1"></i>
+                Generate Challan
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const borrowChoice = document.getElementById("borrowChoice");
+            const sellChoice = document.getElementById("sellChoice");
+            const borrowRadio = document.querySelector('input[name="TransactionType"][value="Borrow"]');
+            const sellRadio = document.querySelector('input[name="TransactionType"][value="Sell"]');
+
+            const dueDateSection = document.getElementById("dueDateSection");
+            const dueDateInput = document.querySelector('input[name="DueDate"]');
+
+            const itemSelect = document.getElementById("itemSelect");
+            const itemTitleInput = document.getElementById("itemTitleInput");
+            const itemTypeInput = document.getElementById("itemTypeInput");
+
+            const quantityInput = document.getElementById("quantityInput");
+            const priceInput = document.getElementById("priceInput");
+            const fineInput = document.getElementById("fineInput");
+            const totalDisplay = document.getElementById("totalDisplay");
+            const totalAmountInput = document.getElementById("totalAmountInput");
+
+            function updateTransactionType() {
+                const isBorrow = borrowRadio.checked;
+
+                borrowChoice.classList.toggle("active", isBorrow);
+                sellChoice.classList.toggle("active", !isBorrow);
+
+                dueDateSection.style.display = isBorrow ? "" : "none";
+                dueDateInput.required = isBorrow;
+
+                if (!isBorrow) {
+                    dueDateInput.value = "";
+                }
+            }
+
+            function updateSelectedItem() {
+                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+
+                if (!selectedOption || !selectedOption.value) {
+                    itemTitleInput.value = "";
+                    itemTypeInput.value = "Book";
+                    return;
+                }
+
+                itemTitleInput.value = selectedOption.dataset.title || selectedOption.text;
+                itemTypeInput.value = selectedOption.dataset.type || "Book";
+            }
+
+            function calculateTotal() {
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const fine = parseFloat(fineInput.value) || 0;
+
+                const total = (quantity * price) + fine;
+
+                totalDisplay.textContent = total.toFixed(2);
+                totalAmountInput.value = total.toFixed(2);
+            }
+
+            borrowRadio.addEventListener("change", updateTransactionType);
+            sellRadio.addEventListener("change", updateTransactionType);
+            itemSelect.addEventListener("change", updateSelectedItem);
+            quantityInput.addEventListener("input", calculateTotal);
+            priceInput.addEventListener("input", calculateTotal);
+            fineInput.addEventListener("input", calculateTotal);
+
+            updateTransactionType();
+            updateSelectedItem();
+            calculateTotal();
+
+
+        });
+    </script>
+}

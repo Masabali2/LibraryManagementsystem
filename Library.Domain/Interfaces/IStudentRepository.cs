@@ -26,5 +26,9 @@ namespace Library.Domain.Interfaces
         Task<bool> ReserveItemAsync(int studentId, int itemId, string itemType);
         Task<bool> UpdateStudentAsync(Student student);
         Task<SeatAvailability> GetSeatAvailabilityAsync();
+        Task<IEnumerable<Student>> GetAllStudentsAsync();
+        Task<Student?> GetStudentDetailsByIdAsync(int studentId);
+        Task<bool> AcceptBorrowRequestAsync(int recordId);
+        Task<bool> ToggleStudentBanAsync(int studentId, string? reason);
     }
 }

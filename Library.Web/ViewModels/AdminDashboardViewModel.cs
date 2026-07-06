@@ -14,6 +14,7 @@ namespace Library.Web.ViewModels
         // Inventory Breakdown (Fixes the "definition not found" errors)
         public int BooksCount { get; set; }
         public int ThesesCount { get; set; }
+        public decimal TotalRevenue { get; set; }
         public int JournalsCount { get; set; }
 
         // Table Data
@@ -22,6 +23,8 @@ namespace Library.Web.ViewModels
 
     public class TransactionDto
     {
+        public int RecordId { get; set; }
+        public int StudentId { get; set; }
         public string StudentName { get; set; }
 
         // Generalizing from BookId to ItemId to cover Thesis/Journals
