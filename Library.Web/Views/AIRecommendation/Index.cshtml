@@ -1,0 +1,952 @@
+﻿@model List<Library.Web.ViewModels.RecommendedBookViewModel>
+
+@{
+    ViewData["Title"] = "AI Book Recommendations";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+    body {
+        background: #f5f7fb;
+    }
+
+    .recommendation-page {
+        padding: 30px;
+    }
+
+    /* =========================
+           HEADER
+        ========================= */
+    .recommendation-header {
+        background: linear-gradient(135deg,#2563eb,#7c3aed);
+        color: white;
+        border-radius: 22px;
+        padding: 45px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 35px;
+        box-shadow: 0 18px 40px rgba(37,99,235,.18);
+    }
+
+        .recommendation-header::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.08);
+            right: -70px;
+            top: -70px;
+        }
+
+        .recommendation-header::after {
+            content: "";
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+            left: -50px;
+            bottom: -60px;
+        }
+
+    .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,.15);
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+    }
+
+    .recommendation-header h2 {
+        font-size: 38px;
+        font-weight: 700;
+        margin-top: 18px;
+    }
+
+    .recommendation-header p {
+        opacity: .95;
+        font-size: 17px;
+        max-width: 650px;
+        margin-bottom: 0;
+    }
+
+    .header-robot {
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        backdrop-filter: blur(12px);
+        animation: floatRobot 3s ease-in-out infinite;
+    }
+
+        .header-robot i {
+            font-size: 75px;
+            color: white;
+        }
+
+    @@keyframes floatRobot {
+        0% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-12px);
+        }
+
+        100% {
+            transform: translateY(0);
+        }
+    }
+
+    /* =========================
+           STATS
+        ========================= */
+    .stats-card {
+        background: white;
+        border-radius: 18px;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        box-shadow: 0 10px 25px rgba(0,0,0,.06);
+        transition: .3s;
+        height: 100%;
+    }
+
+        .stats-card:hover {
+            transform: translateY(-6px);
+        }
+
+    .stats-icon {
+        width: 62px;
+        height: 62px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .blue {
+        background: #2563eb;
+    }
+
+    .green {
+        background: #16a34a;
+    }
+
+    .orange {
+        background: #f59e0b;
+    }
+
+    .purple {
+        background: #7c3aed;
+    }
+
+    .stats-card h3 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    .stats-card p {
+        margin: 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    /* =========================
+           FILTER
+        ========================= */
+    .filter-card {
+        background: white;
+        padding: 22px;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0,0,0,.06);
+        margin-bottom: 30px;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+        .search-box input {
+            width: 100%;
+            height: 48px;
+            border-radius: 50px;
+            border: 1px solid #dbe3ec;
+            padding-left: 45px;
+            outline: none;
+            background: #f8fafc;
+            transition: .3s;
+        }
+
+            .search-box input:focus {
+                border-color: #2563eb;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            }
+
+        .search-box i {
+            position: absolute;
+            top: 16px;
+            left: 18px;
+            color: #94a3b8;
+        }
+
+    .form-select {
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid #dbe3ec;
+        background-color: #f8fafc;
+        color: #334155;
+        font-weight: 500;
+    }
+
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+    /* =========================
+           BOOK GRID & CARD REDESIGN
+        ========================= */
+    .recommend-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        transition: all .35s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        border: 1px solid #eef2f6;
+    }
+
+        .recommend-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+    /* Image Wrapper with fixed contain sizing so covers never stretch weirdly */
+    .book-image {
+        position: relative;
+        height: 250px;
+        background: #f1f5f9;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+    }
+
+        .book-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.12));
+            transition: transform .4s ease;
+        }
+
+    .recommend-card:hover .book-image img {
+        transform: scale(1.05);
+    }
+
+    /* Fallback Cover Styling when image is missing */
+    .book-fallback-cover {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        border-radius: 12px;
+    }
+
+        .book-fallback-cover i {
+            font-size: 36px;
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+
+        .book-fallback-cover span {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+    .match-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: rgba(22, 163, 74, 0.95);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        z-index: 2;
+    }
+
+    /* Card Body Section */
+    .book-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .department-badge {
+        display: inline-block;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin-bottom: 10px;
+        align-self: flex-start;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .book-content h4 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .author {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .book-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+        .book-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+    .reason-box {
+        background: #f8fafc;
+        border-left: 4px solid #2563eb;
+        border-radius: 0 10px 10px 0;
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 16px;
+        flex-grow: 1;
+        line-height: 1.4;
+    }
+
+        .reason-box i {
+            color: #2563eb;
+            margin-right: 6px;
+        }
+
+    .card-footer-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 4px;
+    }
+
+    .available {
+        color: #16a34a;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .unavailable {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-view {
+        background: #2563eb;
+        color: white;
+        border-radius: 20px;
+        padding: 7px 16px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: .3s;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+        .btn-view:hover {
+            background: #1d4ed8;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    /* =========================
+           EMPTY STATE
+        ========================= */
+    .empty-state {
+        background: white;
+        border-radius: 20px;
+        padding: 80px 20px;
+        text-align: center;
+        box-shadow: 0 12px 30px rgba(0,0,0,.04);
+    }
+
+        .empty-state i {
+            font-size: 65px;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+    @@media(max - width: 992px)
+
+    {
+        .header-robot
+
+    {
+        display: none;
+    }
+
+    .recommendation-header {
+        text-align: center;
+    }
+
+        .recommendation-header p {
+            margin: 0 auto;
+        }
+
+    }
+</style>
+
+<div class="container-fluid recommendation-page">
+
+    <!-- ================= HEADER ================= -->
+    <div class="recommendation-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="ai-badge">
+                    <i class="fas fa-brain"></i>
+                    AI Powered Recommendation
+                </span>
+                <h2 class="mt-3">
+                    Recommended Books For You
+                </h2>
+                <p>
+                    Our AI analyzes your borrowing history, reservations, department, and reading interests to recommend books you'll most likely enjoy.
+                </p>
+            </div>
+            <div class="col-lg-4">
+                <div class="header-robot">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= STATISTICS ================= -->
+    <div class="row mb-4 g-3">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="stats-icon blue">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div>
+                    <h3>@Model.Count</h3>
+                    <p>Recommendations</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="stats-icon green">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <h3>
+                        @(Model.Any() ? Math.Min(100, (int)(Model.Average(x => x.Score) * 100)) : 0)%
+                    </h3>
+                    <p>Average Match</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="stats-icon orange">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <h3>
+                        @Model.Select(x => x.Book.Department).Distinct().Count()
+                    </h3>
+                    <p>Departments</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="stats-icon purple">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h3>
+                        @Model.Count(x => x.Book.AvailableCopies > 0)
+                    </h3>
+                    <p>Available Books</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= FILTERS ================= -->
+    <div class="filter-card">
+        <div class="row g-3">
+            <div class="col-lg-5">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchBook" placeholder="Search books by title or author..." />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <select id="departmentFilter" class="form-select">
+                    <option value="">All Departments</option>
+                    @foreach (var department in Model.Select(x => x.Book.Department).Distinct())
+                    {
+                        <option value="@department">@department</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <select id="availabilityFilter" class="form-select">
+                    <option value="">Availability</option>
+                    <option value="available">Available</option>
+                    <option value="out">Out of Stock</option>
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <select id="sortBooks" class="form-select">
+                    <option value="match">Highest Match</option>
+                    <option value="title">Book Title</option>
+                    <option value="year">Publication Year</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BOOKS ================= -->
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h3>No Recommendations Found</h3>
+            <p>Borrow more books to receive personalized AI recommendations.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4" id="recommendationContainer">
+            @foreach (var item in Model)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 recommendation-item"
+                     data-title="@item.Book.Title.ToLower()"
+                     data-author="@item.Book.Author.ToLower()"
+                     data-department="@item.Book.Department"
+                     data-score="@item.Score"
+                     data-year="@item.Book.PublicationYear"
+                     data-available="@item.Book.AvailableCopies">
+
+                    <div class="recommend-card">
+
+                        <!-- IMAGE / FALLBACK COVER -->
+                        <div class="book-image">
+                            @if (!string.IsNullOrEmpty(item.Book.ImageUrl))
+                            {
+                                <img src="@item.Book.ImageUrl" alt="@item.Book.Title" />
+                            }
+                            else
+                            {
+                                <div class="book-fallback-cover">
+                                    <i class="fas fa-book"></i>
+                                    <span>@item.Book.Title</span>
+                                </div>
+                            }
+
+                            <div class="match-badge">
+                                @Math.Min(100, (int)(item.Score * 100))% Match
+                            </div>
+                        </div>
+
+                        <!-- CONTENT -->
+                        <div class="book-content">
+                            <span class="department-badge">
+                                @item.Book.Department
+                            </span>
+
+                            <h4 title="@item.Book.Title">
+                                @item.Book.Title
+                            </h4>
+
+                            <p class="author">
+                                <i class="fas fa-user-edit"></i>
+                                @item.Book.Author
+                            </p>
+
+                            <div class="book-meta">
+                                <span>
+                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                    @item.Book.PublicationYear
+                                </span>
+                                <span>
+                                    <i class="fas fa-copy text-primary"></i>
+                                    @item.Book.AvailableCopies / @item.Book.TotalCopies
+                                </span>
+                            </div>
+
+                            <!-- AI REASON -->
+                            <div class="reason-box">
+                                <i class="fas fa-lightbulb"></i>
+                                @item.Reason
+                            </div>
+
+                            <!-- FOOTER -->
+                            <div class="card-footer-area">
+                                @if (item.Book.AvailableCopies > 0)
+                                {
+                                    <span class="available">
+                                        <i class="fas fa-check-circle"></i> Available
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="unavailable">
+                                        <i class="fas fa-times-circle"></i> Out of Stock
+                                    </span>
+                                }
+
+                                <button type="button" class="btn btn-view" onclick="showBookDetails(@item.Book.BookId)">
+                                    View Details
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+    </div>
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+    <!-- Modal Container Structure -->
+    <div class="modal fade" id="bookDetailsModal" tabindex="-1" aria-labelledby="bookDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" id="modalContentContainer">
+                <!-- Dynamic Partial Content loads here -->
+            </div>
+        </div>
+    </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("searchBook");
+            const departmentFilter = document.getElementById("departmentFilter");
+            const availabilityFilter = document.getElementById("availabilityFilter");
+            const sortBooks = document.getElementById("sortBooks");
+            const container = document.getElementById("recommendationContainer");
+
+            if (!container) return;
+
+            function getCards() {
+                return Array.from(container.querySelectorAll(".recommendation-item"));
+            }
+
+            function filterCards() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                const department = departmentFilter.value;
+                const availability = availabilityFilter.value;
+
+                getCards().forEach(card => {
+                    const title = card.dataset.title;
+                    const author = card.dataset.author;
+                    const dep = card.dataset.department;
+                    const available = parseInt(card.dataset.available);
+
+                    let visible = true;
+
+                    if (keyword !== "" && !title.includes(keyword) && !author.includes(keyword)) {
+                        visible = false;
+                    }
+
+                    if (department !== "" && dep !== department) {
+                        visible = false;
+                    }
+
+                    if (availability === "available" && available <= 0) {
+                        visible = false;
+                    }
+
+                    if (availability === "out" && available > 0) {
+                        visible = false;
+                    }
+
+                    if (visible) {
+                        card.style.display = "block";
+                        card.style.opacity = "0";
+                        setTimeout(() => {
+                            card.style.transition = ".4s";
+                            card.style.opacity = "1";
+                            card.style.transform = "translateY(0)";
+                        }, 50);
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            }
+
+            function sortCards() {
+                let cards = getCards();
+
+                switch (sortBooks.value) {
+                    case "match":
+                        cards.sort((a, b) => parseFloat(b.dataset.score) - parseFloat(a.dataset.score));
+                        break;
+                    case "title":
+                        cards.sort((a, b) => a.dataset.title.localeCompare(b.dataset.title));
+                        break;
+                    case "year":
+                        cards.sort((a, b) => parseInt(b.dataset.year) - parseInt(a.dataset.year));
+                        break;
+                }
+
+                cards.forEach(card => container.appendChild(card));
+            }
+
+            searchInput.addEventListener("keyup", filterCards);
+            departmentFilter.addEventListener("change", filterCards);
+            availabilityFilter.addEventListener("change", filterCards);
+            sortBooks.addEventListener("change", function () {
+                sortCards();
+                filterCards();
+            });
+        });
+
+        // Safely wait for jQuery to be fully ready
+        function waitForJQuery(callback) {
+            if (window.jQuery) {
+                callback(window.jQuery);
+            } else {
+                setTimeout(function () { waitForJQuery(callback); }, 50);
+            }
+        }
+
+        function showBookDetails(bookId) {
+            waitForJQuery(function ($) {
+                $.ajax({
+                    url: '/AIRecommendation/Details/' + bookId,
+                    type: 'GET',
+                    beforeSend: function () {
+                        $('#modalContentContainer').html(`
+                            <div class="text-center p-5">
+                                <div class="spinner-border text-primary"></div>
+                                <p class="mt-3">Loading book details...</p>
+                            </div>
+                        `);
+                    },
+                    success: function (data) {
+                        $('#modalContentContainer').html(data);
+
+                        const modalElement = document.getElementById("bookDetailsModal");
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                        modal.show();
+                    },
+                    error: function (xhr) {
+                        console.log(xhr);
+                        Swal.fire(
+                            'Error',
+                            'Unable to load book information.',
+                            'error'
+                        );
+                    }
+                });
+            });
+        }
+        function submitBookAction(bookId, actionType) {
+
+            Swal.fire({
+                title: `Confirm ${actionType}`,
+                text: `Do you want to ${actionType.toLowerCase()} this book?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#2563eb"
+            }).then((result) => {
+
+                if (!result.isConfirmed)
+                    return;
+
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+
+                    url: '/AIRecommendation/BorrowOrReserve',
+
+                    type: 'POST',
+
+                    headers: {
+                        RequestVerificationToken: token
+                    },
+
+                    data: {
+                        bookId: bookId,
+                        actionType: actionType,
+                        __RequestVerificationToken: token
+                    },
+
+                    beforeSend: function () {
+
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                    },
+
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            Swal.fire({
+
+                                icon: 'success',
+
+                                title: 'Success',
+
+                                text: response.message,
+
+                                confirmButtonColor: '#2563eb'
+
+                            }).then(() => {
+
+                                const modal =
+                                    bootstrap.Modal.getOrCreateInstance(
+                                        document.getElementById('bookDetailsModal'));
+
+                                modal.hide();
+
+                                location.reload();
+
+                            });
+
+                        }
+                        else {
+
+                            Swal.fire({
+
+                                icon: 'error',
+
+                                title: 'Failed',
+
+                                text: response.message
+
+                            });
+
+                        }
+
+                    },
+
+                    error: function (xhr) {
+
+                        console.log(xhr);
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Server Error',
+
+                            text: 'Unable to submit your request.'
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        }
+    </script>
+}

@@ -12,8 +12,10 @@ namespace Library.Domain.Interfaces
     {
         Task<IEnumerable<Borrowingrecord>> GetFullBorrowingHistoryAsync(int studentId);
         Task<bool> ReturnBookAsync(int recordId);
+        Task<List<Book>> GetBooksByIdsAsync(List<int> ids);
         Task<bool> RenewBookAsync(int recordId, int daysToExtend);
         Task<IEnumerable<Book>> GetFeaturedBooksAsync(int count);
+        Task<bool> CreateRequestAsync(int studentId, int itemId, string itemType, string requestType);
         Task<List<LibraryItemOptionDto>> GetAvailableLibraryItemsAsync();
     }
 }

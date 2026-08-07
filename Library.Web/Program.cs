@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Library.Infrastructure.Data;
 using Library.Application.Interfaces;
-using Library.Domain.Interfaces;
-using Library.Infrastructure.Repositories;
 using Library.Application.Services;
+using Library.Domain.Interfaces;
+using Library.Infrastructure.Data;
+using Library.Infrastructure.Repositories;
+using Library.Infrastructure.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,10 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IChallanRepository, ChallanRepository>();
 builder.Services.AddScoped<ILibraryTransactionRepository, LibraryTransactionRepository>();
+builder.Services.AddHttpClient<RecommendationApiService>(client =>
+{
+    client.BaseAddress = new Uri("http://127.0.0.1:8000/");
+});
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

@@ -67,19 +67,22 @@ public class BookRepository : IBookRepository
     }
     public async Task<bool> CreateRequestAsync(int studentId, int itemId, string itemType, string requestType)
     {
-        var newRequest = new Borrowingrecord
+        // Adjust entity and property names to match your database context structure
+        var borrowingRecord = new Borrowingrecord
         {
             StudentId = studentId,
             ItemId = itemId,
-            ItemType = itemType,
-            RequestType = requestType, 
+            ItemType = itemType,// or ItemId depending on your schema
+            RequestType = requestType, // e.g., "Borrow" or "Reserve"
+            Status = "Pending",
             BorrowDate = DateTime.Now,
-            ExpectedReturnDate = DateTime.Now.AddDays(14),
-            IsReturned = false,
-            Status = "Pending"
+            ExpectedReturnDate = DateTime.Now.AddDays(14)
         };
-        await _context.BorrowingRecords.AddAsync(newRequest);
-        return await _context.SaveChangesAsync() > 0;
+
+        _context.BorrowingRecords.Add(borrowingRecord);
+        int affectedRows = await _context.SaveChangesAsync();
+
+        return affectedRows > 0;
     }
     public async Task<List<LibraryItemOptionDto>> GetAvailableLibraryItemsAsync()
     {
@@ -92,6 +95,15 @@ public class BookRepository : IBookRepository
                 Title = book.Title,
                 ItemType = "Book"
             })
+            .ToListAsync();
+    }
+    public async Task<List<Book>> GetBooksByIdsAsync(List<int> ids)
+    {
+        if (ids == null || !ids.Any())
+            return new List<Book>();
+
+        return await _context.Books
+            .Where(b => ids.Contains(b.BookId))
             .ToListAsync();
     }
 }
