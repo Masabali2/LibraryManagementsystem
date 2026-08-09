@@ -1,24 +1,63 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin Intelligence</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>USKT Library - Admin Panel</title>
+
+
+    <!-- ===================================================== -->
+    <!-- FONTS -->
+    <!-- ===================================================== -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap"
+          rel="stylesheet">
+
+
+    <!-- ===================================================== -->
+    <!-- FONT AWESOME -->
+    <!-- ===================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
+    <!-- ===================================================== -->
+    <!-- BOOTSTRAP -->
+    <!-- ===================================================== -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
 
     <style>
+
+        /* =====================================================
+                   ROOT VARIABLES
+                   ===================================================== */
+
         :root {
             --sidebar-width: 280px;
-            --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --primary-grad: linear-gradient( 135deg, #6366f1 0%, #a855f7 100% );
             --glass-bg: rgba(255, 255, 255, 0.85);
             --bg-soft: #f4f7fe;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --accent-purple: #8b5cf6;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
+
+
+        /* =====================================================
+                   BODY
+                   ===================================================== */
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -28,7 +67,11 @@
             overflow-x: hidden;
         }
 
-        /* --- SIDEBAR --- */
+
+        /* =====================================================
+                   SIDEBAR
+                   ===================================================== */
+
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
@@ -39,8 +82,13 @@
             padding: 30px 20px;
             border-right: 1px solid #e2e8f0;
             z-index: 1100;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier( 0.4, 0, 0.2, 1 );
         }
+
+
+        /* =====================================================
+                   BRAND
+                   ===================================================== */
 
         .brand-section {
             display: flex;
@@ -49,6 +97,7 @@
             padding: 0 10px;
             margin-bottom: 50px;
         }
+
 
         .brand-logo {
             width: 52px;
@@ -60,8 +109,9 @@
             justify-content: center;
             overflow: hidden;
             padding: 4px;
-            box-shadow: 0 5px 14px rgba(15, 23, 42, 0.16);
+            box-shadow: 0 5px 14px rgba( 15, 23, 42, 0.16 );
         }
+
 
         .brand-uni-logo {
             width: 100%;
@@ -70,14 +120,21 @@
             display: block;
         }
 
+
+        /* =====================================================
+                   NAVIGATION
+                   ===================================================== */
+
         .nav-links {
             list-style: none;
             padding: 0;
         }
 
+
         .nav-item {
             margin-bottom: 10px;
         }
+
 
         .nav-link-custom {
             display: flex;
@@ -92,11 +149,13 @@
             gap: 15px;
         }
 
+
             .nav-link-custom i {
                 font-size: 1.1rem;
                 width: 20px;
                 text-align: center;
             }
+
 
             .nav-link-custom:hover {
                 background: #f1f5f9;
@@ -104,13 +163,19 @@
                 transform: translateX(5px);
             }
 
-        .nav-item.active .nav-link-custom {
+
+        .nav-item.active
+        .nav-link-custom {
             background: var(--primary-grad);
             color: white !important;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 10px 20px rgba( 99, 102, 241, 0.2 );
         }
 
-        /* --- TOPBAR --- */
+
+        /* =====================================================
+                   TOPBAR
+                   ===================================================== */
+
         .topbar {
             position: fixed;
             top: 0;
@@ -120,7 +185,7 @@
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            border-bottom: 1px solid rgba( 226, 232, 240, 0.8 );
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -128,10 +193,16 @@
             z-index: 1000;
         }
 
+
+        /* =====================================================
+                   SEARCH
+                   ===================================================== */
+
         .search-container {
             position: relative;
             width: 450px;
         }
+
 
             .search-container i {
                 position: absolute;
@@ -140,6 +211,7 @@
                 transform: translateY(-50%);
                 color: var(--text-muted);
             }
+
 
             .search-container input {
                 width: 100%;
@@ -152,19 +224,17 @@
                 transition: 0.3s;
             }
 
+
                 .search-container input:focus {
                     border-color: #6366f1;
-                    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+                    box-shadow: 0 0 0 4px rgba( 99, 102, 241, 0.1 );
                 }
 
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 115px 40px 40px 40px;
-            min-height: 100vh;
-        }
 
-        /* UI Elements */
+        /* =====================================================
+                   PROFILE
+                   ===================================================== */
+
         .profile-pill {
             background: white;
             padding: 6px 6px 6px 18px;
@@ -177,10 +247,12 @@
             transition: 0.3s;
         }
 
+
             .profile-pill:hover {
                 border-color: var(--accent-purple);
                 background: #f8fafc;
             }
+
 
         .avatar {
             width: 38px;
@@ -195,9 +267,14 @@
             font-size: 14px;
         }
 
+
+        /* =====================================================
+                   NOTIFICATION BUTTON
+                   ===================================================== */
+
         .notif-btn {
-            width: 45px;
-            height: 45px;
+            width: 46px;
+            height: 46px;
             border-radius: 14px;
             background: white;
             border: 1px solid #e2e8f0;
@@ -206,27 +283,134 @@
             justify-content: center;
             color: var(--text-muted);
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             position: relative;
         }
+
 
             .notif-btn:hover {
                 color: #6366f1;
                 border-color: #6366f1;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba( 99, 102, 241, 0.12 );
             }
 
-        .notif-dot {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid white;
+
+            .notif-btn i {
+                font-size: 18px;
+            }
+
+
+            /* =====================================================
+                   ACTIVE NOTIFICATION
+                   ===================================================== */
+
+            .notif-btn.has-alert {
+                color: #ef4444;
+                border-color: #ffccd4;
+                box-shadow: 0 0 0 5px rgba( 239, 68, 68, 0.07 );
+            }
+
+
+                .notif-btn.has-alert i {
+                    animation: bellShake 1s infinite;
+                }
+
+
+        @@keyframes bellShake {
+
+            0% {
+                transform: rotate(0deg);
+            }
+
+            15% {
+                transform: rotate(12deg);
+            }
+
+            30% {
+                transform: rotate(-12deg);
+            }
+
+            45% {
+                transform: rotate(8deg);
+            }
+
+            60% {
+                transform: rotate(-8deg);
+            }
+
+            75% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
         }
 
+
+        /* =====================================================
+                   NOTIFICATION BADGE
+                   ===================================================== */
+
+        .notif-count {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 5px;
+            border-radius: 50px;
+            background: #ef4444;
+            color: white;
+            border: 3px solid white;
+            font-size: 10px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+            .notif-count.show {
+                display: flex;
+                animation: notificationPop 0.35s ease;
+            }
+
+
+        @@keyframes notificationPop {
+
+            0% {
+                transform: scale(0);
+            }
+
+            70% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
+        /* =====================================================
+                   MAIN CONTENT
+                   ===================================================== */
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 115px 40px 40px 40px;
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+                   PAGE ANIMATION
+                   ===================================================== */
+
         @@keyframes pageSlide {
+
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -238,87 +422,2134 @@
             }
         }
 
+
         .animate-page {
-            animation: pageSlide 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            animation: pageSlide 0.6s cubic-bezier( 0.23, 1, 0.32, 1 ) forwards;
         }
+
+
+        /* =====================================================
+                   NOISE ALERT MODAL
+                   ===================================================== */
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba( 15, 23, 42, 0.50 );
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+
+            .noise-overlay.show {
+                display: flex;
+                animation: overlayFade 0.25s ease;
+            }
+
+
+        @@keyframes overlayFade {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+
+        /* =====================================================
+                   MODAL
+                   ===================================================== */
+
+        .noise-modal {
+            width: 100%;
+            max-width: 680px;
+            max-height: 88vh;
+            background: white;
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 30px 100px rgba( 15, 23, 42, 0.30 );
+            animation: noiseModalIn 0.4s cubic-bezier( 0.2, 0.8, 0.2, 1 );
+        }
+
+
+        @@keyframes noiseModalIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(35px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+
+        /* =====================================================
+                   MODAL HEADER
+                   ===================================================== */
+
+        .noise-modal-header {
+            padding: 24px 26px;
+            background: linear-gradient( 135deg, #5b5cf0, #a855f7 );
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+
+        .noise-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+
+        .noise-modal-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba( 255, 255, 255, 0.18 );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            animation: alertPulse 2s infinite;
+        }
+
+
+        @@keyframes alertPulse {
+
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba( 255, 255, 255, 0.20 );
+            }
+
+            50% {
+                box-shadow: 0 0 0 9px rgba( 255, 255, 255, 0.04 );
+            }
+        }
+
+
+        .noise-modal-title h2 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+
+        .noise-modal-title p {
+            margin: 4px 0 0;
+            opacity: 0.80;
+            font-size: 12px;
+        }
+
+
+        .noise-close {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba( 255, 255, 255, 0.15 );
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+
+            .noise-close:hover {
+                background: rgba( 255, 255, 255, 0.25 );
+                transform: rotate(90deg);
+            }
+
+
+        /* =====================================================
+                   STATISTICS
+                   ===================================================== */
+
+        .noise-stats {
+            display: grid;
+            grid-template-columns: repeat( 3, 1fr );
+            gap: 12px;
+            padding: 18px 22px 10px;
+        }
+
+
+        .noise-stat {
+            background: #f8f9ff;
+            border: 1px solid #edf0ff;
+            border-radius: 16px;
+            padding: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+
+        .noise-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .noise-stat strong {
+            display: block;
+            font-size: 18px;
+        }
+
+
+        .noise-stat small {
+            display: block;
+            color: #8b95a5;
+            font-size: 10px;
+        }
+
+
+        /* =====================================================
+                   MODAL ACTIONS
+                   ===================================================== */
+
+        .noise-actions {
+            padding: 10px 22px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+
+        .noise-action {
+            border: 0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            background: #f1f3f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+
+            .noise-action:hover {
+                transform: translateY(-1px);
+                background: #e7e9f4;
+            }
+
+
+            .noise-action.danger {
+                background: #fff1f2;
+                color: #ef4444;
+            }
+
+
+        /* =====================================================
+                   ALERT LIST
+                   ===================================================== */
+
+        .noise-list {
+            max-height: 430px;
+            overflow-y: auto;
+            padding: 16px 22px 22px;
+        }
+
+
+        /* =====================================================
+                   ALERT CARD
+                   ===================================================== */
+
+        .noise-card {
+            position: relative;
+            display: flex;
+            gap: 13px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #edf0f5;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 5px 18px rgba( 15, 23, 42, 0.05 );
+            animation: alertCardIn 0.35s ease;
+        }
+
+
+        @@keyframes alertCardIn {
+
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+
+        .noise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba( 15, 23, 42, 0.08 );
+        }
+
+
+        .noise-card.unread {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient( 90deg, #fff7f8, #ffffff );
+        }
+
+
+        .noise-card-icon {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            background: #fff0f2;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+
+        .noise-card-content {
+            flex: 1;
+        }
+
+
+        .noise-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+
+            .noise-card-top strong {
+                font-size: 14px;
+            }
+
+
+        .noise-time {
+            color: #9aa3b2;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+
+        .noise-message {
+            margin: 5px 0 10px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+
+        .noise-tags {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+
+        .noise-tag {
+            padding: 5px 9px;
+            border-radius: 8px;
+            background: #f1f3ff;
+            color: #6366f1;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+
+        .noise-read-btn {
+            margin-top: 8px;
+            border: 0;
+            background: transparent;
+            color: #6366f1;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+
+
+            .noise-read-btn:hover {
+                text-decoration: underline;
+            }
+
+
+        /* =====================================================
+                   EMPTY STATE
+                   ===================================================== */
+
+        .noise-empty {
+            text-align: center;
+            padding: 45px 20px;
+        }
+
+
+        .noise-empty-icon {
+            width: 70px;
+            height: 70px;
+            margin: auto;
+            border-radius: 22px;
+            background: #f3f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+
+        .noise-empty h3 {
+            margin: 15px 0 5px;
+            font-size: 16px;
+        }
+
+
+        .noise-empty p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+                   LIVE TOAST
+                   ===================================================== */
+
+        .noise-toast {
+            position: fixed;
+            right: 28px;
+            top: 105px;
+            width: 370px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba( 15, 23, 42, 0.20 );
+            border: 1px solid #ffe1e5;
+            z-index: 100000;
+            display: none;
+            overflow: hidden;
+        }
+
+
+            .noise-toast.show {
+                display: block;
+                animation: toastIn 0.45s cubic-bezier( 0.2, 0.8, 0.2, 1 );
+            }
+
+
+        @@keyframes toastIn {
+
+            from {
+                opacity: 0;
+                transform: translateX(80px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+
+        .noise-toast-top {
+            padding: 13px 16px;
+            background: linear-gradient( 135deg, #fff1f2, #ffffff );
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+
+        .noise-toast-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #ef4444;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .noise-toast-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #991b1b;
+        }
+
+
+        .noise-toast-subtitle {
+            font-size: 10px;
+            color: #9f7a7a;
+        }
+
+
+        .noise-toast-body {
+            padding: 13px 16px;
+        }
+
+
+        .noise-toast-location {
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+
+            .noise-toast-location strong {
+                color: #1e293b;
+            }
+
+
+        .noise-toast-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        .noise-view-btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 7px 11px;
+            background: #6366f1;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+
+        .noise-dismiss-btn {
+            border: 0;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+
+        /* =====================================================
+                   RESPONSIVE
+                   ===================================================== */
+
+        @@media (max-width: 768px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .topbar {
+                left: 220px;
+                padding: 0 18px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+                padding: 105px 20px 30px;
+            }
+
+            .search-container {
+                width: 300px;
+            }
+
+            .noise-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .noise-toast {
+                left: 15px;
+                right: 15px;
+                width: auto;
+            }
+        }
+
+
+        @@media (max-width: 576px) {
+
+            .sidebar {
+                width: 75px;
+                padding: 20px 10px;
+            }
+
+            .brand-section > div:not(.brand-logo) {
+                display: none;
+            }
+
+            .nav-link-custom {
+                justify-content: center;
+                padding: 14px;
+            }
+
+            .nav-link-custom {
+                font-size: 0;
+            }
+
+                .nav-link-custom i {
+                    font-size: 18px;
+                }
+
+            .topbar {
+                left: 75px;
+            }
+
+            .main-content {
+                margin-left: 75px;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .profile-pill {
+                padding: 5px;
+            }
+
+                .profile-pill .text-end {
+                    display: none !important;
+                }
+        }
+
     </style>
+
 </head>
+
+
 <body>
 
+
+    <!-- ===================================================== -->
+    <!-- SIDEBAR -->
+    <!-- ===================================================== -->
+
     <aside class="sidebar">
+
         <div class="brand-section">
+
             <div class="brand-logo">
+
                 <img src="~/images/usktlibrarylogo.png"
                      alt="USKT Library Logo"
                      class="brand-uni-logo" />
+
             </div>
+
             <div>
-                <h5 class="mb-0 fw-bold">USKT Library</h5>
-                <small class="text-muted fw-semibold">Admin Panel</small>
+
+                <h5 class="mb-0 fw-bold">
+                    USKT Library
+                </h5>
+
+                <small class="text-muted fw-semibold">
+                    Admin Panel
+                </small>
+
             </div>
+
         </div>
+
 
         <ul class="nav-links">
-            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")">
-                <a class="nav-link-custom" asp-controller="Admin" asp-action="Index">
-                    <i class="fas fa-chart-pie"></i> Dashboard
+
+            <li class="nav-item
+                @(ViewData["ActivePage"]?.ToString() == "Dashboard"
+                                    ? "active"
+                                    : "")">
+
+                <a class="nav-link-custom"
+                   asp-controller="Admin"
+                   asp-action="Index">
+
+                    <i class="fas fa-chart-pie"></i>
+
+                    Dashboard
+
                 </a>
-            </li>
-            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Inventory" ? "active" : "")">
-                <a class="nav-link-custom" asp-controller="Inventory" asp-action="Index"">
-                    <i class="fas fa-boxes-stacked"></i> Inventory
-                </a>
-            </li>
-            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "UserManagement" ? "active" : "")">
-                <a class="nav-link-custom" asp-controller="UserManagement" asp-action="Index">
-                    <i class="fas fa-user-group"></i> User Management
-                </a>
-            </li>
-            <li class="nav-item @(ViewData["ActivePage"]?.ToString() == "Fines" ? "active" : "")">
-                <a class="nav-link-custom" asp-controller="Challan" asp-action="List">
-                    <i class="fas fa-file-invoice-dollar"></i> Revenue Tracking
-                </a>
+
             </li>
 
-            <li class="nav-item" style="margin-top: 100px;">
-                <hr class="mx-3 opacity-10">
-                <a class="nav-link-custom text-danger" asp-controller="Account" asp-action="Logout">
-                    <i class="fas fa-arrow-right-from-bracket"></i> Sign Out
+
+            <li class="nav-item
+                @(ViewData["ActivePage"]?.ToString() == "Inventory"
+                                    ? "active"
+                                    : "")">
+
+                <a class="nav-link-custom"
+                   asp-controller="Inventory"
+                   asp-action="Index">
+
+                    <i class="fas fa-boxes-stacked"></i>
+
+                    Inventory
+
                 </a>
+
             </li>
+
+
+            <li class="nav-item
+                @(ViewData["ActivePage"]?.ToString() == "UserManagement"
+                                    ? "active"
+                                    : "")">
+
+                <a class="nav-link-custom"
+                   asp-controller="UserManagement"
+                   asp-action="Index">
+
+                    <i class="fas fa-user-group"></i>
+
+                    User Management
+
+                </a>
+
+            </li>
+
+
+            <li class="nav-item
+                @(ViewData["ActivePage"]?.ToString() == "Fines"
+                                    ? "active"
+                                    : "")">
+
+                <a class="nav-link-custom"
+                   asp-controller="Challan"
+                   asp-action="List">
+
+                    <i class="fas fa-file-invoice-dollar"></i>
+
+                    Revenue Tracking
+
+                </a>
+
+            </li>
+
+
+            <li class="nav-item"
+                style="margin-top:100px;">
+
+                <hr class="mx-3 opacity-10">
+
+
+                <a class="nav-link-custom text-danger"
+                   asp-controller="Account"
+                   asp-action="Logout">
+
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+
+                    Sign Out
+
+                </a>
+
+            </li>
+
         </ul>
+
     </aside>
 
+
+
+    <!-- ===================================================== -->
+    <!-- TOPBAR -->
+    <!-- ===================================================== -->
+
     <nav class="topbar">
+
+
+        <!-- SEARCH -->
+
         <div class="search-container">
+
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Global search for items, users, or records..." />
+
+            <input type="text"
+                   placeholder="Global search for items, users, or records..." />
+
         </div>
+
+
+
+        <!-- RIGHT SIDE -->
 
         <div class="d-flex align-items-center gap-3">
-            <div class="notif-btn">
+
+
+            <!-- ================================================= -->
+            <!-- NOISE NOTIFICATION BUTTON -->
+            <!-- ================================================= -->
+
+            <button type="button"
+                    id="noiseNotificationButton"
+                    class="notif-btn"
+                    onclick="openNoiseNotifications()"
+                    title="Noise Alerts">
+
                 <i class="far fa-bell"></i>
-                <div class="notif-dot"></div>
-            </div>
+
+                <span id="noiseNotificationCount"
+                      class="notif-count">
+
+                    0
+
+                </span>
+
+            </button>
+
+
+
+            <!-- ================================================= -->
+            <!-- PROFILE -->
+            <!-- ================================================= -->
 
             <div class="profile-pill">
+
                 <div class="text-end d-none d-sm-block">
-                    <p class="mb-0 fw-bold small lh-1">Admin User</p>
-                    <small class="text-muted" style="font-size: 11px;">Super Control</small>
+
+                    <p class="mb-0 fw-bold small lh-1">
+                        Admin User
+                    </p>
+
+                    <small class="text-muted"
+                           style="font-size:11px;">
+
+                        Super Control
+
+                    </small>
+
                 </div>
-                <div class="avatar">AD</div>
+
+
+                <div class="avatar">
+
+                    AD
+
+                </div>
+
             </div>
+
         </div>
+
     </nav>
 
+
+
+    <!-- ===================================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ===================================================== -->
+
     <main class="main-content">
+
         <div class="animate-page">
+
             @RenderBody()
+
         </div>
+
     </main>
 
+
+
+    <!-- ===================================================== -->
+    <!-- NOISE NOTIFICATION MODAL -->
+    <!-- ===================================================== -->
+
+    <div id="noiseOverlay"
+         class="noise-overlay"
+         onclick="closeNoiseNotifications(event)">
+
+
+        <div class="noise-modal"
+             onclick="event.stopPropagation()">
+
+
+            <!-- HEADER -->
+
+            <div class="noise-modal-header">
+
+
+                <div class="noise-modal-title">
+
+
+                    <div class="noise-modal-icon">
+
+                        <i class="fas fa-volume-high"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2>
+                            Noise Alerts
+                        </h2>
+
+                        <p>
+                            Smart Library Monitoring System
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button type="button"
+                        class="noise-close"
+                        onclick="closeNoiseNotifications()">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- STATISTICS -->
+
+            <div class="noise-stats">
+
+
+                <div class="noise-stat">
+
+                    <div class="noise-stat-icon">
+
+                        <i class="fas fa-triangle-exclamation text-danger"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong id="noiseActiveCount">
+                            0
+                        </strong>
+
+                        <small>
+                            Unread Alerts
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="noise-stat">
+
+                    <div class="noise-stat-icon">
+
+                        <i class="fas fa-location-dot text-primary"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong id="noiseLocationCount">
+                            0
+                        </strong>
+
+                        <small>
+                            Locations
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="noise-stat">
+
+                    <div class="noise-stat-icon">
+
+                        <i class="fas fa-satellite-dish text-success"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            LIVE
+                        </strong>
+
+                        <small>
+                            Sensor Status
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ACTIONS -->
+
+            <div class="noise-actions">
+
+
+                <button type="button"
+                        class="noise-action"
+                        onclick="markAllNoiseAlertsRead()">
+
+                    <i class="fas fa-check-double"></i>
+
+                    Mark All Read
+
+                </button>
+
+
+                <button type="button"
+                        class="noise-action danger"
+                        onclick="clearAllNoiseAlerts()">
+
+                    <i class="fas fa-trash"></i>
+
+                    Clear All
+
+                </button>
+
+            </div>
+
+
+
+            <!-- ALERT LIST -->
+
+            <div id="noiseList"
+                 class="noise-list">
+
+                <div class="noise-empty">
+
+                    <div class="noise-empty-icon">
+
+                        <i class="far fa-bell-slash"></i>
+
+                    </div>
+
+                    <h3>
+                        No Noise Alerts
+                    </h3>
+
+                    <p>
+                        Everything is quiet in the library.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- LIVE NOISE TOAST -->
+    <!-- ===================================================== -->
+
+    <div id="noiseToast"
+         class="noise-toast">
+
+
+        <div class="noise-toast-top">
+
+
+            <div class="noise-toast-icon">
+
+                <i class="fas fa-volume-high"></i>
+
+            </div>
+
+
+            <div>
+
+                <div class="noise-toast-title">
+
+                    NEW NOISE ALERT
+
+                </div>
+
+                <div class="noise-toast-subtitle">
+
+                    Smart Library Sensor
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="noise-toast-body">
+
+
+            <div id="noiseToastLocation"
+                 class="noise-toast-location">
+
+                Noise detected.
+
+            </div>
+
+
+            <div class="noise-toast-footer">
+
+
+                <button type="button"
+                        class="noise-view-btn"
+                        onclick="viewNoiseAlertsFromToast()">
+
+                    <i class="fas fa-eye"></i>
+
+                    View Alert
+
+                </button>
+
+
+                <button type="button"
+                        class="noise-dismiss-btn"
+                        onclick="dismissNoiseToast()">
+
+                    ×
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ===================================================== -->
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+
+
+    <script>
+
+
+        /* =====================================================
+           FASTAPI CONFIGURATION
+           ===================================================== */
+
+        const NOISE_API_URL =
+            "http://127.0.0.1:8002";
+
+
+        /* =====================================================
+           VARIABLES
+           ===================================================== */
+
+        let noiseAlerts = [];
+
+        let previousUnreadCount = 0;
+
+        let firstNoiseLoad = true;
+
+        let noiseToastTimer = null;
+
+
+
+        /* =====================================================
+           LOAD ALERTS
+           ===================================================== */
+        async function loadNoiseAlerts() {
+
+            try {
+
+                const response =
+                    await fetch("/Noise/Alerts");
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Noise controller unavailable"
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                noiseAlerts =
+                    data.alerts || [];
+
+
+                updateNoiseNotification(
+                    noiseAlerts
+                );
+
+
+                if (!firstNoiseLoad) {
+
+                    checkForNewNoiseAlert();
+
+                }
+
+
+                firstNoiseLoad = false;
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Noise notification error:",
+                    error
+                );
+
+            }
+
+        }
+        /* =====================================================
+           UPDATE NOTIFICATION BUTTON
+           ===================================================== */
+
+        function updateNoiseNotification(
+            alerts
+        ) {
+
+            const unreadAlerts =
+                alerts.filter(
+                    alert =>
+                        !alert.is_read
+                );
+
+
+            const unreadCount =
+                unreadAlerts.length;
+
+
+            const button =
+                document.getElementById(
+                    "noiseNotificationButton"
+                );
+
+
+            const badge =
+                document.getElementById(
+                    "noiseNotificationCount"
+                );
+
+
+            /* ------------------------------
+               BADGE
+               ------------------------------ */
+
+            if (unreadCount > 0) {
+
+                badge.textContent =
+                    unreadCount > 99
+                        ? "99+"
+                        : unreadCount;
+
+                badge.classList.add(
+                    "show"
+                );
+
+                button.classList.add(
+                    "has-alert"
+                );
+
+            }
+
+            else {
+
+                badge.classList.remove(
+                    "show"
+                );
+
+                button.classList.remove(
+                    "has-alert"
+                );
+
+            }
+
+
+            /* ------------------------------
+               STATISTICS
+               ------------------------------ */
+
+            document.getElementById(
+                "noiseActiveCount"
+            ).textContent =
+                unreadCount;
+
+
+            const locations =
+                new Set(
+                    alerts.map(
+                        alert =>
+                            alert.location
+                    )
+                );
+
+
+            document.getElementById(
+                "noiseLocationCount"
+            ).textContent =
+                locations.size;
+
+        }
+
+
+
+        /* =====================================================
+           CHECK FOR NEW ALERT
+           ===================================================== */
+
+        function checkForNewNoiseAlert() {
+
+            const unreadAlerts =
+                noiseAlerts.filter(
+                    alert =>
+                        !alert.is_read
+                );
+
+
+            const currentCount =
+                unreadAlerts.length;
+
+
+            if (
+                currentCount >
+                previousUnreadCount
+            ) {
+
+                const newestAlert =
+                    unreadAlerts[0];
+
+
+                if (newestAlert) {
+
+                    showNoiseToast(
+                        newestAlert
+                    );
+
+                    playNoiseSound();
+
+                }
+
+            }
+
+
+            previousUnreadCount =
+                currentCount;
+
+        }
+
+
+
+        /* =====================================================
+           OPEN MODAL
+           ===================================================== */
+
+        function openNoiseNotifications() {
+
+            document
+                .getElementById(
+                    "noiseOverlay"
+                )
+                .classList.add(
+                    "show"
+                );
+
+
+            renderNoiseAlerts(
+                noiseAlerts
+            );
+
+        }
+
+
+
+        /* =====================================================
+           CLOSE MODAL
+           ===================================================== */
+
+        function closeNoiseNotifications(
+            event
+        ) {
+
+            if (
+                event &&
+                event.target !==
+                event.currentTarget
+            ) {
+
+                return;
+
+            }
+
+
+            document
+                .getElementById(
+                    "noiseOverlay"
+                )
+                .classList.remove(
+                    "show"
+                );
+
+        }
+
+
+
+        /* =====================================================
+           RENDER ALERTS
+           ===================================================== */
+
+        function renderNoiseAlerts(
+            alerts
+        ) {
+
+            const list =
+                document.getElementById(
+                    "noiseList"
+                );
+
+
+            if (
+                !alerts ||
+                alerts.length === 0
+            ) {
+
+                list.innerHTML = `
+
+                    <div class="noise-empty">
+
+                        <div class="noise-empty-icon">
+
+                            <i class="far fa-bell-slash"></i>
+
+                        </div>
+
+                        <h3>
+                            No Noise Alerts
+                        </h3>
+
+                        <p>
+                            Everything is quiet in the library.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            list.innerHTML =
+                alerts
+                    .map(
+                        alert =>
+                            createNoiseCard(
+                                alert
+                            )
+                    )
+                    .join("");
+
+        }
+
+
+
+        /* =====================================================
+           CREATE ALERT CARD
+           ===================================================== */
+
+        function createNoiseCard(
+            alert
+        ) {
+
+            const unreadClass =
+                alert.is_read
+                    ? ""
+                    : "unread";
+
+
+            const time =
+                formatNoiseTime(
+                    alert.detected_at
+                );
+
+
+            return `
+
+                <div class="
+                    noise-card
+                    ${unreadClass}
+                ">
+
+
+                    <div class="noise-card-icon">
+
+                        <i class="fas fa-volume-high"></i>
+
+                    </div>
+
+
+                    <div class="noise-card-content">
+
+
+                        <div class="noise-card-top">
+
+                            <strong>
+                                Noise Detected
+                            </strong>
+
+                            <span class="noise-time">
+
+                                ${time}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="noise-message">
+
+                            ${escapeNoise(
+                                alert.message
+                            )}
+
+                        </div>
+
+
+                        <div class="noise-tags">
+
+
+                            <span class="noise-tag">
+
+                                <i class="fas fa-location-dot"></i>
+
+                                ${escapeNoise(
+                                    alert.location
+                                )}
+
+                            </span>
+
+
+                            <span class="noise-tag">
+
+                                <i class="fas fa-chair"></i>
+
+                                Desk
+                                ${alert.desk_number}
+
+                            </span>
+
+
+                            <span class="noise-tag">
+
+                                <i class="fas fa-chair"></i>
+
+                                Chair
+                                ${alert.chair_number}
+
+                            </span>
+
+                        </div>
+
+
+                        ${
+                            !alert.is_read
+
+                            ?
+
+                            `
+
+                            <button
+                                type="button"
+                                class="noise-read-btn"
+                                onclick="
+                                    markNoiseAlertRead(
+                                        ${alert.id}
+                                    )
+                                "
+                            >
+
+                                <i class="fas fa-check"></i>
+
+                                Mark as Read
+
+                            </button>
+
+                            `
+
+                            :
+
+                            `
+
+                            <div
+                                style="
+                                    margin-top:8px;
+                                    color:#22c55e;
+                                    font-size:10px;
+                                    font-weight:600;
+                                "
+                            >
+
+                                <i class="fas fa-check-circle"></i>
+
+                                Read
+
+                            </div>
+
+                            `
+                        }
+
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        /* =====================================================
+           MARK ONE ALERT READ
+           ===================================================== */
+
+                async function markNoiseAlertRead(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/Noise/MarkAsRead?id=${id}`,
+                        {
+                            method: "PUT"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to mark alert as read"
+                    );
+
+                }
+
+
+                await loadNoiseAlerts();
+
+
+                renderNoiseAlerts(
+                    noiseAlerts
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Mark read error:",
+                    error
+                );
+
+            }
+
+        }
+
+               async function markAllNoiseAlertsRead() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/Noise/MarkAllAsRead",
+                        {
+                            method: "PUT"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to mark all alerts as read"
+                    );
+
+                }
+
+
+                await loadNoiseAlerts();
+
+
+                renderNoiseAlerts(
+                    noiseAlerts
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Mark all read error:",
+                    error
+                );
+
+            }
+
+        }
+        /* =====================================================
+           CLEAR ALL ALERTS
+           ===================================================== */
+        async function clearAllNoiseAlerts() {
+
+            if (
+                noiseAlerts.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to clear all noise alerts?"
+                );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/Noise/ClearAll",
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to clear alerts"
+                    );
+
+                }
+
+
+                noiseAlerts = [];
+
+                previousUnreadCount = 0;
+
+
+                updateNoiseNotification(
+                    noiseAlerts
+                );
+
+
+                renderNoiseAlerts(
+                    noiseAlerts
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Clear alerts error:",
+                    error
+                );
+
+            }
+
+        }
+
+        /* =====================================================
+           SHOW LIVE TOAST
+           ===================================================== */
+
+        function showNoiseToast(
+            alert
+        ) {
+
+            const toast =
+                document.getElementById(
+                    "noiseToast"
+                );
+
+
+            const location =
+                document.getElementById(
+                    "noiseToastLocation"
+                );
+
+
+            location.innerHTML = `
+
+                <strong>
+                    Excessive noise detected
+                </strong>
+
+                <br>
+
+                📍
+                ${escapeNoise(
+                    alert.location
+                )}
+
+                &nbsp; • &nbsp;
+
+                🪑 Desk
+                ${alert.desk_number}
+
+                &nbsp; • &nbsp;
+
+                💺 Chair
+                ${alert.chair_number}
+
+            `;
+
+
+            toast.classList.add(
+                "show"
+            );
+
+
+            clearTimeout(
+                noiseToastTimer
+            );
+
+
+            noiseToastTimer =
+                setTimeout(
+                    function () {
+
+                        dismissNoiseToast();
+
+                    },
+                    8000
+                );
+
+        }
+
+
+
+        /* =====================================================
+           DISMISS TOAST
+           ===================================================== */
+
+        function dismissNoiseToast() {
+
+            document
+                .getElementById(
+                    "noiseToast"
+                )
+                .classList.remove(
+                    "show"
+                );
+
+        }
+
+
+
+        /* =====================================================
+           VIEW ALERT FROM TOAST
+           ===================================================== */
+
+        function viewNoiseAlertsFromToast() {
+
+            dismissNoiseToast();
+
+            openNoiseNotifications();
+
+        }
+
+
+
+        /* =====================================================
+           SOUND
+           ===================================================== */
+
+        function playNoiseSound() {
+
+            try {
+
+                const AudioContext =
+                    window.AudioContext ||
+                    window.webkitAudioContext;
+
+
+                if (!AudioContext) {
+
+                    return;
+
+                }
+
+
+                const context =
+                    new AudioContext();
+
+
+                const oscillator =
+                    context.createOscillator();
+
+
+                const gain =
+                    context.createGain();
+
+
+                oscillator.connect(
+                    gain
+                );
+
+
+                gain.connect(
+                    context.destination
+                );
+
+
+                oscillator.frequency.value =
+                    880;
+
+
+                oscillator.type =
+                    "sine";
+
+
+                gain.gain.setValueAtTime(
+                    0.0001,
+                    context.currentTime
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    0.15,
+                    context.currentTime + 0.03
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    0.0001,
+                    context.currentTime + 0.5
+                );
+
+
+                oscillator.start();
+
+
+                oscillator.stop(
+                    context.currentTime + 0.5
+                );
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "Notification sound unavailable"
+                );
+
+            }
+
+        }
+
+
+
+        /* =====================================================
+           FORMAT TIME
+           ===================================================== */
+
+        function formatNoiseTime(
+            dateString
+        ) {
+
+            const date =
+                new Date(
+                    dateString
+                );
+
+
+            const now =
+                new Date();
+
+
+            const seconds =
+                Math.floor(
+                    (
+                        now -
+                        date
+                    ) / 1000
+                );
+
+
+            if (
+                seconds < 10
+            ) {
+
+                return "Just now";
+
+            }
+
+
+            if (
+                seconds < 60
+            ) {
+
+                return (
+                    `${seconds} sec ago`
+                );
+
+            }
+
+
+            const minutes =
+                Math.floor(
+                    seconds / 60
+                );
+
+
+            if (
+                minutes < 60
+            ) {
+
+                return (
+                    `${minutes} min ago`
+                );
+
+            }
+
+
+            const hours =
+                Math.floor(
+                    minutes / 60
+                );
+
+
+            if (
+                hours < 24
+            ) {
+
+                return (
+                    `${hours} hr ago`
+                );
+
+            }
+
+
+            return date.toLocaleString();
+
+        }
+
+
+
+        /* =====================================================
+           ESCAPE HTML
+           ===================================================== */
+
+        function escapeNoise(
+            value
+        ) {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.textContent =
+                value || "";
+
+
+            return div.innerHTML;
+
+        }
+
+
+
+        /* =====================================================
+           AUTO REFRESH
+           ===================================================== */
+
+        setInterval(
+            loadNoiseAlerts,
+            3000
+        );
+
+
+
+        /* =====================================================
+           INITIAL LOAD
+           ===================================================== */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                loadNoiseAlerts();
+
+            }
+        );
+
+
+
+        /* =====================================================
+           ESC KEY
+           ===================================================== */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeNoiseNotifications();
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+        )
+
+
 </body>
+
 </html>

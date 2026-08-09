@@ -44,6 +44,17 @@ builder.Services.AddHttpClient(
         client.Timeout =
             TimeSpan.FromSeconds(30);
     });
+builder.Services.AddHttpClient(
+    "NoiseApi",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://127.0.0.1:8002");
+
+        client.Timeout =
+            TimeSpan.FromSeconds(5);
+    }
+);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
