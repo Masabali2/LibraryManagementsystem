@@ -34,7 +34,16 @@ builder.Services.AddSession(options => {
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddHttpClient(
+    "LibraryChatbot",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("http://127.0.0.1:8001");
 
+        client.Timeout =
+            TimeSpan.FromSeconds(30);
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
